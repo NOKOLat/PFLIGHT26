@@ -1,5 +1,5 @@
-#include "States/AutoFlightStateBase/auto_flight_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void AutoFlightState::onEnter(StateContext& context) {

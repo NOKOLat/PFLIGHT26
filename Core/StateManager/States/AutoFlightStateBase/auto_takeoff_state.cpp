@@ -1,5 +1,5 @@
-#include "States/AutoFlightStateBase/auto_takeoff_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void AutoTakeoffState::onEnter(StateContext& context) {

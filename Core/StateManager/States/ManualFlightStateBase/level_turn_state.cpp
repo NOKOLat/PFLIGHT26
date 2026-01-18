@@ -1,5 +1,5 @@
-#include "States/ManualFlightStateBase/level_turn_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void LevelTurnState::onEnter(StateContext& context) {

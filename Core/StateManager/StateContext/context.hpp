@@ -93,14 +93,6 @@ struct PinConfiguration {
 // 状態実行時に必要なすべての情報を包含する構造体
 struct StateContext {
 
-    // 実体を std::optional で静的メモリ確保（初期化時は empty）
-    std::optional<IMUSensor> imu_sensor = std::nullopt;
-    std::optional<MagnetometerSensor> mag_sensor = std::nullopt;
-    std::optional<LiDARSensor> lidar_sensor = std::nullopt;
-    std::optional<BarometricSensor> barometric_sensor = std::nullopt;
-    std::optional<MotorDriver> motor_driver = std::nullopt;
-    std::optional<PIDController> pid_controller = std::nullopt;
-
     // ピン設定
     PinConfiguration pin_config;
 

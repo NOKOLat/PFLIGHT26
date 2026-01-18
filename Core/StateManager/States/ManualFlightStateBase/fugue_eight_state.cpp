@@ -1,5 +1,5 @@
-#include "States/ManualFlightStateBase/fugue_eight_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void FugueEightState::onEnter(StateContext& context) {

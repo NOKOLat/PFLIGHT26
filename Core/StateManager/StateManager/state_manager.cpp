@@ -3,14 +3,14 @@
 
 
 // コンストラクタ
-StateManager::StateManager(StateID init_state_id)
-    : loop_manager_(100000) {
+StateManager::StateManager(StateID init_state_id) : loop_manager_(100000) {
 
     // 初期状態を生成
     current_state_ = StateFactory::createState(init_state_id);
 
     // 初期状態のenter関数を呼ぶ
-    if (current_state_) {
+    if (current_state_) 
+    {
         current_state_->enter(state_context_);
     }
 }

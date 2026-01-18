@@ -1,5 +1,5 @@
-#include "States/InitStateBase/init_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void InitState::enter(StateContext& context) {

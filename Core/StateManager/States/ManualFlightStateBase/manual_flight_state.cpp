@@ -1,5 +1,5 @@
-#include "States/ManualFlightStateBase/manual_flight_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void ManualFlightState::onEnter(StateContext& context) {

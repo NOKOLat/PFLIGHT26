@@ -1,5 +1,5 @@
-#include "States/ManualFlightStateBase/climbing_turn_state.hpp"
-#include "StateContext/context.hpp"
+#include "../StateHeaders.hpp"
+#include "../../StateContext/context.hpp"
 
 
 void ClimbingTurnState::onEnter(StateContext& context) {

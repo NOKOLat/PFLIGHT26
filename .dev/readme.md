@@ -44,35 +44,22 @@ PFLIGHT2/
 │       └── States/
 │           ├── StateHeaders.hpp
 │           ├── InitStateBase/
-│           │   ├── init_state.hpp
 │           │   └── init_state.cpp
 │           ├── PreFlightStateBase/
-│           │   ├── calibration_state.hpp
 │           │   ├── calibration_state.cpp
-│           │   ├── pre_flight_state.hpp
 │           │   └── pre_flight_state.cpp
 │           ├── ManualFlightStateBase/
-│           │   ├── manual_flight_state.hpp
 │           │   ├── manual_flight_state.cpp
-│           │   ├── level_turn_state.hpp
 │           │   ├── level_turn_state.cpp
-│           │   ├── climbing_turn_state.hpp
 │           │   ├── climbing_turn_state.cpp
-│           │   ├── fugue_eight_state.hpp
 │           │   └── fugue_eight_state.cpp
 │           ├── AutoFlightStateBase/
-│           │   ├── pre_auto_flight_state.hpp
 │           │   ├── pre_auto_flight_state.cpp
-│           │   ├── auto_takeoff_state.hpp
 │           │   ├── auto_takeoff_state.cpp
-│           │   ├── auto_flight_state.hpp
 │           │   ├── auto_flight_state.cpp
-│           │   ├── auto_landing_state.hpp
 │           │   └── auto_landing_state.cpp
 │           └── PostFlightStateBase/
-│               ├── post_flight_state.hpp
 │               ├── post_flight_state.cpp
-│               ├── emergency_state.hpp
 │               └── emergency_state.cpp
 // ここより下はサブモジュールで取り込むので、ファイル作成はしない
 ├── Lib/
