@@ -5,12 +5,6 @@
 void InitState::enter(StateContext& context) {
 
     // 各インスタンスを emplace で構築（静的メモリ確保）
-    context.imu_sensor.emplace();
-    context.mag_sensor.emplace();
-    context.lidar_sensor.emplace();
-    context.barometric_sensor.emplace();
-    context.motor_driver.emplace();
-    context.pid_controller.emplace();
 
     // ピン設定の初期化
     context.pin_config.motor_pins[0] = 0;  // PIN_MOTOR_1

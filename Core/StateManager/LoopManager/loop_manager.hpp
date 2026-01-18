@@ -1,9 +1,6 @@
 #ifndef LOOP_MANAGER_HPP
 #define LOOP_MANAGER_HPP
 
-#include <Arduino.h>
-
-
 class LoopManager {
 
     public:
@@ -12,13 +9,13 @@ class LoopManager {
         LoopManager(unsigned long loop_interval_us = 100000) {
 
             this->loop_interval_us = loop_interval_us;
-            this->last_time_us = micros();
+            this->last_time_us = 0;
         }
 
         // 次ループまで待機が必要かどうかを判定
         bool isWaitNextLoop() {
 
-            unsigned long current_time_us = micros();
+            unsigned long current_time_us = 0;
 
             // 最初の実行時は待機しない
             if (last_time_us == 0) {
