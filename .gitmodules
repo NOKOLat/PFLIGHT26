@@ -1,0 +1,6 @@
+[submodule "Core/Lib/STM32_Motor-Servo_Driver"]
+	path = Core/Lib/STM32_Motor-Servo_Driver
+	url = https://github.com/NOKOLat/STM32_Motor-Servo_Driver
+[submodule "Core/Lib/STM32_ICM42688P"]
+	path = Core/Lib/STM32_ICM42688P
+	url = https://github.com/NOKOLat/STM32_ICM42688P
