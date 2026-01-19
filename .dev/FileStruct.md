@@ -2,13 +2,31 @@
 PFLIGHT2/
 ├── Core/
 │   ├── Inc/
+│   │   ├── dma.h
+│   │   ├── gpio.h
 │   │   ├── main.h
+│   │   ├── spi.h
+│   │   ├── stm32f7xx_hal_conf.h
+│   │   ├── stm32f7xx_it.h
+│   │   ├── tim.h
+│   │   ├── usart.h
 │   │   └── wrapper.hpp
-│   └── Src/
-│       ├── main.c
-│       └── wrapper.cpp
-│
-├── StateManager/
+│   ├── Src/
+│   │   ├── dma.c
+│   │   ├── gpio.c
+│   │   ├── main.c
+│   │   ├── spi.c
+│   │   ├── stm32f7xx_hal_msp.c
+│   │   ├── stm32f7xx_it.c
+│   │   ├── syscalls.c
+│   │   ├── sysmem.c
+│   │   ├── system_stm32f7xx.c
+│   │   ├── tim.c
+│   │   ├── usart.c
+│   │   └── wrapper.cpp
+│   ├── Startup/
+│   │   └── startup_stm32f732retx.s
+│   ├── StateManager/ 
 │       ├── StateManager/
 │       │   ├── state_manager.hpp
 │       │   └── state_manager.cpp
@@ -50,11 +68,12 @@ PFLIGHT2/
 │               ├── post_flight_state.cpp
 │               └── emergency_state.cpp
 ├── Lib/
-│   ├── ICM42688P/
-│   ├── BMM350/
-│   ├── DPS368/
-│   ├── EKF/
-│   ├── MotorServoDriver/
-│   ├── WireLessConnection/
-│   └── SBUS/
+│   ├── STM32_Motor-Servo_Driver/
+│   ├── STM32_ICM42688P/
+│   ├── STM32_BMM350/
+│   ├── SBUS/
+│   ├── STM32_DPS368/
+│   ├── 1DoF_PID/
+│   ├── InertialEstimators/
+│   └── MatLib/
 ```

@@ -1,0 +1,25 @@
+[submodule "Core/Lib/STM32_Motor-Servo_Driver"]
+	path = Core/Lib/STM32_Motor-Servo_Driver
+	url = https://github.com/NOKOLat/STM32_Motor-Servo_Driver
+[submodule "Core/Lib/STM32_ICM42688P"]
+	path = Core/Lib/STM32_ICM42688P
+	url = https://github.com/NOKOLat/STM32_ICM42688P
+[submodule "Core/Lib/STM32_BMM350"]
+	path = Core/Lib/STM32_BMM350
+	url = https://github.com/NOKOLat/STM32_BMM350
+[submodule "Core/Lib/SBUS"]
+	path = Core/Lib/SBUS
+	url = https://github.com/NOKOLat/SBUS
+	branch = add_ringbuffer_lib
+[submodule "Core/Lib/STM32_DPS368"]
+	path = Core/Lib/STM32_DPS368
+	url = https://github.com/NOKOLat/STM32_DPS368
+[submodule "Core/Lib/1DoF_PID"]
+	path = Core/Lib/1DoF_PID
+	url = https://github.com/NOKOLat/1DoF_PID
+[submodule "Core/Lib/InertialEstimators"]
+	path = Core/Lib/InertialEstimators
+	url = https://github.com/Tellicious/InertialEstimators
+[submodule "Core/Lib/MatLib"]
+	path = Core/Lib/MatLib
+	url = https://github.com/Tellicious/MatLib
