@@ -4,3 +4,10 @@
 [submodule "Core/Lib/STM32_ICM42688P"]
 	path = Core/Lib/STM32_ICM42688P
 	url = https://github.com/NOKOLat/STM32_ICM42688P
+[submodule "Core/Lib/STM32_BMM350"]
+	path = Core/Lib/STM32_BMM350
+	url = https://github.com/NOKOLat/STM32_BMM350
+[submodule "Core/Lib/SBUS"]
+	path = Core/Lib/SBUS
+	url = https://github.com/NOKOLat/SBUS
+	branch = add_ringbuffer_lib
