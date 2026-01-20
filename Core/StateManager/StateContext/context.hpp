@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 #include <optional>
+#include "Vector3f.hpp"
 
 
 // 前方宣言（実装は Lib 内）
@@ -13,34 +14,6 @@ class MotorDriver;
 class PIDController;
 class LiDARSensor;
 class BarometricSensor;
-
-
-// 3軸データのインデックス定義
-enum class Axis : uint8_t {
-
-    X = 0,
-    Y = 1,
-    Z = 2
-};
-
-
-// 3軸データ格納用構造体（float型）
-struct Vector3f {
-
-    float data[3] = {0.0f, 0.0f, 0.0f};
-
-    // Axis enum で直接アクセス（内部でインデックスに変換）
-    float& operator[](Axis axis) {
-
-        return data[static_cast<uint8_t>(axis)];
-    }
-
-    const float& operator[](Axis axis) const {
-
-        return data[static_cast<uint8_t>(axis)];
-    }
-};
-
 
 // センサーデータを格納する構造体
 struct SensorData {
