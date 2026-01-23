@@ -20,6 +20,3 @@
 [submodule "Core/Lib/InertialEstimators"]
 	path = Core/Lib/InertialEstimators
 	url = https://github.com/Tellicious/InertialEstimators
-[submodule "Core/Lib/MatLib"]
-	path = Core/Lib/MatLib
-	url = https://github.com/Tellicious/MatLib
