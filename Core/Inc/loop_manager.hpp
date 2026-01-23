@@ -46,6 +46,11 @@ class LoopManager {
             return true;
         }
 
+        // ループタイムの取得
+        unsigned long getLoopTime() const {
+            return loop_interval_us;
+        }
+
     private:
 
         // ループ間隔（マイクロ秒）

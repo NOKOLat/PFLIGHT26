@@ -1,14 +1,17 @@
 #include "wrapper.hpp"
-#include "optional.h"
+#include "optional"
 #include "stdio.h"
 
-#include "state_manager.hpp"
+#include "StateManager/state_manager.hpp"
 #include "loop_manager.hpp"
+#include "stm32f7xx_hal.h"
 
-std::optional<StateManager*> state_manager;
-std::optional<LoopManager*> loop_manager;
+std::optional<StateManager> state_manager;
+std::optional<LoopManager> loop_manager;
 
 void init(){
+
+	printf("Program Start Build: 1\n");
 
     loop_manager.emplace(20000); // 20ms
     state_manager.emplace(StateID::INIT_STATE);
