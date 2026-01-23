@@ -126,9 +126,8 @@ void StateManager::init() {
     state_context_.instances.aileron_servo.emplace(state_context_.pin_config.servo_tim[2], state_context_.pin_config.servo_tim_channels[2]);
     state_context_.instances.drop_servo.emplace(state_context_.pin_config.servo_tim[3], state_context_.pin_config.servo_tim_channels[3]);
 
-    // 2-4 姿勢推定フィルタの初期化
-
-    // ライブラリの修正中
+    // 2-4 姿勢推定フィルタの初期化(Gravity, dt[秒])
+    state_context_.instances.ekf.emplace(9.8, loop_time_us_ / 1000000.0f);
 
     // 2-5-1角度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, loop_time_us_ / 1000000.0f);

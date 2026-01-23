@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <array>
 #include <optional>
+#include "usart.h"
 #include "Vector3f.hpp"
 
 #include "1DoF_PID/PID.h"
@@ -18,7 +19,7 @@
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "STM32_Motor-Servo_Driver/motor_controller.hpp"
 #include "STM32_Motor-Servo_Driver/servo_controller.hpp"
-#include "usart.h"
+#include "Tellicious_InertialEstimators_EKF/AHRS_Attitude_EKF.h"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -30,15 +31,16 @@ struct SensorData {
     // 磁気センサー (BMM350)
     Vector3f mag;        // 磁気 [uT]
 
-    Vector3f angle;     // 角度 [deg]
-
     // LiDAR
     Vector3f lidar_coord; // LiDARからの座標 [m]
 
     // 気圧センサー (DPS368)
-    float altitude;       // 高度 [m]
     float barometric_pressure; // 気圧 [Pa]
     float temperature;    // 温度 [℃]
+
+    // 計算データ
+    Vector3f angle;     // 角度 [deg]
+    float altitude;       // 高度 [m]
 };
 
 
@@ -106,6 +108,9 @@ struct Instances {
 
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
+
+    // EKFインスタンス
+    std::optional<AHRS_Attitude_EKF> ekf;
 
     // モーター・サーボドライバーインスタンス
     std::optional<MotorController> left_motor;
