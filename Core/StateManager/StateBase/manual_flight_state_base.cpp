@@ -21,22 +21,29 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
     // 共通の更新処理
 
-    // センサーデータの取得
-    // context.imu_sensor->readData(context.sensor_data);
-    // context.mag_sensor->readData(context.sensor_data);
+    // 1. センサーデータの取得
+	context.instances.imu_sensor->GetData(context.sensor_data.accel.getptr(), context.sensor_data.gyro.getptr());
+	context.instances.baro_sensor->getData(&context.sensor_data.barometric_pressure, &context.sensor_data.temperature);
+	context.instances.mag_sensor->getdata(context.sensor_data.mag.getptr());
 
-    // EKFの更新
+    // 2. EKFの更新
     // context.ekf->update(context.sensor_data, context.attitude);
 
-    // 派生クラス固有の更新処理を呼び出す（PID計算）
+    // 3. 派生クラス固有の更新処理を呼び出す（PID計算）
     StateResult result = onUpdate(context);
 
-    if (!result.success) {
-        return result;
-    }
+    // 4. モーターのPWM出力
+    context.instances.right_motor->setSpeed(context.control_output.motor_pwm[0]);
+    context.instances.left_motor->setSpeed(context.control_output.motor_pwm[1]);
 
-    // PWM値の出力
-    // context.motor_driver->setPWM(context.control_output.motor_pwm);
+    // 5. サーボのPWM出力
+    context.instances.elevator_servo->setAngle(context.control_output.servo_pwm[0]);
+    context.instances.rudder_servo->setAngle(context.control_output.servo_pwm[1]);
+    context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[2]);
+    context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[3]);
+
+    //debug code
+    printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);
 
     return result;
 }

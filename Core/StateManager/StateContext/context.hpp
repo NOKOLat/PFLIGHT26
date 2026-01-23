@@ -30,12 +30,15 @@ struct SensorData {
     // 磁気センサー (BMM350)
     Vector3f mag;        // 磁気 [uT]
 
+    Vector3f angle;     // 角度 [deg]
+
     // LiDAR
     Vector3f lidar_coord; // LiDARからの座標 [m]
 
     // 気圧センサー (DPS368)
     float altitude;       // 高度 [m]
     float barometric_pressure; // 気圧 [Pa]
+    float temperature;    // 温度 [℃]
 };
 
 
@@ -54,8 +57,8 @@ struct AttitudeState {
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    // 4つのモーターの PWM 値 [0-1000]
-    std::array<uint16_t, 4> motor_pwm;
+    std::array<float, 2> motor_pwm; // 4つのモーターの PWM 値 [0-100] % （右、左）
+    std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体

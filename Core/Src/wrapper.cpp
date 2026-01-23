@@ -28,7 +28,7 @@ void loop(){
 }
 
 // UART受信完了コールバック関数
-extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
     // ISRマネージャに処理のみを委譲
     ISRManager::handleUartRxCplt(huart);

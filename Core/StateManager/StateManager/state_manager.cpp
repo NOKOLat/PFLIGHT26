@@ -48,7 +48,7 @@ void StateManager::update() {
         init();
     }
 
-    // ループ間隔まで待機が必要な場合は処理を進めない
+    // ループ管理
     if (loop_manager_.isWaitNextLoop()) {
 
         return;
@@ -60,7 +60,7 @@ void StateManager::update() {
 
     // SBUSデータの更新
     if (state_context_.instances.sbus_receiver.has_value()) {
-        
+
         nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
         const nokolat::SBUS_DATA& sbus_data = sbus.getData();
 
@@ -68,6 +68,12 @@ void StateManager::update() {
         state_context_.control_input.failsafe = sbus_data.failsafe;
         state_context_.control_input.framelost = sbus_data.framelost;
     }
+
+    // 無線通信データの更新
+
+    // あとでLidarからのデータを受け取る部分を実装する
+    //
+    //
 
     // 現在の状態が有効な場合
     if (current_state_) {

@@ -27,6 +27,11 @@ struct Vector3f {
 
         return data[static_cast<uint8_t>(axis)];
     }
+
+    // 配列の先頭ポインタを取得
+    float* getptr() {
+        return data.data();
+    }
 };
 
 #endif // VECTOR3F_HPP
