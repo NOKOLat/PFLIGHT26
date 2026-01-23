@@ -29,6 +29,9 @@ class StateManager {
         // デストラクタ
         virtual ~StateManager() = default;
 
+        // コンテキストの取得
+        StateContext& getContext();
+
         // メインループの更新処理
         void update();
 

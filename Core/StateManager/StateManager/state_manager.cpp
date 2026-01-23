@@ -1,5 +1,6 @@
 #include "StateManager/state_manager.hpp"
 #include "StateFactory/state_factory.hpp"
+#include "isr_manager.hpp"
 
 
 // コンストラクタ
@@ -7,6 +8,10 @@ StateManager::StateManager(StateID init_state_id) : loop_manager_(100000), init_
 
     // コンストラクタでは初期状態を保存するのみ
     // 実際の初期化はupdate()の初回実行時にinit()で行う
+}
+
+StateContext& StateManager::getContext() {
+    return state_context_;
 }
 
 
@@ -52,6 +57,17 @@ void StateManager::update() {
     // ループタイムを保存
     loop_time_us_ = loop_manager_.getLoopTime();
     state_context_.timestamp_ms = loop_time_us_ / 1000;
+
+    // SBUSデータの更新
+    if (state_context_.instances.sbus_receiver.has_value()) {
+        
+        nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
+        const nokolat::SBUS_DATA& sbus_data = sbus.getData();
+
+        state_context_.control_input.data = sbus_data.data;
+        state_context_.control_input.failsafe = sbus_data.failsafe;
+        state_context_.control_input.framelost = sbus_data.framelost;
+    }
 
     // 現在の状態が有効な場合
     if (current_state_) {
@@ -120,6 +136,11 @@ void StateManager::init() {
 
     // 2-6 SBUS
     state_context_.instances.sbus_receiver.emplace();
+    // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
+    if (state_context_.instances.sbus_receiver.has_value()) {
+
+        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
+    }
 
     // 3. 初期状態を生成
     current_state_ = StateFactory::createState(init_state_id_);

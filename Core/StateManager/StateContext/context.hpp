@@ -18,6 +18,7 @@
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "STM32_Motor-Servo_Driver/motor_controller.hpp"
 #include "STM32_Motor-Servo_Driver/servo_controller.hpp"
+#include "usart.h"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -57,6 +58,14 @@ struct ControlOutput {
     std::array<uint16_t, 4> motor_pwm;
 };
 
+// オペレータからの制御入力を格納する構造体
+struct ControlInput {
+    // SBUSデータ
+    std::array<uint16_t, 18> data = {};
+    bool failsafe = false;
+    bool framelost = false;
+};
+
 struct PIDGains {
 
     float angle_kp = 1.0f;
@@ -74,6 +83,7 @@ struct PIDGains {
 struct PinConfiguration {
 
     I2C_HandleTypeDef* sensor_i2c = &hi2c1;  // センサー用 I2C
+    UART_HandleTypeDef* sbus_uart = &huart2; // SBUS用 UART
 
     // モーター用のTIMとチャンネル(左、右)
     std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim1, &htim1};
@@ -118,8 +128,15 @@ struct StateContext {
     // ピン設定
     PinConfiguration pin_config;
     Instances instances;
-    PIDGains pid_gains;
-    uint32_t timestamp_ms;
+
+    // データコンテナ
+    SensorData sensor_data;       // センサー生データ
+    AttitudeState attitude_state; // 姿勢推定結果
+    ControlInput control_input;   // 制御入力 (SBUS)
+    ControlOutput control_output; // 制御出力
+    PIDGains pid_gains;           // PIDゲイン
+
+    uint32_t timestamp_ms = 0;    // 現在のタイムスタンプ
 };
 
 #endif // CONTEXT_HPP

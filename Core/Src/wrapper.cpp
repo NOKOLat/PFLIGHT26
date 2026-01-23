@@ -5,6 +5,7 @@
 #include "StateManager/state_manager.hpp"
 #include "loop_manager.hpp"
 #include "stm32f7xx_hal.h"
+#include "isr_manager.hpp"
 
 std::optional<StateManager> state_manager;
 std::optional<LoopManager> loop_manager;
@@ -24,4 +25,11 @@ void loop(){
 
         state_manager->update();
     }
+}
+
+// UART受信完了コールバック関数
+extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+
+    // ISRマネージャに処理のみを委譲
+    ISRManager::handleUartRxCplt(huart);
 }

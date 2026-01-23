@@ -7,7 +7,6 @@ void InitState::enter(StateContext& context) {
 
 }
 
-
 StateResult InitState::update(StateContext& context) {
 
     //1-1. imuの初期化・通信チェック
@@ -22,6 +21,7 @@ StateResult InitState::update(StateContext& context) {
         printf("Error: IMU sensor connection failed.\n");
         return {false, false, StateID::INIT_STATE};
     }
+
 
     // 1-2. imuの設定
     context.instances.imu_sensor->AccelConfig(ICM42688P::ACCEL_Mode::LowNoize, ICM42688P::ACCEL_SCALE::SCALE02g, ICM42688P::ACCEL_ODR::ODR00500hz, ICM42688P::ACCEL_DLPF::ODR40);
@@ -41,8 +41,10 @@ StateResult InitState::update(StateContext& context) {
     	return {false, false, StateID::INIT_STATE};
     }
 
+
     // 1-4. magの設定
     context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
+
 
     // 1-5. baroの初期化・通信チェック
     if(!context.instances.baro_sensor.has_value()){
@@ -57,9 +59,11 @@ StateResult InitState::update(StateContext& context) {
     	return {false, false, StateID::INIT_STATE};
     }
 
+
     // 1-6. baroの設定
     context.instances.baro_sensor->pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
     context.instances.baro_sensor->tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
+
 
     // 1-7 Motorの初期化チェック(成功 == 1)
     if((context.instances.left_motor.has_value() & context.instances.right_motor.has_value()) != 1){
@@ -73,6 +77,10 @@ StateResult InitState::update(StateContext& context) {
     	printf("Error: Motor instance is not initialized.\n");
     	return {false, false, StateID::INIT_STATE};
     }
+
+
+    // 初期化終了・状態遷移
+    printf("All init complate! \n");
 
     StateResult result;
     result.success = true;
