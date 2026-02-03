@@ -28,35 +28,31 @@ StateResult InitState::update(StateContext& context) {
     context.instances.imu_sensor->GyroConfig(ICM42688P::GYRO_MODE::LowNoize, ICM42688P::GYRO_SCALE::Dps0250, ICM42688P::GYRO_ODR::ODR00500hz, ICM42688P::GYRO_DLPF::ODR40);
 
 
-    // 1-3. magの初期化・通信チェック
-    if(!context.instances.mag_sensor.has_value()){
-
-    	printf("Error: Mag sensor instance is not initialized.\n");
-    	return {false, false, StateID::INIT_STATE};
-    }
-
-    if(context.instances.mag_sensor->init()){
-
-    	printf("Error: IMU sensor connection failed.\n");
-    	return {false, false, StateID::INIT_STATE};
-    }
-
+    // 1-3. magの初期化・通信チェック（磁気センサーは試験用基板にないためコメントアウト）
+    // if(!context.instances.mag_sensor.has_value()){
+    //     printf("Error: Mag sensor instance is not initialized.\n");
+    //     return {false, false, StateID::INIT_STATE};
+    // }
+    // if(context.instances.mag_sensor->init()){
+    //     printf("Error: Mag sensor connection failed.\n");
+    //     return {false, false, StateID::INIT_STATE};
+    // }
 
     // 1-4. magの設定
-    context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
+    // context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
 
 
     // 1-5. baroの初期化・通信チェック
     if(!context.instances.baro_sensor.has_value()){
 
-    	printf("Error: Baro sensor instance is not initialized.\n");
-    	return {false, false, StateID::INIT_STATE};
+        printf("Error: Baro sensor instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
     }
 
     if(!context.instances.baro_sensor->init()){
 
-    	printf("Error: Baro sensor connection failed.\n");
-    	return {false, false, StateID::INIT_STATE};
+        printf("Error: Baro sensor connection failed.\n");
+        return {false, false, StateID::INIT_STATE};
     }
 
 
@@ -74,9 +70,18 @@ StateResult InitState::update(StateContext& context) {
 
     if((context.instances.left_motor->isInitialized() & context.instances.right_motor->isInitialized()) != 1){
 
-    	printf("Error: Motor instance is not initialized.\n");
-    	return {false, false, StateID::INIT_STATE};
+        printf("Error: Motor instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
     }
+
+    // 1-8 姿勢推定の初期化
+    if(!context.instances.madgwick.has_value()){
+
+        printf("Error: Madgwick instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
 
     // 初期化終了・状態遷移

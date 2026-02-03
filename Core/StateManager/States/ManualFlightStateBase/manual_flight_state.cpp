@@ -27,6 +27,7 @@ StateResult ManualFlightState::onUpdate(StateContext& context) {
     // PID制御の計算（ロール角制御）
     // float roll_pwm = context.pid_controller->calculateRoll(target_roll, current_roll);
 
+
     // PID制御の計算（ピッチ角制御）
     // float pitch_pwm = context.pid_controller->calculatePitch(target_pitch, current_pitch);
 

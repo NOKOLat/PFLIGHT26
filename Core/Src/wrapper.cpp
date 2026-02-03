@@ -9,13 +9,14 @@
 
 std::optional<StateManager> state_manager;
 std::optional<LoopManager> loop_manager;
+constexpr uint32_t loop_time_μs = 20000; //20ms
 
 void init(){
 
 	printf("Program Start Build: 1\n");
 
-    loop_manager.emplace(20000); // 20ms
-    state_manager.emplace(StateID::INIT_STATE);
+    loop_manager.emplace(loop_time_μs);
+    state_manager.emplace(StateID::INIT_STATE, loop_time_μs);
 }
 
 void loop(){
@@ -28,7 +29,7 @@ void loop(){
 }
 
 // UART受信完了コールバック関数
-extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
     // ISRマネージャに処理のみを委譲
     ISRManager::handleUartRxCplt(huart);

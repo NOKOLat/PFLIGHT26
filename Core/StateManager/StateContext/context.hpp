@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <array>
 #include <optional>
+#include "usart.h"
 #include "Vector3f.hpp"
 
 #include "1DoF_PID/PID.h"
@@ -18,7 +19,7 @@
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "STM32_Motor-Servo_Driver/motor_controller.hpp"
 #include "STM32_Motor-Servo_Driver/servo_controller.hpp"
-#include "usart.h"
+#include "MadgwickAHRS/src/MadgwickAHRS.h"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -34,8 +35,12 @@ struct SensorData {
     Vector3f lidar_coord; // LiDARからの座標 [m]
 
     // 気圧センサー (DPS368)
-    float altitude;       // 高度 [m]
     float barometric_pressure; // 気圧 [Pa]
+    float temperature;    // 温度 [℃]
+
+    // 計算データ
+    Vector3f angle;     // 角度 [deg]
+    float altitude;       // 高度 [m]
 };
 
 
@@ -54,8 +59,8 @@ struct AttitudeState {
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    // 4つのモーターの PWM 値 [0-1000]
-    std::array<uint16_t, 4> motor_pwm;
+    std::array<float, 2> motor_pwm; // 4つのモーターの PWM 値 [0-100] % （右、左）
+    std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体
@@ -104,6 +109,9 @@ struct Instances {
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
+    // AHRSインスタンス
+    std::optional<Madgwick> madgwick;
+
     // モーター・サーボドライバーインスタンス
     std::optional<MotorController> left_motor;
     std::optional<MotorController> right_motor;
@@ -136,7 +144,7 @@ struct StateContext {
     ControlOutput control_output; // 制御出力
     PIDGains pid_gains;           // PIDゲイン
 
-    uint32_t timestamp_ms = 0;    // 現在のタイムスタンプ
+    uint32_t loop_time_us = 0;    
 };
 
 #endif // CONTEXT_HPP
