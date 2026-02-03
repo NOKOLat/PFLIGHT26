@@ -115,10 +115,10 @@ void StateManager::init() {
     // 1. 初回実行フラグをクリア
     is_first_execution_ = false;
 
-    // 2. 使用するインスタンスの初期化
+    // 2. 使用するインスタンスの初期化u
 
     // 2-1 センサーモジュールの初期化
-    state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c);
+    state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c, 0b1101000);
     // state_context_.instances.mag_sensor.emplace(state_context_.pin_config.sensor_i2c, 0x14); // 試験用の基板にないためコメントアウト
     state_context_.instances.baro_sensor.emplace(state_context_.pin_config.sensor_i2c);
 
