@@ -19,7 +19,7 @@
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "STM32_Motor-Servo_Driver/motor_controller.hpp"
 #include "STM32_Motor-Servo_Driver/servo_controller.hpp"
-#include "Tellicious_InertialEstimators_EKF/AHRS_Attitude_EKF.h"
+#include "MadgwickAHRS/src/MadgwickAHRS.h"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -109,8 +109,8 @@ struct Instances {
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
-    // EKFインスタンス
-    std::optional<AHRS_Attitude_EKF> ekf;
+    // AHRSインスタンス
+    std::optional<Madgwick> madgwick;
 
     // モーター・サーボドライバーインスタンス
     std::optional<MotorController> left_motor;
@@ -144,7 +144,7 @@ struct StateContext {
     ControlOutput control_output; // 制御出力
     PIDGains pid_gains;           // PIDゲイン
 
-    uint32_t timestamp_ms = 0;    // 現在のタイムスタンプ
+    uint32_t loop_time_us = 0;    
 };
 
 #endif // CONTEXT_HPP

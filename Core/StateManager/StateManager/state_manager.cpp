@@ -4,26 +4,33 @@
 
 
 // コンストラクタ
-StateManager::StateManager(StateID init_state_id) : loop_manager_(100000), init_state_id_(init_state_id) {
+StateManager::StateManager(StateID init_state_id, uint32_t loop_time_us){
 
-    // コンストラクタでは初期状態を保存するのみ
-    // 実際の初期化はupdate()の初回実行時にinit()で行う
+    this->init_state_id_ = init_state_id;
+    state_context_.loop_time_us = loop_time_us;
 }
 
 StateContext& StateManager::getContext() {
+
     return state_context_;
 }
 
+void StateManager::changeState(StateID state_id) {
 
-void StateManager::changeState(std::unique_ptr<StateInterface> new_state) {
+    // Factoryを使用して新しい状態を生成
+    std::unique_ptr<StateInterface> new_state = StateFactory::createState(state_id);
+
+    // ポインタの安全性を確認
+    if (!new_state) {
+
+        printf("[StateManager::changeState] Failed to create state (ID: %d)\n", static_cast<int>(state_id));
+        return;
+    }
 
     // 現在の状態の終了処理
     if (current_state_) {
 
         current_state_->exit(state_context_);
-
-        // デバッグ出力
-        // printf("[StateManager] StateExit: %d\n", static_cast<int>(current_state_->getStateID()));
     }
 
     // 新しい状態に遷移
@@ -35,28 +42,18 @@ void StateManager::changeState(std::unique_ptr<StateInterface> new_state) {
         current_state_->enter(state_context_);
 
         // デバッグ出力
-        // printf("[StateManager] StateEnter: %d\n", static_cast<int>(current_state_->getStateID()));
+        printf("[StateManager] StateEnter: %d\n", static_cast<int>(current_state_->getStateID()));
     }
 }
 
 void StateManager::update() {
 
     // 初回実行時は初期化を行う
-
     if (is_first_execution_) {
 
         init();
-    }
-
-    // ループ管理
-    if (loop_manager_.isWaitNextLoop()) {
-
         return;
     }
-
-    // ループタイムを保存
-    loop_time_us_ = loop_manager_.getLoopTime();
-    state_context_.timestamp_ms = loop_time_us_ / 1000;
 
     // SBUSデータの更新
     if (state_context_.instances.sbus_receiver.has_value()) {
@@ -75,29 +72,36 @@ void StateManager::update() {
     //
     //
 
-    // 現在の状態が有効な場合
-    if (current_state_) {
+    // 現在の状態が有効でない場合
+    if (!current_state_) {
 
-        // 現在の状態の更新処理
-        StateResult result = current_state_->update(state_context_);
-
-        // 状態遷移が必要かつ処理が成功した場合
-        if (result.should_transition && result.success) {
-
-            // 新しい状態を生成
-            std::unique_ptr<StateInterface> next_state = StateFactory::createState(result.next_state_id);
-
-            // 状態遷移を実行
-            if (next_state) {
-
-                changeState(std::move(next_state));
-            }
-        }
+        printf("[StateManager::update] StateInstance Error\n");
+        changeState(StateID::EMERGENCY_STATE);
+        return;
     }
+
+	// 現在の状態の更新処理
+	StateResult result = current_state_->update(state_context_);
+
+	// 処理に失敗した場合
+	if (!result.success){
+
+		printf("[StateManager::update] State Update Failed\n");
+		changeState(StateID::EMERGENCY_STATE);
+		return;
+	}
+
+	// 状態遷移が必要な場合
+	if (result.should_transition) {
+
+		// 状態遷移を実行（Factoryの呼び出しはchangeState内で行われる）
+		changeState(result.next_state_id);
+	}
 }
 
 // 初期化処理
-// インスタンスの初期化、初期状態の設定を行う
+// インスタンスの初期化、静的な設定を行う
+// 通信などの失敗する可能性があるチェックはInitStateで行う
 void StateManager::init() {
 
     // 初回実行時のみ実行
@@ -106,6 +110,8 @@ void StateManager::init() {
         return;
     }
 
+    printf("[StateManager] InitStart\n");
+
     // 1. 初回実行フラグをクリア
     is_first_execution_ = false;
 
@@ -113,7 +119,7 @@ void StateManager::init() {
 
     // 2-1 センサーモジュールの初期化
     state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c);
-    state_context_.instances.mag_sensor.emplace(state_context_.pin_config.sensor_i2c, 0x14);
+    // state_context_.instances.mag_sensor.emplace(state_context_.pin_config.sensor_i2c, 0x14); // 試験用の基板にないためコメントアウト
     state_context_.instances.baro_sensor.emplace(state_context_.pin_config.sensor_i2c);
 
     // 2-2 モーターインスタンスの初期化
@@ -126,21 +132,23 @@ void StateManager::init() {
     state_context_.instances.aileron_servo.emplace(state_context_.pin_config.servo_tim[2], state_context_.pin_config.servo_tim_channels[2]);
     state_context_.instances.drop_servo.emplace(state_context_.pin_config.servo_tim[3], state_context_.pin_config.servo_tim_channels[3]);
 
-    // 2-4 姿勢推定フィルタの初期化(Gravity, dt[秒])
-    state_context_.instances.ekf.emplace(9.8, loop_time_us_ / 1000000.0f);
+    // 2-4 姿勢推定フィルタの初期化(6軸モード: IMUのみ使用、magnetometerなし)
+    state_context_.instances.madgwick.emplace();
+    state_context_.instances.madgwick->begin(1.0f / (state_context_.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
     // 2-5-1角度制御用PID(kp, ki, kd, dt [秒])
-    state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, loop_time_us_ / 1000000.0f);
-    state_context_.instances.angle_pitch_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, loop_time_us_ / 1000000.0f);
-    state_context_.instances.angle_yaw_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, loop_time_us_ / 1000000.0f);
+    state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);
+    state_context_.instances.angle_pitch_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
+    state_context_.instances.angle_yaw_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
 
     // 2-5-2角速度制御用PID(kp, ki, kd, dt [秒])
-    state_context_.instances.rate_roll_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, loop_time_us_ / 1000000.0f);
-    state_context_.instances.rate_pitch_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, loop_time_us_ / 1000000.0f);
-    state_context_.instances.rate_yaw_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, loop_time_us_ / 1000000.0f);
+    state_context_.instances.rate_roll_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
+    state_context_.instances.rate_pitch_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
+    state_context_.instances.rate_yaw_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
 
     // 2-6 SBUS
     state_context_.instances.sbus_receiver.emplace();
+
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
@@ -151,10 +159,10 @@ void StateManager::init() {
     current_state_ = StateFactory::createState(init_state_id_);
 
     // 4. 初期状態のenter関数を呼ぶ
-    if (!current_state_) {
+    if (current_state_) {
 
-        return;
+        current_state_->enter(state_context_);
     }
     
-    current_state_->enter(state_context_);
+    printf("[StateManager] All Instances Generated\n");
 }

@@ -21,25 +21,15 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     // 1. センサーデータの取得
 	context.instances.imu_sensor->GetData(context.sensor_data.accel.getptr(), context.sensor_data.gyro.getptr());
 	context.instances.baro_sensor->getData(&context.sensor_data.barometric_pressure, &context.sensor_data.temperature);
-	context.instances.mag_sensor->getdata(context.sensor_data.mag.getptr());
+	// context.instances.mag_sensor->getdata(context.sensor_data.mag.getptr()); // 磁気センサーはないため削除
 
-	// 2-1. EKF 予測ステップ
-	context.instances.ekf->prediction();
+	// 2. 姿勢推定
+	context.instances.madgwick->updateIMU(context.sensor_data.gyro[Axis::X], context.sensor_data.gyro[Axis::Y], context.sensor_data.gyro[Axis::Z], context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
 
-	// 2-2. EKF 更新ステップ（センサーデータを使用）
-	//　ジャイロ: rad / s、加速度: 正規化済み、磁気センサ: 正規化済み
-	context.instances.ekf->update_accel(context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
-	context.instances.ekf->update_gyro(context.sensor_data.gyro[Axis::X], context.sensor_data.gyro[Axis::Y], context.sensor_data.gyro[Axis::Z]);
-	context.instances.ekf->update_mag(context.sensor_data.mag[Axis::X], -context.sensor_data.mag[Axis::Y], context.sensor_data.mag[Axis::Z]);
-
-	// 2-3. 推定状態からオイラー角を計算
-	context.instances.ekf->euler_angles();
-
-	// 2-4. オイラー角を度単位で取得
-	context.sensor_data.angle[Axis::X] = context.instances.ekf->Roll * (180.0f / M_PI) -180;   // Roll
-	context.sensor_data.angle[Axis::Y] = context.instances.ekf->Pitch * (180.0f / M_PI);  // Pitch
-	context.sensor_data.angle[Axis::Z] = context.instances.ekf->Yaw * (180.0f / M_PI) + 180;    // Yaw
-
+    context.sensor_data.angle[Axis::X] = context.instances.madgwick->getRoll();
+    context.sensor_data.angle[Axis::Y] = context.instances.madgwick->getPitch();
+    context.sensor_data.angle[Axis::Z] = context.instances.madgwick->getYaw();
+    
     // 3. 派生クラス固有の更新処理を呼び出す（PID計算）
     StateResult result = onUpdate(context);
 
