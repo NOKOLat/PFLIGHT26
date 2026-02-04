@@ -14,6 +14,7 @@
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
+#include "sbus_rescaler.hpp"
 #include "STM32_BMM350/BMM350_Class.hpp"
 #include "STM32_ICM42688P/ICM42688P_HAL_I2C.h"
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
@@ -138,11 +139,12 @@ struct StateContext {
     Instances instances;
 
     // データコンテナ
-    SensorData sensor_data;       // センサー生データ
-    AttitudeState attitude_state; // 姿勢推定結果
-    ControlInput control_input;   // 制御入力 (SBUS)
-    ControlOutput control_output; // 制御出力
-    PIDGains pid_gains;           // PIDゲイン
+    SensorData sensor_data;              // センサー生データ
+    AttitudeState attitude_state;        // 姿勢推定結果
+    ControlInput control_input;          // 制御入力 (SBUS生データ)
+    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
+    ControlOutput control_output;        // 制御出力
+    PIDGains pid_gains;                  // PIDゲイン
 
     uint32_t loop_time_us = 0;    
 };

@@ -64,6 +64,9 @@ void StateManager::update() {
         state_context_.control_input.data = sbus_data.data;
         state_context_.control_input.failsafe = sbus_data.failsafe;
         state_context_.control_input.framelost = sbus_data.framelost;
+
+        // SBUSデータをリスケーリング
+        state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
     }
 
     // 無線通信データの更新
