@@ -4,6 +4,7 @@
 #include <memory>
 #include "StateInterface/state_interface.hpp"
 #include "StateInterface/state_id.hpp"
+#include "States/StateHeaders.hpp"
 
 
 // 状態オブジェクトを生成するファクトリークラス
@@ -18,22 +19,18 @@ class StateFactory {
 
                 // InitStateBase
                 case StateID::INIT_STATE:
-                    // return std::make_unique<InitState>();
-                    break;
+                    return std::make_unique<InitState>();
 
                 // PreFlightStateBase
                 case StateID::CALIBRATION_STATE:
-                    // return std::make_unique<CalibrationState>();
-                    break;
+                    return std::make_unique<CalibrationState>();
 
                 case StateID::PRE_FLIGHT_STATE:
-                    // return std::make_unique<PreFlightState>();
-                    break;
+                    return std::make_unique<PreFlightState>();
 
                 // ManualFlightStateBase
                 case StateID::MANUAL_FLIGHT_STATE:
-                    // return std::make_unique<ManualFlightState>();
-                    break;
+                    return std::make_unique<ManualFlightState>();
 
                 case StateID::LEVEL_TURN_STATE:
                     // return std::make_unique<LevelTurnState>();
@@ -70,8 +67,7 @@ class StateFactory {
                     break;
 
                 case StateID::EMERGENCY_STATE:
-                    // return std::make_unique<EmergencyState>();
-                    break;
+                    return std::make_unique<EmergencyState>();
 
                 default:
                     // 無効な状態ID

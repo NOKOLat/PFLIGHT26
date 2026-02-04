@@ -16,7 +16,7 @@ StateResult InitState::update(StateContext& context) {
         return {false, false, StateID::INIT_STATE};
     }
 
-    if(!context.instances.imu_sensor->Connection()){
+    if(context.instances.imu_sensor->Connection() != 0){
 
         printf("Error: IMU sensor connection failed.\n");
         return {false, false, StateID::INIT_STATE};
@@ -29,32 +29,31 @@ StateResult InitState::update(StateContext& context) {
 
 
     // 1-3. magの初期化・通信チェック（磁気センサーは試験用基板にないためコメントアウト）
-    // if(!context.instances.mag_sensor.has_value()){
-    //     printf("Error: Mag sensor instance is not initialized.\n");
-    //     return {false, false, StateID::INIT_STATE};
-    // }
-    // if(context.instances.mag_sensor->init()){
-    //     printf("Error: Mag sensor connection failed.\n");
-    //     return {false, false, StateID::INIT_STATE};
-    // }
+     if(!context.instances.mag_sensor.has_value()){
+         printf("Error: Mag sensor instance is not initialized.\n");
+         return {false, false, StateID::INIT_STATE};
+     }
+     if(context.instances.mag_sensor->init()){
+         printf("Error: Mag sensor connection failed.\n");
+         return {false, false, StateID::INIT_STATE};
+     }
 
     // 1-4. magの設定
-    // context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
+    context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
 
 
     // 1-5. baroの初期化・通信チェック
-    if(!context.instances.baro_sensor.has_value()){
+	if(!context.instances.baro_sensor.has_value()){
 
-        printf("Error: Baro sensor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
+		printf("Error: Baro sensor instance is not initialized.\n");
+		return {false, false, StateID::INIT_STATE};
+	}
 
-    if(!context.instances.baro_sensor->init()){
+	if(context.instances.baro_sensor->init() != 0){
 
-        printf("Error: Baro sensor connection failed.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
+		printf("Error: Baro sensor connection failed.\n");
+		return {false, false, StateID::INIT_STATE};
+	}
 
     // 1-6. baroの設定
     context.instances.baro_sensor->pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
