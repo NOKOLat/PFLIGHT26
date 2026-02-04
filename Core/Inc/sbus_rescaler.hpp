@@ -29,9 +29,9 @@ struct RescaledSBUSData {
 // プロポーショナル送信機のチャンネルマッピング
 enum class SBUSChannel : uint8_t {
 
-    THROTTLE = 0,    // スロットル
+    THROTTLE = 2,    // スロットル
     ROLL = 1,        // ロール（エルロン）
-    PITCH = 2,       // ピッチ（エレベーター）
+    PITCH = 0,       // ピッチ（エレベーター）
     YAW = 3,         // ヨー（ラダー）
     DROP = 4,        // 投下装置
     AUX1 = 5,        // 補助チャンネル1

@@ -61,12 +61,20 @@ void StateManager::update() {
         nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
         const nokolat::SBUS_DATA& sbus_data = sbus.getData();
 
+
         state_context_.control_input.data = sbus_data.data;
         state_context_.control_input.failsafe = sbus_data.failsafe;
         state_context_.control_input.framelost = sbus_data.framelost;
 
         // SBUSデータをリスケーリング
         state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
+
+        // フェイルセーフ判定
+        if(state_context_.control_input.failsafe){
+
+            printf("[StateManager::update] SBUS FailSafe\n");
+            changeState(StateID::EMERGENCY_STATE);
+        }
 
     }
 
@@ -81,7 +89,6 @@ void StateManager::update() {
 
         printf("[StateManager::update] StateInstance Error\n");
         changeState(StateID::EMERGENCY_STATE);
-        return;
     }
 
 	// 現在の状態の更新処理
@@ -119,7 +126,7 @@ void StateManager::init() {
     // 1. 初回実行フラグをクリア
     is_first_execution_ = false;
 
-    // 2. 使用するインスタンスの初期化u
+    // 2. 使用するインスタンスの初期化
 
     // 2-1 センサーモジュールの初期化
     state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c,  0b1101001);

@@ -31,7 +31,6 @@ void loop(){
 // UART受信完了コールバック関数
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
-	printf("received uartcallback\n");
     // ISRマネージャに処理のみを委譲
     ISRManager::handleUartRxCplt(huart);
 }
