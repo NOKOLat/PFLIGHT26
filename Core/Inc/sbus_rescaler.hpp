@@ -50,13 +50,13 @@ enum class SwitchPosition : uint8_t {
 };
 
 // ===== SBUSリスケーラークラス =====
-// SBUSの生データ（64~1984）を制御用の値にリスケールする静的メソッド群
+// SBUSの生データ（360~1692）を制御用の値にリスケールする静的メソッド群
 class SBUSRescaler {
 public:
     // ===== SBUS生データの範囲定数 =====
-    static constexpr uint16_t SBUS_MIN = 64;
+    static constexpr uint16_t SBUS_MIN = 360;
     static constexpr uint16_t SBUS_MID = 1024;
-    static constexpr uint16_t SBUS_MAX = 1984;
+    static constexpr uint16_t SBUS_MAX = 1692;
 
     // ===== 閾値設定用構造体 =====
     struct Thresholds {
