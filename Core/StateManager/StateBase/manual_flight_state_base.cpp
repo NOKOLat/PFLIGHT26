@@ -20,8 +20,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
 
     // debug sbusdataのチェック
-
-    printf("throttle: %f\n", context.rescaled_sbus_data.throttle);
+    //printf("throttle: %f\n", context.rescaled_sbus_data.throttle);
 
 
     // 1. センサーデータの取得
