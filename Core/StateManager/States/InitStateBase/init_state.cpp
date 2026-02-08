@@ -82,9 +82,21 @@ StateResult InitState::update(StateContext& context) {
 
     context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
+    // 1-9 SBUSの受信チェック
+    if(!context.instances.sbus_receiver.has_value()){
+
+        printf("Error: SBUS receiver instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    if(context.rescaled_sbus_data[nokolat::SBUSChannel::THROTTLE] == 0.0f){
+
+        printf("Error: SBUS receiver failed to receive data.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
 
     // 初期化終了・状態遷移
-    printf("All init complate! \n");
+    printf("All init complete! \n");
 
     StateResult result;
     result.success = true;
