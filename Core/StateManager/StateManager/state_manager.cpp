@@ -129,7 +129,7 @@ void StateManager::init() {
     // 2. 使用するインスタンスの初期化
 
     // 2-1 センサーモジュールの初期化
-    state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c,  0b1101001);
+    state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c, 0b1101001);
     state_context_.instances.mag_sensor.emplace(state_context_.pin_config.sensor_i2c, 0x14); // 試験用の基板にないためコメントアウト
     state_context_.instances.baro_sensor.emplace(state_context_.pin_config.sensor_i2c);
 
