@@ -14,6 +14,7 @@
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
+#include "sbus_rescaler.hpp"
 #include "STM32_BMM350/BMM350_Class.hpp"
 #include "STM32_ICM42688P/ICM42688P_HAL_I2C.h"
 #include "STM32_DPS368/DPS368_HAL_I2C.hpp"
@@ -88,7 +89,7 @@ struct PIDGains {
 struct PinConfiguration {
 
     I2C_HandleTypeDef* sensor_i2c = &hi2c1;  // センサー用 I2C
-    UART_HandleTypeDef* sbus_uart = &huart2; // SBUS用 UART
+    UART_HandleTypeDef* sbus_uart = &huart5; // SBUS用 UART
 
     // モーター用のTIMとチャンネル(左、右)
     std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim1, &htim1};
@@ -138,11 +139,12 @@ struct StateContext {
     Instances instances;
 
     // データコンテナ
-    SensorData sensor_data;       // センサー生データ
-    AttitudeState attitude_state; // 姿勢推定結果
-    ControlInput control_input;   // 制御入力 (SBUS)
-    ControlOutput control_output; // 制御出力
-    PIDGains pid_gains;           // PIDゲイン
+    SensorData sensor_data;              // センサー生データ
+    AttitudeState attitude_state;        // 姿勢推定結果
+    ControlInput control_input;          // 制御入力 (SBUS生データ)
+    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
+    ControlOutput control_output;        // 制御出力
+    PIDGains pid_gains;                  // PIDゲイン
 
     uint32_t loop_time_us = 0;    
 };
