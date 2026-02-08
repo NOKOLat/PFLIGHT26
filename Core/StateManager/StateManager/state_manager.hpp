@@ -6,7 +6,6 @@
 #include "StateInterface/state_interface.hpp"
 #include "StateInterface/state_id.hpp"
 #include "StateContext/context.hpp"
-#include "LoopManager/loop_manager.hpp"
 
 
 // 前方宣言
@@ -24,10 +23,13 @@ class StateManager {
     public:
 
         // コンストラクタ（初期状態を設定）
-        StateManager(StateID init_state_id);
+        StateManager(StateID init_state_id, uint32_t loop_time_us);
 
         // デストラクタ
         virtual ~StateManager() = default;
+
+        // コンテキストの取得
+        StateContext& getContext();
 
         // メインループの更新処理
         void update();
@@ -35,17 +37,23 @@ class StateManager {
 
     private:
 
+        // 初期化処理
+        void init();
+
+        // 状態遷移（StateIDを受け取りFactoryで状態を生成）
+        void changeState(StateID state_id);
+
+        // 初期状態ID
+        StateID init_state_id_;
+
         // StateContext をメンバーとして保持
         StateContext state_context_;
 
+        // 初回実行フラグ
+        bool is_first_execution_ = true;
+
         // 現在の状態
         std::unique_ptr<StateInterface> current_state_;
-
-        // ループ管理（10Hz = 100000us）
-        LoopManager loop_manager_;
-
-        // 状態遷移
-        void changeState(std::unique_ptr<StateInterface> new_state);
 };
 
 #endif // STATE_MANAGER_HPP

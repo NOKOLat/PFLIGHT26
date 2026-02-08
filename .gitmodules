@@ -17,9 +17,9 @@
 [submodule "Core/Lib/1DoF_PID"]
 	path = Core/Lib/1DoF_PID
 	url = https://github.com/NOKOLat/1DoF_PID
-[submodule "Core/Lib/InertialEstimators"]
-	path = Core/Lib/InertialEstimators
-	url = https://github.com/Tellicious/InertialEstimators
-[submodule "Core/Lib/MatLib"]
-	path = Core/Lib/MatLib
-	url = https://github.com/Tellicious/MatLib
+[submodule "Core/Lib/Tellicious_InertialEstimators_EKF"]
+	path = Core/Lib/Tellicious_InertialEstimators_EKF
+	url = https://github.com/NOKOLat/Tellicious_InertialEstimators_EKF
+[submodule "Core/Lib/MadgwickAHRS"]
+	path = Core/Lib/MadgwickAHRS
+	url = https://github.com/arduino-libraries/MadgwickAHRS

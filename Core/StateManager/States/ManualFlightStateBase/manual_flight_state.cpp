@@ -23,17 +23,10 @@ StateResult ManualFlightState::onUpdate(StateContext& context) {
 
     // 現在の姿勢情報から目標値を計算
     // （パイロット入力に基づいて）
-    float target_roll = context.attitude.roll;      // 目標ロール角
-    float target_pitch = context.attitude.pitch;    // 目標ピッチ角
-    float target_yaw_rate = context.attitude.yaw_rate; // 目標ヨー角速度
-
-    // 現在値
-    float current_roll = context.attitude.roll;
-    float current_pitch = context.attitude.pitch;
-    float current_yaw_rate = context.attitude.yaw_rate;
 
     // PID制御の計算（ロール角制御）
     // float roll_pwm = context.pid_controller->calculateRoll(target_roll, current_roll);
+
 
     // PID制御の計算（ピッチ角制御）
     // float pitch_pwm = context.pid_controller->calculatePitch(target_pitch, current_pitch);

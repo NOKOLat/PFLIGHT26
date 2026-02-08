@@ -33,6 +33,8 @@ build/
 *~
 .vscode/
 .idea/
+.claude
+.claudeai/
 
 # OS specific
 Thumbs.db

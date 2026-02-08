@@ -7,6 +7,12 @@ void EmergencyState::onEnter(StateContext& context) {
     // 緊急状態固有の初期化処理
     // モーターの即座停止
     // context.motor_driver->emergencyStop();
+
+	while(1){
+
+		printf("All Program Stop/n");
+		HAL_Delay(1000);
+	}
 }
 
 

@@ -4,29 +4,87 @@
 
 void InitState::enter(StateContext& context) {
 
-    // 各インスタンスを emplace で構築（静的メモリ確保）
 
-    // ピン設定の初期化
-    context.pin_config.motor_pins[0] = 0;  // PIN_MOTOR_1
-    context.pin_config.motor_pins[1] = 1;  // PIN_MOTOR_2
-    context.pin_config.motor_pins[2] = 2;  // PIN_MOTOR_3
-    context.pin_config.motor_pins[3] = 3;  // PIN_MOTOR_4
-
-    // センサーの初期化
-    // context.imu_sensor->initialize();
-    // context.mag_sensor->initialize();
-    // context.motor_driver->initializePins(context.pin_config);
-
-    // キャリブレーション
-    // context.imu_sensor->calibrate();
-    // context.mag_sensor->calibrate();
 }
-
 
 StateResult InitState::update(StateContext& context) {
 
-    // 通信チェック等の処理
-    // bool is_connected = context.wireless->isConnected();
+    //1-1. imuの初期化・通信チェック
+    if(!context.instances.imu_sensor.has_value()){
+
+        printf("Error: IMU sensor instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    if(context.instances.imu_sensor->Connection() != 0){
+
+        printf("Error: IMU sensor connection failed.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+
+    // 1-2. imuの設定
+    context.instances.imu_sensor->AccelConfig(ICM42688P::ACCEL_Mode::LowNoize, ICM42688P::ACCEL_SCALE::SCALE02g, ICM42688P::ACCEL_ODR::ODR00500hz, ICM42688P::ACCEL_DLPF::ODR40);
+    context.instances.imu_sensor->GyroConfig(ICM42688P::GYRO_MODE::LowNoize, ICM42688P::GYRO_SCALE::Dps0250, ICM42688P::GYRO_ODR::ODR00500hz, ICM42688P::GYRO_DLPF::ODR40);
+
+
+    // 1-3. magの初期化・通信チェック（磁気センサーは試験用基板にないためコメントアウト）
+     if(!context.instances.mag_sensor.has_value()){
+         printf("Error: Mag sensor instance is not initialized.\n");
+         return {false, false, StateID::INIT_STATE};
+     }
+     if(context.instances.mag_sensor->init()){
+         printf("Error: Mag sensor connection failed.\n");
+         return {false, false, StateID::INIT_STATE};
+     }
+
+    // 1-4. magの設定
+    context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
+
+
+    // 1-5. baroの初期化・通信チェック
+	if(!context.instances.baro_sensor.has_value()){
+
+		printf("Error: Baro sensor instance is not initialized.\n");
+		return {false, false, StateID::INIT_STATE};
+	}
+
+	if(context.instances.baro_sensor->init() != 0){
+
+		printf("Error: Baro sensor connection failed.\n");
+		return {false, false, StateID::INIT_STATE};
+	}
+
+    // 1-6. baroの設定
+    context.instances.baro_sensor->pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
+    context.instances.baro_sensor->tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
+
+
+    // 1-7 Motorの初期化チェック(成功 == 1)
+    if((context.instances.left_motor.has_value() & context.instances.right_motor.has_value()) != 1){
+
+        printf("Error: Motor instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    if((context.instances.left_motor->isInitialized() & context.instances.right_motor->isInitialized()) != 1){
+
+        printf("Error: Motor instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    // 1-8 姿勢推定の初期化
+    if(!context.instances.madgwick.has_value()){
+
+        printf("Error: Madgwick instance is not initialized.\n");
+        return {false, false, StateID::INIT_STATE};
+    }
+
+    context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
+
+
+    // 初期化終了・状態遷移
+    printf("All init complate! \n");
 
     StateResult result;
     result.success = true;
