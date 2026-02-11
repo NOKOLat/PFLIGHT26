@@ -20,25 +20,24 @@ void ManualFlightState::onExit(StateContext& context) {
 StateResult ManualFlightState::onUpdate(StateContext& context) {
 
     // 手動飛行用の更新処理
+    // 制御は不要なので、sbusの値をそのまま出力に反映させる
 
-    // 現在の姿勢情報から目標値を計算
-    // （パイロット入力に基づいて）
+    context.control_output.motor_pwm[0] = context.rescaled_sbus_data.throttle; // 右モーター
+    context.control_output.motor_pwm[1] = context.rescaled_sbus_data.throttle; // 左モーター
 
-    // PID制御の計算（ロール角制御）
-    // float roll_pwm = context.pid_controller->calculateRoll(target_roll, current_roll);
+    context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator; // エレベーター
+    context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder;   // ラダー
+    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron;  // エルロン 
+    
+    // 投下装置
+    if(context.rescaled_sbus_data.aux6 == 1) {
 
+        context.control_output.servo_pwm[3] = 90.0f; 
+    } 
+    else {
 
-    // PID制御の計算（ピッチ角制御）
-    // float pitch_pwm = context.pid_controller->calculatePitch(target_pitch, current_pitch);
-
-    // PID制御の計算（ヨー角速度制御）
-    // float yaw_pwm = context.pid_controller->calculateYaw(target_yaw_rate, current_yaw_rate);
-
-    // モーター出力
-    // context.control_output.motor_pwm[0] = static_cast<uint16_t>(roll_pwm);
-    // context.control_output.motor_pwm[1] = static_cast<uint16_t>(pitch_pwm);
-    // context.control_output.motor_pwm[2] = static_cast<uint16_t>(yaw_pwm);
-    // context.control_output.motor_pwm[3] = static_cast<uint16_t>(0);
+        context.control_output.servo_pwm[3] = 0.0f;
+    }
 
     StateResult result;
     result.success = true;

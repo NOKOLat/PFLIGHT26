@@ -10,7 +10,16 @@ void CalibrationState::enter(StateContext& context) {
 
 StateResult CalibrationState::update(StateContext& context) {
 
-    // キャリブレーション処理
+	// imuキャリブレーション
+	printf("Start IMU Calibration\n");
+
+    if(context.instances.imu_sensor->Calibration(1000) != 0){
+
+        printf("IMU Calibration Failed\n");
+        return {false, false, StateID::CALIBRATION_STATE};
+    }
+
+    printf("End Imu Calibration \n");
 
     StateResult result;
     result.success = true;

@@ -60,7 +60,7 @@ struct AttitudeState {
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    std::array<float, 2> motor_pwm; // 4つのモーターの PWM 値 [0-100] % （右、左）
+    std::array<float, 2> motor_pwm; // 2つのモーターの PWM 値 [0-100] % （右、左）
     std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 

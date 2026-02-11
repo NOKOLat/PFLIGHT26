@@ -20,16 +20,16 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
 
     // debug sbusdataのチェック
-    //printf("throttle: %f\n", context.rescaled_sbus_data.throttle);
+	// context.rescaled_sbus_data.throttle = 20.0f;
+	// context.rescaled_sbus_data.elevator = 35.0f;
+	// context.rescaled_sbus_data.rudder   = 10.0f;
+	// context.rescaled_sbus_data.aileron  = 5.0f;
 
 
     // 1. センサーデータの取得
 	context.instances.imu_sensor->GetData(context.sensor_data.accel.getptr(), context.sensor_data.gyro.getptr());
 	context.instances.baro_sensor->getData(&context.sensor_data.barometric_pressure, &context.sensor_data.temperature);
 	context.instances.mag_sensor->getdata(context.sensor_data.mag.getptr());
-
-	// debug センサーデータの確認
-	//printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
 
 	// 2. 姿勢推定
 	context.instances.madgwick->updateIMU(context.sensor_data.gyro[Axis::X], context.sensor_data.gyro[Axis::Y], context.sensor_data.gyro[Axis::Z], context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
@@ -51,7 +51,10 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[2]);
     context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[3]);
 
-    //debug code
+	// debug センサーデータの確認
+	//printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
+
+    //debug 角度データの確認
     //printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);
 
     return result;
