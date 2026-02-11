@@ -22,6 +22,14 @@ class InitState : public StateInterface {
         virtual void exit(StateContext& context) override;
         virtual StateID getStateID() const override;
         virtual StateBaseID getStateBaseID() const override;
+    private:
+        StateResult initializeIMU(StateContext& context);
+        StateResult initializeMagnetometer(StateContext& context);
+        StateResult initializeBarometer(StateContext& context);
+        StateResult initializeMotors(StateContext& context);
+        StateResult initializeServos(StateContext& context);
+        StateResult initializeAttitudeEstimation(StateContext& context);
+        StateResult initializeSBUS(StateContext& context);
 };
 
 
