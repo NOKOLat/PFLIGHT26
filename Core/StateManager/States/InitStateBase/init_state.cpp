@@ -161,10 +161,10 @@ StateResult InitState::initializeServos(StateContext& context) {
     }
 
     // 1-9-1. サーボの中立位置へ移動
-    context.instances.elevator_servo->moveToNeutral();
-    context.instances.rudder_servo->moveToNeutral();
-    context.instances.aileron_servo->moveToNeutral();
-    context.instances.drop_servo->moveToNeutral();
+    context.instances.elevator_servo->neutral();
+    context.instances.rudder_servo->neutral();
+    context.instances.aileron_servo->neutral();
+    context.instances.drop_servo->neutral();
 
     return {true, false, StateID::INIT_STATE};
 }
