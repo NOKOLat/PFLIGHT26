@@ -15,8 +15,18 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
     // 共通の更新処理
 
-    // 0. SBUSデータの取得
-    // StateManager側で更新
+	// 0. 安全装置のチェック
+	if(!context.rescaled_sbus_data.aux5){
+
+		printf("End ManualFlight SBUS[9] = %d\n", context.rescaled_sbus_data.aux5);
+		return {true, true, StateID::POST_FLIGHT_STATE};
+	}
+
+	if(context.rescaled_sbus_data.aux5 && StateID::MANUAL_FLIGHT_STATE){
+
+
+	}
+
 
 
     // debug sbusdataのチェック
@@ -57,9 +67,11 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     //debug 角度データの確認
     //printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);
 
+    //debug PWMデータの確認
+    printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2], context.control_output.servo_pwm[3]);
+
     return result;
 }
-
 
 void ManualFlightStateBase::exit(StateContext& context) {
 

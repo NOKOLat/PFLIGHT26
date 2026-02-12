@@ -7,6 +7,9 @@ void ManualFlightState::onEnter(StateContext& context) {
     // 手動飛行状態固有の初期化処理
     // PID制御の目標値を初期化
     // context.pid_controller->setTarget(0.0f);
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+
 }
 
 

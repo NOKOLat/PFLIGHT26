@@ -12,6 +12,7 @@ StateResult InitState::update(StateContext& context) {
 
     // 初期化関数の呼び出し
     // 具体的な処理はこのファイルの下に関数ごとに実装されています
+
     if (!(result = initializeIMU(context)).success) {
 
         return result;
@@ -56,6 +57,8 @@ StateResult InitState::update(StateContext& context) {
 }
 
 void InitState::exit(StateContext& context){
+
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
 
 }
 
@@ -192,11 +195,11 @@ StateResult InitState::initializeSBUS(StateContext& context) {
         return {false, false, StateID::INIT_STATE};
     }
 
-    if (context.rescaled_sbus_data.throttle == 0.0f) {
-
-        printf("Error: SBUS receiver failed to receive data.\n");
-        return {false, false, StateID::INIT_STATE};
-    } 
+//    if (context.rescaled_sbus_data.throttle == 0.0f) {
+//
+//        printf("Error: SBUS receiver failed to receive data.\n");
+//        return {false, false, StateID::INIT_STATE};
+//    }
 
     return {true, false, StateID::INIT_STATE};
 }

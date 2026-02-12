@@ -10,8 +10,8 @@ void EmergencyState::onEnter(StateContext& context) {
 
 	while(1){
 
-		printf("All Program Stop/n");
-		HAL_Delay(1000);
+		printf("All Program Stop\n");
+		HAL_Delay(10000);
 	}
 }
 

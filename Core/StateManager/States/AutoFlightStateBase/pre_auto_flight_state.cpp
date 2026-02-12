@@ -16,12 +16,7 @@ void PreAutoFlightState::onExit(StateContext& context) {
 
 StateResult PreAutoFlightState::onUpdate(StateContext& context) {
 
-    // 自動飛行前準備用の更新処理
-
     StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::AUTO_TAKEOFF_STATE;
 
     return result;
 }

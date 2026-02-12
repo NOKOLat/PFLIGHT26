@@ -12,12 +12,16 @@ StateResult PreFlightState::update(StateContext& context) {
 
     // 飛行前の準備処理
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::MANUAL_FLIGHT_STATE;
+	// 安全スティックの値を確認
+	if(context.rescaled_sbus_data.aux5){
 
-    return result;
+		printf("Start SBUS[9] = %d\n", context.rescaled_sbus_data.aux5);
+		return {true, true, StateID::MANUAL_FLIGHT_STATE};
+	}
+
+	printf("Wait Start SBUS[9] = %d, %f\n", context.rescaled_sbus_data.aux5, context.rescaled_sbus_data.throttle);
+
+	return {true, false, StateID::PRE_FLIGHT_STATE};
 }
 
 
