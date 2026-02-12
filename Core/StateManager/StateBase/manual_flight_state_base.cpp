@@ -22,13 +22,6 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 		return {true, true, StateID::POST_FLIGHT_STATE};
 	}
 
-	if(context.rescaled_sbus_data.aux5 && StateID::MANUAL_FLIGHT_STATE){
-
-
-	}
-
-
-
     // debug sbusdataのチェック
 	// context.rescaled_sbus_data.throttle = 20.0f;
 	// context.rescaled_sbus_data.elevator = 35.0f;

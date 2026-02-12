@@ -1,6 +1,7 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
-
+#include "servo_controller.hpp"
+#include "motor_controller.hpp"
 
 void InitState::enter(StateContext& context) {
 
@@ -163,7 +164,13 @@ StateResult InitState::initializeServos(StateContext& context) {
         return {false, false, StateID::INIT_STATE};
     }
 
-    // 1-9-1. サーボの中立位置へ移動
+    // サーボのパルス幅設定
+    context.instances.elevator_servo->setPulseRange(1600, 1900);
+    context.instances.rudder_servo->setPulseRange(1600, 1900);
+    context.instances.aileron_servo->setPulseRange(1600, 1900);
+    context.instances.drop_servo->setPulseRange(1600, 1900);
+    
+    // サーボの中立位置へ移動
     context.instances.elevator_servo->neutral();
     context.instances.rudder_servo->neutral();
     context.instances.aileron_servo->neutral();
