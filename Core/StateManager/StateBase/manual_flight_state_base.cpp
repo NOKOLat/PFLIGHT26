@@ -30,9 +30,15 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
 
     // 1. センサーデータの取得
-	context.instances.imu_sensor->GetData(context.sensor_data.accel.getptr(), context.sensor_data.gyro.getptr());
-	context.instances.baro_sensor->getData(&context.sensor_data.barometric_pressure, &context.sensor_data.temperature);
-	context.instances.mag_sensor->getdata(context.sensor_data.mag.getptr());
+	if (context.instances.sensor_manager.has_value()) {
+
+		context.instances.sensor_manager->updateSensors();
+		context.instances.sensor_manager->getAccelData(&context.sensor_data.accel);
+		context.instances.sensor_manager->getGyroData(&context.sensor_data.gyro);
+		context.instances.sensor_manager->getMagData(&context.sensor_data.mag);
+		context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
+		context.instances.sensor_manager->getTempData(&context.sensor_data.temperature);
+	}
 
 	// 2. 姿勢推定
 	context.instances.madgwick->updateIMU(context.sensor_data.gyro[Axis::X], context.sensor_data.gyro[Axis::Y], context.sensor_data.gyro[Axis::Z], context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
@@ -44,15 +50,12 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     // 3. 派生クラス固有の更新処理を呼び出す（PID計算）
     StateResult result = onUpdate(context);
 
-    // 4. モーターのPWM出力
-    context.instances.right_motor->setSpeed(context.control_output.motor_pwm[0]);
-    context.instances.left_motor->setSpeed(context.control_output.motor_pwm[1]);
+    // 4. PWM出力（PwmManager経由）
+    if (context.instances.pwm_controller.has_value()) {
 
-    // 5. サーボのPWM出力
-    context.instances.elevator_servo->setAngle(context.control_output.servo_pwm[0]);
-    context.instances.rudder_servo->setAngle(context.control_output.servo_pwm[1]);
-    context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[2]);
-    context.instances.aileron_servo->setAngle(context.control_output.servo_pwm[3]);
+        context.instances.pwm_controller->setMotorSpeed(context.control_output.motor_pwm.data());
+        context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.data());
+    }
 
 	// debug センサーデータの確認
 	//printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);

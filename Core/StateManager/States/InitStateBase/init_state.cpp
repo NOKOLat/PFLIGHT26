@@ -1,7 +1,5 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
-#include "servo_controller.hpp"
-#include "motor_controller.hpp"
 
 void InitState::enter(StateContext& context) {
 
@@ -14,43 +12,25 @@ StateResult InitState::update(StateContext& context) {
     // 初期化関数の呼び出し
     // 具体的な処理はこのファイルの下に関数ごとに実装されています
 
-    // 1. IMUの初期化と設定
-    if (!(result = initializeIMU(context)).success) {
+    // 1. センサーの初期化（SensorManager経由）
+    if (!(result = initializeSensors(context)).success) {
 
         return result;
     }
 
-    // 2. 磁気センサーの初期化と設定
-    if (!(result = initializeMagnetometer(context)).success) {
+    // 2. PWM制御（モーター・サーボ）の初期化
+    if (!(result = initializePWM(context)).success) {
 
         return result;
     }
 
-    // 3. 気圧センサーの初期化と設定
-    if (!(result = initializeBarometer(context)).success) {
-
-        return result;
-    }
-
-    // 4. モーターの初期化と設定
-    if (!(result = initializeMotors(context)).success) {
-
-        return result;
-    }
-
-    // 5. サーボの初期化と設定
-    if (!(result = initializeServos(context)).success) {
-
-        return result;
-    }
-
-    // 6. 姿勢推定の初期化
+    // 3. 姿勢推定の初期化
     if (!(result = initializeAttitudeEstimation(context)).success) {
 
         return result;
     }
 
-    // 7. SBUS受信の初期化と確認
+    // 4. SBUS受信の初期化と確認
     if (!(result = initializeSBUS(context)).success) {
 
         return result;
@@ -66,132 +46,55 @@ void InitState::exit(StateContext& context){
 
 }
 
-// 1. IMUの初期化と設定
-StateResult InitState::initializeIMU(StateContext& context) {
+// 1. センサーの初期化と設定
+StateResult InitState::initializeSensors(StateContext& context) {
 
-    // インスタンスチェック
-    if (!context.instances.imu_sensor.has_value()) {
+    // SensorManagerインスタンスチェック
+    if (!context.instances.sensor_manager.has_value()) {
 
-        printf("Error: IMU sensor instance is not initialized.\n");
+        printf("Error: SensorManager instance is not initialized.\n");
         return {false, false, StateID::INIT_STATE};
     }
 
-    // 通信チェック
-    if (context.instances.imu_sensor->Connection() != 0) {
+    // SensorManagerのセンサー初期化
+    if (!context.instances.sensor_manager->initSensors()) {
 
-        printf("Error: IMU sensor connection failed.\n");
+        printf("Error: Sensor initialization failed.\n");
         return {false, false, StateID::INIT_STATE};
     }
 
-    // 設定
-    context.instances.imu_sensor->AccelConfig(ICM42688P::ACCEL_Mode::LowNoize, ICM42688P::ACCEL_SCALE::SCALE02g, ICM42688P::ACCEL_ODR::ODR00500hz, ICM42688P::ACCEL_DLPF::ODR40);
-    context.instances.imu_sensor->GyroConfig(ICM42688P::GYRO_MODE::LowNoize, ICM42688P::GYRO_SCALE::Dps0250, ICM42688P::GYRO_ODR::ODR00500hz, ICM42688P::GYRO_DLPF::ODR40);
+    // SensorManagerのセンサー設定
+    if (!context.instances.sensor_manager->configSensors()) {
 
-    return {true, false, StateID::INIT_STATE};
-}
-
-// 2. 磁気センサーの初期化と設定
-StateResult InitState::initializeMagnetometer(StateContext& context) {
-
-    // インスタンスチェック
-    if (!context.instances.mag_sensor.has_value()) {
-
-        printf("Error: Mag sensor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    // 通信チェック
-    if (context.instances.mag_sensor->init()) {
-
-        printf("Error: Mag sensor connection failed.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    // 設定
-    context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
-
-    return {true, false, StateID::INIT_STATE};
-}
-
-// 3. 気圧センサーの初期化と設定
-StateResult InitState::initializeBarometer(StateContext& context) {
-
-    // インスタンスチェック
-    if (!context.instances.baro_sensor.has_value()) {
-
-        printf("Error: Baro sensor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    // 通信チェック
-    if (context.instances.baro_sensor->init() != 0) {
-
-        printf("Error: Baro sensor connection failed.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    // 設定
-    context.instances.baro_sensor->pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
-    context.instances.baro_sensor->tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
-
-    return {true, false, StateID::INIT_STATE};
-}
-
-// 4. モーターの初期化と設定
-StateResult InitState::initializeMotors(StateContext& context) {
-
-    // インスタンスチェック
-    if ((context.instances.left_motor.has_value() & context.instances.right_motor.has_value()) != 1) {
-
-        printf("Error: Motor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    // 初期化確認
-    if ((context.instances.left_motor->isInitialized() & context.instances.right_motor->isInitialized()) != 1) {
-
-        printf("Error: Motor instance is not initialized.\n");
+        printf("Error: Sensor configuration failed.\n");
         return {false, false, StateID::INIT_STATE};
     }
 
     return {true, false, StateID::INIT_STATE};
 }
 
-// 5. サーボの初期化と設定
-StateResult InitState::initializeServos(StateContext& context) {
+// 2. PWM制御（モーター・サーボ）の初期化
+StateResult InitState::initializePWM(StateContext& context) {
 
-    // インスタンスチェック
-    if (!context.instances.elevator_servo.has_value() || !context.instances.rudder_servo.has_value() ||
-        !context.instances.aileron_servo.has_value() || !context.instances.drop_servo.has_value()) {
+    // PwmManagerインスタンスチェック
+    if (!context.instances.pwm_controller.has_value()) {
 
-        printf("Error: Servo instance is not initialized.\n");
+        printf("Error: PWM controller instance is not initialized.\n");
         return {false, false, StateID::INIT_STATE};
     }
 
-    // 初期化確認
-    if (!context.instances.elevator_servo->isInitialized() || !context.instances.rudder_servo->isInitialized() ||
-        !context.instances.aileron_servo->isInitialized() || !context.instances.drop_servo->isInitialized()) {
+    // PwmManagerの初期化
+    if (!context.instances.pwm_controller->initPwm()) {
 
-        printf("Error: Servo instance failed to initialize.\n");
+        printf("Error: PWM controller initialization failed.\n");
         return {false, false, StateID::INIT_STATE};
     }
 
-    // サーボのパルス幅設定
-    context.instances.elevator_servo->setPulseRange(1600, 1900);
-    context.instances.rudder_servo->setPulseRange(1600, 1900);
-    context.instances.aileron_servo->setPulseRange(1600, 1900);
-    context.instances.drop_servo->setPulseRange(1600, 1900);
-    
-    // サーボの中立位置へ移動
-    context.instances.elevator_servo->neutral();
-    context.instances.rudder_servo->neutral();
-    context.instances.aileron_servo->neutral();
-    context.instances.drop_servo->neutral();
-
+    printf("PWM controller initialized successfully.\n");
     return {true, false, StateID::INIT_STATE};
 }
 
-// 6. 姿勢推定の初期化
+// 3. 姿勢推定の初期化
 StateResult InitState::initializeAttitudeEstimation(StateContext& context) {
 
     // インスタンスチェック
@@ -207,7 +110,7 @@ StateResult InitState::initializeAttitudeEstimation(StateContext& context) {
     return {true, false, StateID::INIT_STATE};
 }
 
-// 7. SBUS受信の初期化と確認
+// 4. SBUS受信の初期化と確認
 StateResult InitState::initializeSBUS(StateContext& context) {
 
     // インスタンスチェック
