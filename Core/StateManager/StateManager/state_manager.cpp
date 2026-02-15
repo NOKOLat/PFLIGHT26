@@ -128,36 +128,27 @@ void StateManager::init() {
 
     // 2. 使用するインスタンスの初期化
 
-    // 2-1 センサーモジュールの初期化
-    state_context_.instances.imu_sensor.emplace(state_context_.pin_config.sensor_i2c, 0b1101001);
-    state_context_.instances.mag_sensor.emplace(state_context_.pin_config.sensor_i2c, 0x14); // 試験用の基板にないためコメントアウト
-    state_context_.instances.baro_sensor.emplace(state_context_.pin_config.sensor_i2c);
+    // 2-0 センサーマネージャーの初期化
+    state_context_.instances.sensor_manager.emplace(state_context_.pin_config.sensor_i2c);
 
-    // 2-2 モーターインスタンスの初期化
-    state_context_.instances.left_motor.emplace(state_context_.pin_config.motor_tim[0], state_context_.pin_config.motor_tim_channels[0]);
-    state_context_.instances.right_motor.emplace(state_context_.pin_config.motor_tim[1], state_context_.pin_config.motor_tim_channels[1]);
+    // 2-1 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
+    state_context_.instances.pwm_controller.emplace();
 
-    // 2-3 サーボインスタンスの初期化
-    state_context_.instances.elevator_servo.emplace(state_context_.pin_config.servo_tim[0], state_context_.pin_config.servo_tim_channels[0]);
-    state_context_.instances.rudder_servo.emplace(state_context_.pin_config.servo_tim[1], state_context_.pin_config.servo_tim_channels[1]);
-    state_context_.instances.aileron_servo.emplace(state_context_.pin_config.servo_tim[2], state_context_.pin_config.servo_tim_channels[2]);
-    state_context_.instances.drop_servo.emplace(state_context_.pin_config.servo_tim[3], state_context_.pin_config.servo_tim_channels[3]);
-
-    // 2-4 姿勢推定フィルタの初期化(6軸モード: IMUのみ使用、magnetometerなし)
+    // 2-2 姿勢推定フィルタの初期化(6軸モード: IMUのみ使用、magnetometerなし)
     state_context_.instances.madgwick.emplace();
     state_context_.instances.madgwick->begin(1.0f / (state_context_.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
-    // 2-5-1角度制御用PID(kp, ki, kd, dt [秒])
+    // 2-3角度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);
     state_context_.instances.angle_pitch_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
     state_context_.instances.angle_yaw_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
 
-    // 2-5-2角速度制御用PID(kp, ki, kd, dt [秒])
+    // 2-3-2角速度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.rate_roll_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
     state_context_.instances.rate_pitch_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
     state_context_.instances.rate_yaw_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
 
-    // 2-6 SBUS
+    // 2-4 SBUS
     state_context_.instances.sbus_receiver.emplace();
 
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
