@@ -16,9 +16,15 @@ void PreAutoFlightState::onExit(StateContext& context) {
 
 StateResult PreAutoFlightState::onUpdate(StateContext& context) {
 
-    StateResult result;
+    return {true, false, StateID::PRE_AUTO_FLIGHT_STATE};
+}
 
-    return result;
+
+StateID PreAutoFlightState::evaluateNextState(StateContext& context) {
+
+    // PreAutoFlightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
+    return StateID::PRE_AUTO_FLIGHT_STATE;
 }
 
 

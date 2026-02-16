@@ -17,13 +17,14 @@ void AutoTakeoffState::onExit(StateContext& context) {
 StateResult AutoTakeoffState::onUpdate(StateContext& context) {
 
     // 自動離陸用の更新処理
+    return {true, false, StateID::AUTO_TAKEOFF_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::AUTO_FLIGHT_STATE;
 
-    return result;
+StateID AutoTakeoffState::evaluateNextState(StateContext& context) {
+
+    // 自動離陸完了後はAUTO_FLIGHT_STATEに遷移
+    return StateID::AUTO_FLIGHT_STATE;
 }
 
 

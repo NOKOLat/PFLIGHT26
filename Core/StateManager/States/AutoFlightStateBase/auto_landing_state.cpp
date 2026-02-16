@@ -17,13 +17,14 @@ void AutoLandingState::onExit(StateContext& context) {
 StateResult AutoLandingState::onUpdate(StateContext& context) {
 
     // 自動着陸用の更新処理
+    return {true, false, StateID::AUTO_LANDING_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::POST_FLIGHT_STATE;
 
-    return result;
+StateID AutoLandingState::evaluateNextState(StateContext& context) {
+
+    // 自動着陸完了後はPOST_FLIGHT_STATEに遷移
+    return StateID::POST_FLIGHT_STATE;
 }
 
 

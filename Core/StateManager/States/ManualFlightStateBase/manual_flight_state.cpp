@@ -30,24 +30,27 @@ StateResult ManualFlightState::onUpdate(StateContext& context) {
 
     context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator; // エレベーター
     context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder;   // ラダー
-    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron;  // エルロン 
-    
+    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron;  // エルロン
+
     // 投下装置
     if(context.rescaled_sbus_data.aux6 == 1) {
 
-        context.control_output.servo_pwm[3] = 90.0f; 
-    } 
+        context.control_output.servo_pwm[3] = 90.0f;
+    }
     else {
 
         context.control_output.servo_pwm[3] = 0.0f;
     }
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::MANUAL_FLIGHT_STATE;
+    return {true, false, StateID::MANUAL_FLIGHT_STATE};
+}
 
-    return result;
+
+StateID ManualFlightState::evaluateNextState(StateContext& context) {
+
+    // ManualFlightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
+    return StateID::MANUAL_FLIGHT_STATE;
 }
 
 

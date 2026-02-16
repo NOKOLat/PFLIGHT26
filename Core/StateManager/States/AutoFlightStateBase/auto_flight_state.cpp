@@ -17,13 +17,15 @@ void AutoFlightState::onExit(StateContext& context) {
 StateResult AutoFlightState::onUpdate(StateContext& context) {
 
     // 自動飛行用の更新処理
+    return {true, false, StateID::AUTO_FLIGHT_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::AUTO_FLIGHT_STATE;
 
-    return result;
+StateID AutoFlightState::evaluateNextState(StateContext& context) {
+
+    // AutoFlightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
+    return StateID::AUTO_FLIGHT_STATE;
 }
 
 

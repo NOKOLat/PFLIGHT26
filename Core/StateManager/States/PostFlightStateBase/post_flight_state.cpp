@@ -18,15 +18,16 @@ void PostFlightState::onExit(StateContext& context) {
 StateResult PostFlightState::onUpdate(StateContext& context) {
 
     // 飛行後の処理
+    HAL_Delay(1000);
 
-	HAL_Delay(1000);
+    return {true, false, StateID::POST_FLIGHT_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::PRE_FLIGHT_STATE;
 
-    return result;
+StateID PostFlightState::evaluateNextState(StateContext& context) {
+
+    // 飛行後の処理完了後はPRE_FLIGHT_STATEに遷移
+    return StateID::PRE_FLIGHT_STATE;
 }
 
 

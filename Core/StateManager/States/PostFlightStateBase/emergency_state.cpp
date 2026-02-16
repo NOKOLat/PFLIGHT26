@@ -25,13 +25,14 @@ void EmergencyState::onExit(StateContext& context) {
 StateResult EmergencyState::onUpdate(StateContext& context) {
 
     // 緊急対応の処理
+    return {true, false, StateID::EMERGENCY_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::EMERGENCY_STATE;
 
-    return result;
+StateID EmergencyState::evaluateNextState(StateContext& context) {
+
+    // 緊急状態では遷移しない
+    return StateID::EMERGENCY_STATE;
 }
 
 

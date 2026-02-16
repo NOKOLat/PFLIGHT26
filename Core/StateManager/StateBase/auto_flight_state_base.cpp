@@ -35,6 +35,11 @@ StateResult AutoFlightStateBase::update(StateContext& context) {
     // PWM値の出力
     // context.motor_driver->setPWM(context.control_output.motor_pwm);
 
+    // 遷移判定
+    StateID next_state = evaluateNextState(context);
+    result.next_state_id = next_state;
+    result.should_transition = (next_state != getStateID());
+
     return result;
 }
 

@@ -20,6 +20,7 @@ class InitStateBase : public StateInterface {
         virtual void onEnter(StateContext& context) = 0;
         virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
 
@@ -41,6 +42,7 @@ class PreFlightStateBase : public StateInterface {
         virtual void onEnter(StateContext& context) = 0;
         virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
 
@@ -62,6 +64,7 @@ class ManualFlightStateBase : public StateInterface {
         virtual void onEnter(StateContext& context) = 0;
         virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
 
@@ -83,6 +86,7 @@ class AutoFlightStateBase : public StateInterface {
         virtual void onEnter(StateContext& context) = 0;
         virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
 
@@ -104,6 +108,7 @@ class PostFlightStateBase : public StateInterface {
         virtual void onEnter(StateContext& context) = 0;
         virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
 

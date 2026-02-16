@@ -17,13 +17,15 @@ void FugueEightState::onExit(StateContext& context) {
 StateResult FugueEightState::onUpdate(StateContext& context) {
 
     // フュージュエイト用の更新処理
+    return {true, false, StateID::FUGUE_EIGHT_STATE};
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::FUGUE_EIGHT_STATE;
 
-    return result;
+StateID FugueEightState::evaluateNextState(StateContext& context) {
+
+    // FugueEightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
+    return StateID::FUGUE_EIGHT_STATE;
 }
 
 

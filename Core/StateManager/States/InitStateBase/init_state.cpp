@@ -1,11 +1,13 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-void InitState::enter(StateContext& context) {
+
+void InitState::onEnter(StateContext& context) {
 
 }
 
-StateResult InitState::update(StateContext& context) {
+
+StateResult InitState::onUpdate(StateContext& context) {
 
     StateResult result;
 
@@ -37,14 +39,23 @@ StateResult InitState::update(StateContext& context) {
     }
 
     printf("All init complete! \n");
-    return {true, true, StateID::CALIBRATION_STATE};
+    return result;
 }
 
-void InitState::exit(StateContext& context){
+
+void InitState::onExit(StateContext& context){
 
 	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
 
 }
+
+
+StateID InitState::evaluateNextState(StateContext& context) {
+
+    // 初期化完了後はCALIBRATION_STATEに遷移
+    return StateID::CALIBRATION_STATE;
+}
+
 
 // 1. センサーの初期化と設定
 StateResult InitState::initializeSensors(StateContext& context) {
@@ -132,9 +143,4 @@ StateResult InitState::initializeSBUS(StateContext& context) {
 StateID InitState::getStateID() const {
 
     return StateID::INIT_STATE;
-}
-
-StateBaseID InitState::getStateBaseID() const {
-
-    return StateBaseID::INIT_STATE_BASE;
 }
