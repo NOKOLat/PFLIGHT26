@@ -2,25 +2,10 @@
 #include "../../StateContext/context.hpp"
 
 
-void ManualFlightState::onEnter(StateContext& context) {
-
-    // 手動飛行状態固有の初期化処理
-    // PID制御の目標値を初期化
-    // context.pid_controller->setTarget(0.0f);
-
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-}
-
-
-void ManualFlightState::onExit(StateContext& context) {
-
-    // 手動飛行状態固有のクリーンアップ処理
-    // 必要に応じてここで状態をリセット
-}
-
-
 StateResult ManualFlightState::onUpdate(StateContext& context) {
+
+    // GPIO設定
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
     // 手動飛行用の更新処理
     // 制御は不要なので、sbusの値をそのまま出力に反映させる

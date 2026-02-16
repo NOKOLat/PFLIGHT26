@@ -27,23 +27,9 @@ void StateManager::changeState(StateID state_id) {
         return;
     }
 
-    // 現在の状態の終了処理
-    if (current_state_) {
-
-        current_state_->exit(state_context_);
-    }
-
     // 新しい状態に遷移
     current_state_ = std::move(new_state);
 
-    // 新しい状態の開始処理
-    if (current_state_) {
-
-        current_state_->enter(state_context_);
-
-        // デバッグ出力
-        printf("[StateManager] StateEnter: %d\n", static_cast<int>(current_state_->getStateID()));
-    }
 }
 
 void StateManager::update() {
@@ -160,11 +146,6 @@ void StateManager::init() {
     // 3. 初期状態を生成
     current_state_ = StateFactory::createState(init_state_id_);
 
-    // 4. 初期状態のenter関数を呼ぶ
-    if (current_state_) {
 
-        current_state_->enter(state_context_);
-    }
-    
     printf("[StateManager] All Instances Generated\n");
 }

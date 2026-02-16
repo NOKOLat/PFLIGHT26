@@ -2,12 +2,6 @@
 #include "../../StateContext/context.hpp"
 
 
-void CalibrationState::onEnter(StateContext& context) {
-
-    // キャリブレーション処理の初期化
-}
-
-
 StateResult CalibrationState::onUpdate(StateContext& context) {
 
     // imuキャリブレーション
@@ -16,12 +10,6 @@ StateResult CalibrationState::onUpdate(StateContext& context) {
     printf("End Calibration \n");
 
     return {true, false, StateID::CALIBRATION_STATE};
-}
-
-
-void CalibrationState::onExit(StateContext& context) {
-
-    // クリーンアップ処理
 }
 
 

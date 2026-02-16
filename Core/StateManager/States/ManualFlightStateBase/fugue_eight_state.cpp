@@ -2,18 +2,6 @@
 #include "../../StateContext/context.hpp"
 
 
-void FugueEightState::onEnter(StateContext& context) {
-
-    // フュージュエイト状態固有の初期化処理
-}
-
-
-void FugueEightState::onExit(StateContext& context) {
-
-    // フュージュエイト状態固有のクリーンアップ処理
-}
-
-
 StateResult FugueEightState::onUpdate(StateContext& context) {
 
     // フュージュエイト用の更新処理

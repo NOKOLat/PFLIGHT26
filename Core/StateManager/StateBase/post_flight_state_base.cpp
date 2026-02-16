@@ -2,21 +2,7 @@
 #include "StateContext/context.hpp"
 
 
-void PostFlightStateBase::enter(StateContext& context) {
-
-    // 共通の初期化処理
-
-    // モーターの停止処理
-    // context.motor_driver->stop();
-
-    // 派生クラス固有の初期化処理を呼び出す
-    onEnter(context);
-}
-
-
 StateResult PostFlightStateBase::update(StateContext& context) {
-
-    // 共通の更新処理
 
     // 派生クラス固有の更新処理を呼び出す
     StateResult result = onUpdate(context);
@@ -27,15 +13,6 @@ StateResult PostFlightStateBase::update(StateContext& context) {
     result.should_transition = (next_state != getStateID());
 
     return result;
-}
-
-
-void PostFlightStateBase::exit(StateContext& context) {
-
-    // 派生クラス固有のクリーンアップ処理を呼び出す
-    onExit(context);
-
-    // 共通のクリーンアップ処理
 }
 
 

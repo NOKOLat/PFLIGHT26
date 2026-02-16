@@ -17,8 +17,6 @@ class InitStateBase : public StateInterface {
     protected:
 
         // 派生クラスで実装すべき処理
-        virtual void onEnter(StateContext& context) = 0;
-        virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
@@ -26,9 +24,7 @@ class InitStateBase : public StateInterface {
 
         virtual ~InitStateBase() = default;
 
-        virtual void enter(StateContext& context) override;
         virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateBaseID getStateBaseID() const override;
 };
 
@@ -39,8 +35,6 @@ class PreFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual void onEnter(StateContext& context) = 0;
-        virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
@@ -48,9 +42,7 @@ class PreFlightStateBase : public StateInterface {
 
         virtual ~PreFlightStateBase() = default;
 
-        virtual void enter(StateContext& context) override;
         virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateBaseID getStateBaseID() const override;
 };
 
@@ -61,8 +53,6 @@ class ManualFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual void onEnter(StateContext& context) = 0;
-        virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
@@ -70,9 +60,7 @@ class ManualFlightStateBase : public StateInterface {
 
         virtual ~ManualFlightStateBase() = default;
 
-        virtual void enter(StateContext& context) override;
         virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateBaseID getStateBaseID() const override;
 };
 
@@ -83,8 +71,6 @@ class AutoFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual void onEnter(StateContext& context) = 0;
-        virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
@@ -92,9 +78,7 @@ class AutoFlightStateBase : public StateInterface {
 
         virtual ~AutoFlightStateBase() = default;
 
-        virtual void enter(StateContext& context) override;
         virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateBaseID getStateBaseID() const override;
 };
 
@@ -105,8 +89,6 @@ class PostFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual void onEnter(StateContext& context) = 0;
-        virtual void onExit(StateContext& context) = 0;
         virtual StateResult onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
@@ -114,9 +96,7 @@ class PostFlightStateBase : public StateInterface {
 
         virtual ~PostFlightStateBase() = default;
 
-        virtual void enter(StateContext& context) override;
         virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateBaseID getStateBaseID() const override;
 };
 

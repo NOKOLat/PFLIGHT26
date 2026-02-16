@@ -2,18 +2,6 @@
 #include "../../StateContext/context.hpp"
 
 
-void LevelTurnState::onEnter(StateContext& context) {
-
-    // レベルターン状態固有の初期化処理
-}
-
-
-void LevelTurnState::onExit(StateContext& context) {
-
-    // レベルターン状態固有のクリーンアップ処理
-}
-
-
 StateResult LevelTurnState::onUpdate(StateContext& context) {
 
     // レベルターン用の更新処理

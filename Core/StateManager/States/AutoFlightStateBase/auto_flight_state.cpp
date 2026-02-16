@@ -1,19 +1,6 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-
-void AutoFlightState::onEnter(StateContext& context) {
-
-    // 自動飛行状態固有の初期化処理
-}
-
-
-void AutoFlightState::onExit(StateContext& context) {
-
-    // 自動飛行状態固有のクリーンアップ処理
-}
-
-
 StateResult AutoFlightState::onUpdate(StateContext& context) {
 
     // 自動飛行用の更新処理

@@ -1,16 +1,6 @@
 #include "StateBase/state_base.hpp"
 #include "StateContext/context.hpp"
 
-
-void ManualFlightStateBase::enter(StateContext& context) {
-
-    // 共通の初期化処理
-
-    // 派生クラス固有の初期化処理を呼び出す
-    onEnter(context);
-}
-
-
 StateResult ManualFlightStateBase::update(StateContext& context) {
 
     // 共通の更新処理
@@ -55,20 +45,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     // debug PWMデータの確認
     //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2], context.control_output.servo_pwm[3]);
 
-    // 5. 遷移判定（SBUSデータと直前のセンサーデータから判断）
-    StateID next_state = evaluateNextState(context);
-    result.next_state_id = next_state;
-    result.should_transition = (next_state != getStateID());
-
     return result;
-}
-
-void ManualFlightStateBase::exit(StateContext& context) {
-
-    // 派生クラス固有のクリーンアップ処理を呼び出す
-    onExit(context);
-
-    // 共通のクリーンアップ処理
 }
 
 

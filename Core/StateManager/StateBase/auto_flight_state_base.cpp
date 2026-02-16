@@ -2,15 +2,6 @@
 #include "StateContext/context.hpp"
 
 
-void AutoFlightStateBase::enter(StateContext& context) {
-
-    // 共通の初期化処理
-
-    // 派生クラス固有の初期化処理を呼び出す
-    onEnter(context);
-}
-
-
 StateResult AutoFlightStateBase::update(StateContext& context) {
 
     // 共通の更新処理
@@ -25,7 +16,7 @@ StateResult AutoFlightStateBase::update(StateContext& context) {
     // EKFの更新
     // context.ekf->update(context.sensor_data, context.attitude);
 
-    // 派生クラス固有の更新処理を呼び出す（PID計算）
+    // 派生クラス固有の更新処理を呼び出す
     StateResult result = onUpdate(context);
 
     if (!result.success) {
@@ -41,15 +32,6 @@ StateResult AutoFlightStateBase::update(StateContext& context) {
     result.should_transition = (next_state != getStateID());
 
     return result;
-}
-
-
-void AutoFlightStateBase::exit(StateContext& context) {
-
-    // 派生クラス固有のクリーンアップ処理を呼び出す
-    onExit(context);
-
-    // 共通のクリーンアップ処理
 }
 
 
