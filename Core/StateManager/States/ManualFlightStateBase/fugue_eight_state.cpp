@@ -2,10 +2,10 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult FugueEightState::onUpdate(StateContext& context) {
+ProcessStatus FugueEightState::onUpdate(StateContext& context) {
 
     // フュージュエイト用の更新処理
-    return {true, false, StateID::FUGUE_EIGHT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

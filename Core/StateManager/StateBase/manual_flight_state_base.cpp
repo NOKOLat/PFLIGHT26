@@ -11,7 +11,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     // 状態遷移が必要な場合は、遷移フラグを立てて次の状態IDをセット
     if(next_state != getStateID()) {
 
-        return {true, true, next_state};
+        return {ProcessStatus::SUCCESS, TransitionFlag::SHOULD_TRANSITION, next_state};
     }
 
     // 1. センサーデータの取得
@@ -30,7 +30,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.sensor_data.angle[Axis::Z] = context.instances.madgwick->getYaw();
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
-    StateResult result = onUpdate(context);
+    ProcessStatus status = onUpdate(context);
 
     // 4. PWM出力（PwmManager経由）
     context.instances.pwm_controller->setMotorSpeed(context.control_output.motor_pwm.data());
@@ -45,7 +45,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     // debug PWMデータの確認
     //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2], context.control_output.servo_pwm[3]);
 
-    return result;
+    return {status, TransitionFlag::NO_TRANSITION, getStateID()};
 }
 
 

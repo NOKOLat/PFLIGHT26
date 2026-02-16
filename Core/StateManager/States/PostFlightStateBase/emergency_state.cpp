@@ -1,10 +1,10 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-StateResult EmergencyState::onUpdate(StateContext& context) {
+ProcessStatus EmergencyState::onUpdate(StateContext& context) {
 
     // 緊急対応の処理
-    return {true, false, StateID::EMERGENCY_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

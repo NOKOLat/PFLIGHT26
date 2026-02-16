@@ -2,10 +2,10 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult LevelTurnState::onUpdate(StateContext& context) {
+ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
 
     // レベルターン用の更新処理
-    return {true, false, StateID::LEVEL_TURN_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

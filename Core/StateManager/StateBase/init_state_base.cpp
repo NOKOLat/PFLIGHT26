@@ -5,23 +5,19 @@
 StateResult InitStateBase::update(StateContext& context) {
 
     // 派生クラス固有の更新処理を呼び出す
-    StateResult result = onUpdate(context);
+    ProcessStatus status = onUpdate(context);
 
     // 処理が失敗した場合はEMERGENCY_STATEに遷移
-    if(!result.success){
+    if(status == ProcessStatus::FAILURE) {
 
-        printf("Error: InitStateBase update failed. %s\n", result.error_message);
-        return {false, false, StateID::EMERGENCY_STATE};
+        printf("Error: InitStateBase update failed.\n");
+        return {ProcessStatus::FAILURE, TransitionFlag::SHOULD_TRANSITION, StateID::EMERGENCY_STATE};
     }
 
     // 遷移判定
     StateID next_state = evaluateNextState(context);
 
-    // 現在の状態と次の状態が異なる場合は遷移フラグを立てる
-    result.next_state_id = next_state;
-    result.should_transition = (next_state != getStateID());
-
-    return result;
+    return {ProcessStatus::SUCCESS, TransitionFlag::SHOULD_TRANSITION, next_state};
 }
 
 

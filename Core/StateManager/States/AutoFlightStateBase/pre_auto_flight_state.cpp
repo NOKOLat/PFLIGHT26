@@ -2,9 +2,9 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult PreAutoFlightState::onUpdate(StateContext& context) {
+ProcessStatus PreAutoFlightState::onUpdate(StateContext& context) {
 
-    return {true, false, StateID::PRE_AUTO_FLIGHT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

@@ -1,10 +1,10 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-StateResult AutoLandingState::onUpdate(StateContext& context) {
+ProcessStatus AutoLandingState::onUpdate(StateContext& context) {
 
     // 自動着陸用の更新処理
-    return {true, false, StateID::AUTO_LANDING_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

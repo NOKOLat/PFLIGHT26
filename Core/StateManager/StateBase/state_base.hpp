@@ -17,7 +17,7 @@ class InitStateBase : public StateInterface {
     protected:
 
         // 派生クラスで実装すべき処理
-        virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual ProcessStatus onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
@@ -35,7 +35,7 @@ class PreFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual ProcessStatus onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
@@ -53,7 +53,7 @@ class ManualFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual ProcessStatus onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
@@ -71,7 +71,7 @@ class AutoFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual ProcessStatus onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:
@@ -89,7 +89,7 @@ class PostFlightStateBase : public StateInterface {
 
     protected:
 
-        virtual StateResult onUpdate(StateContext& context) = 0;
+        virtual ProcessStatus onUpdate(StateContext& context) = 0;
         virtual StateID evaluateNextState(StateContext& context) = 0;
 
     public:

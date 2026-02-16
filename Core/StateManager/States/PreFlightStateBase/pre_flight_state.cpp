@@ -2,12 +2,12 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult PreFlightState::onUpdate(StateContext& context) {
+ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
     // 飛行前の準備処理
     printf("Wait Start SBUS[9] = %d, %f\n", context.rescaled_sbus_data.aux5, context.rescaled_sbus_data.throttle);
 
-    return {true, false, StateID::PRE_FLIGHT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

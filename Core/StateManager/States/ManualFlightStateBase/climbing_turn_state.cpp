@@ -2,10 +2,10 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult ClimbingTurnState::onUpdate(StateContext& context) {
+ProcessStatus ClimbingTurnState::onUpdate(StateContext& context) {
 
     // クライミングターン用の更新処理
-    return {true, false, StateID::CLIMBING_TURN_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

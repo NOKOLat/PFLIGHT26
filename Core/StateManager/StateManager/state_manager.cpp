@@ -81,7 +81,7 @@ void StateManager::update() {
 	StateResult result = current_state_->update(state_context_);
 
 	// 処理に失敗した場合
-	if (!result.success){
+	if (result.success == ProcessStatus::FAILURE){
 
 		printf("[StateManager::update] State Update Failed\n");
 		changeState(StateID::EMERGENCY_STATE);
@@ -89,7 +89,7 @@ void StateManager::update() {
 	}
 
 	// 状態遷移が必要な場合
-	if (result.should_transition) {
+	if (result.should_transition == TransitionFlag::SHOULD_TRANSITION) {
 
 		// 状態遷移を実行（Factoryの呼び出しはchangeState内で行われる）
 		changeState(result.next_state_id);

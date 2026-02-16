@@ -2,7 +2,7 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult ManualFlightState::onUpdate(StateContext& context) {
+ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
 
     // GPIO設定
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -27,7 +27,7 @@ StateResult ManualFlightState::onUpdate(StateContext& context) {
         context.control_output.servo_pwm[3] = 0.0f;
     }
 
-    return {true, false, StateID::MANUAL_FLIGHT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

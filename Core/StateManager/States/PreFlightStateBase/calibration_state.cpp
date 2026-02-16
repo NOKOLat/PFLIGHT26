@@ -2,14 +2,14 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult CalibrationState::onUpdate(StateContext& context) {
+ProcessStatus CalibrationState::onUpdate(StateContext& context) {
 
     // imuキャリブレーション
     printf("Start Calibration\n");
     context.instances.sensor_manager->CalibrationSensors();
     printf("End Calibration \n");
 
-    return {true, false, StateID::CALIBRATION_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

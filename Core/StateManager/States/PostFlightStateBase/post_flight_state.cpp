@@ -2,7 +2,7 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult PostFlightState::onUpdate(StateContext& context) {
+ProcessStatus PostFlightState::onUpdate(StateContext& context) {
 
     // GPIO設定
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
@@ -10,7 +10,7 @@ StateResult PostFlightState::onUpdate(StateContext& context) {
     // 飛行後の処理
     HAL_Delay(1000);
 
-    return {true, false, StateID::POST_FLIGHT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

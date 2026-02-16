@@ -17,10 +17,11 @@ StateResult AutoFlightStateBase::update(StateContext& context) {
     // context.ekf->update(context.sensor_data, context.attitude);
 
     // 派生クラス固有の更新処理を呼び出す
-    StateResult result = onUpdate(context);
+    ProcessStatus status = onUpdate(context);
 
-    if (!result.success) {
-        return result;
+    if (status == ProcessStatus::FAILURE) {
+        
+        return {ProcessStatus::FAILURE, TransitionFlag::NO_TRANSITION, getStateID()};
     }
 
     // PWM値の出力
@@ -28,10 +29,9 @@ StateResult AutoFlightStateBase::update(StateContext& context) {
 
     // 遷移判定
     StateID next_state = evaluateNextState(context);
-    result.next_state_id = next_state;
-    result.should_transition = (next_state != getStateID());
+    TransitionFlag should_transition = (next_state != getStateID()) ? TransitionFlag::SHOULD_TRANSITION : TransitionFlag::NO_TRANSITION;
 
-    return result;
+    return {status, should_transition, next_state};
 }
 
 

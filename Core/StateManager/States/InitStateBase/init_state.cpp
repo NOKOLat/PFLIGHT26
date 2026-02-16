@@ -2,33 +2,33 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult InitState::onUpdate(StateContext& context) {
+ProcessStatus InitState::onUpdate(StateContext& context) {
 
-    StateResult result;
+    ProcessStatus result;
 
     // 初期化関数の呼び出し
     // 具体的な処理はこのファイルの下に関数ごとに実装されています
 
     // 1. センサーの初期化（SensorManager経由）
-    if (!(result = initializeSensors(context)).success) {
+    if ((result = initializeSensors(context)) == ProcessStatus::FAILURE) {
 
         return result;
     }
 
     // 2. PWM制御（モーター・サーボ）の初期化
-    if (!(result = initializePWM(context)).success) {
+    if ((result = initializePWM(context)) == ProcessStatus::FAILURE) {
 
         return result;
     }
 
     // 3. 姿勢推定の初期化
-    if (!(result = initializeAttitudeEstimation(context)).success) {
+    if ((result = initializeAttitudeEstimation(context)) == ProcessStatus::FAILURE) {
 
         return result;
     }
 
     // 4. SBUS受信の初期化と確認
-    if (!(result = initializeSBUS(context)).success) {
+    if ((result = initializeSBUS(context)) == ProcessStatus::FAILURE) {
 
         return result;
     }
@@ -50,86 +50,86 @@ StateID InitState::evaluateNextState(StateContext& context) {
 
 
 // 1. センサーの初期化と設定
-StateResult InitState::initializeSensors(StateContext& context) {
+ProcessStatus InitState::initializeSensors(StateContext& context) {
 
     // SensorManagerインスタンスチェック
     if (!context.instances.sensor_manager.has_value()) {
 
         printf("Error: SensorManager instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
     // SensorManagerのセンサー初期化
     if (!context.instances.sensor_manager->initSensors()) {
 
         printf("Error: Sensor initialization failed.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
     // SensorManagerのセンサー設定
     if (!context.instances.sensor_manager->configSensors()) {
 
         printf("Error: Sensor configuration failed.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
-    return {true, false, StateID::INIT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 // 2. PWM制御（モーター・サーボ）の初期化
-StateResult InitState::initializePWM(StateContext& context) {
+ProcessStatus InitState::initializePWM(StateContext& context) {
 
     // PwmManagerインスタンスチェック
     if (!context.instances.pwm_controller.has_value()) {
 
         printf("Error: PWM controller instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
     // PwmManagerの初期化
     if (!context.instances.pwm_controller->initPwm()) {
 
         printf("Error: PWM controller initialization failed.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
     printf("PWM controller initialized successfully.\n");
-    return {true, false, StateID::INIT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 // 3. 姿勢推定の初期化
-StateResult InitState::initializeAttitudeEstimation(StateContext& context) {
+ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
 
     // インスタンスチェック
     if (!context.instances.madgwick.has_value()) {
 
         printf("Error: Madgwick instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
     // 初期化
     context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
-    return {true, false, StateID::INIT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 // 4. SBUS受信の初期化と確認
-StateResult InitState::initializeSBUS(StateContext& context) {
+ProcessStatus InitState::initializeSBUS(StateContext& context) {
 
     // インスタンスチェック
     if (!context.instances.sbus_receiver.has_value()) {
 
         printf("Error: SBUS receiver instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return ProcessStatus::FAILURE;
     }
 
 //    if (context.rescaled_sbus_data.throttle == 0.0f) {
 //
 //        printf("Error: SBUS receiver failed to receive data.\n");
-//        return {false, false, StateID::INIT_STATE};
+//        return ProcessStatus::FAILURE;
 //    }
 
-    return {true, false, StateID::INIT_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 StateID InitState::getStateID() const {

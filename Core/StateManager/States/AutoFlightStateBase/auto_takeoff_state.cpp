@@ -2,10 +2,10 @@
 #include "../../StateContext/context.hpp"
 
 
-StateResult AutoTakeoffState::onUpdate(StateContext& context) {
+ProcessStatus AutoTakeoffState::onUpdate(StateContext& context) {
 
     // 自動離陸用の更新処理
-    return {true, false, StateID::AUTO_TAKEOFF_STATE};
+    return ProcessStatus::SUCCESS;
 }
 
 

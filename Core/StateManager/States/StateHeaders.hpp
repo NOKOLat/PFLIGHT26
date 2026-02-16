@@ -19,13 +19,13 @@ class InitState : public InitStateBase {
         virtual ~InitState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 
-        StateResult initializeSensors(StateContext& context);
-        StateResult initializePWM(StateContext& context);
-        StateResult initializeAttitudeEstimation(StateContext& context);
-        StateResult initializeSBUS(StateContext& context);
+        ProcessStatus initializeSensors(StateContext& context);
+        ProcessStatus initializePWM(StateContext& context);
+        ProcessStatus initializeAttitudeEstimation(StateContext& context);
+        ProcessStatus initializeSBUS(StateContext& context);
 };
 
 
@@ -39,7 +39,7 @@ class CalibrationState : public PreFlightStateBase {
         virtual ~CalibrationState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -49,7 +49,7 @@ class PreFlightState : public PreFlightStateBase {
         virtual ~PreFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -64,7 +64,7 @@ class ManualFlightState : public ManualFlightStateBase {
         virtual ~ManualFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -74,7 +74,7 @@ class LevelTurnState : public ManualFlightStateBase {
         virtual ~LevelTurnState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -84,7 +84,7 @@ class ClimbingTurnState : public ManualFlightStateBase {
         virtual ~ClimbingTurnState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -94,7 +94,7 @@ class FugueEightState : public ManualFlightStateBase {
         virtual ~FugueEightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -109,7 +109,7 @@ class PreAutoFlightState : public AutoFlightStateBase {
         virtual ~PreAutoFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -119,7 +119,7 @@ class AutoTakeoffState : public AutoFlightStateBase {
         virtual ~AutoTakeoffState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -129,7 +129,7 @@ class AutoFlightState : public AutoFlightStateBase {
         virtual ~AutoFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -139,7 +139,7 @@ class AutoLandingState : public AutoFlightStateBase {
         virtual ~AutoLandingState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -154,7 +154,7 @@ class PostFlightState : public PostFlightStateBase {
         virtual ~PostFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
@@ -164,7 +164,7 @@ class EmergencyState : public PostFlightStateBase {
         virtual ~EmergencyState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
