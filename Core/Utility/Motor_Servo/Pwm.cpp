@@ -2,13 +2,13 @@
 #include "stdio.h"
 
 PwmManager::PwmManager()
-    : right_motor(&htim4, TIM_CHANNEL_1),
-      left_motor(&htim4, TIM_CHANNEL_2),
+    : right_motor(&htim3, TIM_CHANNEL_1),
+      left_motor(&htim3, TIM_CHANNEL_2),
       elevator_servo(&htim1, TIM_CHANNEL_1),
       rudder_servo(&htim1, TIM_CHANNEL_2),
       right_aileron_servo(&htim1, TIM_CHANNEL_3),
       left_aileron_servo(&htim1, TIM_CHANNEL_4),
-      drop_servo(&htim3, TIM_CHANNEL_1) {
+      drop_servo(&htim12, TIM_CHANNEL_2) {
 
     printf("[PwmManager] Constructor called\n");
 }

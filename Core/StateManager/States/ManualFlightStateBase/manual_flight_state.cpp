@@ -10,15 +10,17 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     // 手動飛行用の更新処理
     // 制御は不要なので、sbusの値をそのまま出力に反映させる
 
+    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる
     context.control_output.motor_pwm[0] = context.rescaled_sbus_data.throttle; // 右モーター
     context.control_output.motor_pwm[1] = context.rescaled_sbus_data.throttle; // 左モーター
 
-    context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator; // エレベーター
-    context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder;   // ラダー
-    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron;  // エルロン
+    // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
+    context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator * 0.9; // エレベーター
+    context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder * 0.9;   // ラダー
+    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron * 0.9;  // エルロン
 
     // 投下装置
-    if(context.rescaled_sbus_data.aux6 == 1) {
+    if(context.rescaled_sbus_data.drop == 1) {
 
         context.control_output.servo_pwm[3] = 90.0f;
     }
@@ -26,6 +28,9 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
 
         context.control_output.servo_pwm[3] = 0.0f;
     }
+
+    // debug: モーター出力[%], サーボ角度[deg]
+    //printf("motor: %f %f | servo: %f %f %f %f \n",context.control_output.motor_pwm[0], context.control_output.motor_pwm[1], context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2],context.control_output.servo_pwm[3]);
 
     return ProcessStatus::SUCCESS;
 }
@@ -35,6 +40,38 @@ StateID ManualFlightState::evaluateNextState(StateContext& context) {
 
     // ManualFlightState から他の状態への遷移判定をここに実装
     // デフォルトは現在の状態を継続
+
+    // 安全スティックの値を確認（飛行終了判定）
+    if(!context.rescaled_sbus_data.safety){
+
+        return StateID::POST_FLIGHT_STATE;
+    }
+
+    // 手動飛行の判定
+	if(context.rescaled_sbus_data.autofly == 0){
+
+	    return StateID::MANUAL_FLIGHT_STATE;
+	}
+
+	// 自動飛行の分岐
+
+	// 水平旋回
+	printf("switch %d\n", context.rescaled_sbus_data.selectmission);
+	if(context.rescaled_sbus_data.selectmission == 0){
+
+		return StateID::LEVEL_TURN_STATE;
+	}
+
+	if(context.rescaled_sbus_data.selectmission == 1){
+
+		return StateID::CLIMBING_TURN_STATE;
+	}
+
+	if(context.rescaled_sbus_data.selectmission == 2){
+
+		return StateID::FUGUE_EIGHT_STATE;
+	}
+
     return StateID::MANUAL_FLIGHT_STATE;
 }
 

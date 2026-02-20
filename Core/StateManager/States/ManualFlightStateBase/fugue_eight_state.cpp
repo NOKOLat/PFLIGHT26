@@ -11,9 +11,19 @@ ProcessStatus FugueEightState::onUpdate(StateContext& context) {
 
 StateID FugueEightState::evaluateNextState(StateContext& context) {
 
-    // FugueEightState から他の状態への遷移判定をここに実装
-    // デフォルトは現在の状態を継続
-    return StateID::FUGUE_EIGHT_STATE;
+    // 安全スティックの値を確認（飛行終了判定）
+    if(!context.rescaled_sbus_data.safety){
+
+        return StateID::POST_FLIGHT_STATE;
+    }
+
+    // 手動飛行の判定
+	if(context.rescaled_sbus_data.autofly == 0){
+
+	    return StateID::MANUAL_FLIGHT_STATE;
+	}
+
+	return StateID::FUGUE_EIGHT_STATE;
 }
 
 

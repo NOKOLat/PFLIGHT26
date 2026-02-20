@@ -11,9 +11,19 @@ ProcessStatus ClimbingTurnState::onUpdate(StateContext& context) {
 
 StateID ClimbingTurnState::evaluateNextState(StateContext& context) {
 
-    // ClimbingTurnState から他の状態への遷移判定をここに実装
-    // デフォルトは現在の状態を継続
-    return StateID::CLIMBING_TURN_STATE;
+    // 安全スティックの値を確認（飛行終了判定）
+    if(!context.rescaled_sbus_data.safety){
+
+        return StateID::POST_FLIGHT_STATE;
+    }
+
+    // 手動飛行の判定
+	if(context.rescaled_sbus_data.autofly == 0){
+
+	    return StateID::MANUAL_FLIGHT_STATE;
+	}
+
+	return StateID::CLIMBING_TURN_STATE;
 }
 
 

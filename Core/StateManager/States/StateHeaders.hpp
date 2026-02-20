@@ -51,6 +51,7 @@ class PreFlightState : public PreFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
+        int loop_count = 0;
 };
 
 

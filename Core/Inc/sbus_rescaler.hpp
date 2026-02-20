@@ -15,30 +15,30 @@ struct RescaledSBUSData {
     float aileron;       // エルロン (ロール) [-100~100] %
     float elevator;      // エレベーター (ピッチ) [-100~100] %
     float rudder;        // ラダー (ヨー) [-100~100] %
+    float right_aileron;   // 右エルロン [-90~90] deg
 
     // AUXチャネル
-    uint8_t aux1;        // AUX1 [0 or 1]
-    uint8_t aux2;        // AUX2 [0 or 1]
-    uint8_t aux3;        // AUX3 [0 or 1]
-    uint8_t aux4;        // AUX4 [0 or 1]
-    uint8_t aux5;        // AUX5 [0 or 1]
-    uint8_t aux6;        // 投下装置（DROP） [0 or 1]
+    uint8_t autofly;         // 自動操縦フラグ [0:手動 / 1:自動]
+    uint8_t selectmission;   // ミッション選択 [0 / 1 / 2]
+    uint8_t aux4;            // AUX4 [0 or 1]
+    uint8_t safety;          // 安全装置 [0:解除 / 1:有効]
+    uint8_t drop;            // 投下装置トリガー [0 or 1]
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====
 // プロポーショナル送信機のチャンネルマッピング
 enum class SBUSChannel : uint8_t {
 
-    THROTTLE = 2,    // スロットル
-    ROLL = 1,        // ロール（エルロン）
-    PITCH = 0,       // ピッチ（エレベーター）
-    YAW = 3,         // ヨー（ラダー）
-    DROP = 4,        // 投下装置
-    AUX1 = 5,        // 補助チャンネル1
-    AUX2 = 6,        // 補助チャンネル2
-    AUX3 = 7,        // 補助チャンネル3
-    AUX4 = 8,        // 補助チャンネル4
-    AUX5 = 9         // 補助チャンネル5
+    THROTTLE = 2,    // スロットル       (ch3)
+    AILERON = 0,     // エルロン（左）   (ch1)
+    RUDDER = 1,      // ラダー           (ch2)
+    ELEVATOR = 3,    // エレベーター     (ch4)
+    DROP = 4,              // 投下装置         (ch5)
+    RIGHT_AILERON = 5,    // エルロン（右）   (ch6)
+    AUTOFLY = 6,          // 自動操縦フラグ   (ch7)
+    SELECT_MISSION = 7,   // ミッション選択   (ch8)
+    AUX4 = 8,             // フリー           (ch9)
+    SAFETY = 9            // 安全装置         (ch10)
 };
 
 // ===== 3段階スイッチの状態定義 =====
@@ -70,9 +70,9 @@ public:
         uint16_t control_center = SBUS_MID;
         uint16_t control_max = SBUS_MAX;
 
-        // 投下装置など3段階スイッチの閾値
-        uint16_t switch_low_threshold = 600;    // LOW/MID境界
-        uint16_t switch_high_threshold = 1400;  // MID/HIGH境界
+        // 3段階スイッチの閾値 (0~750: LOW / 751~1500: MID / 1501~2047: HIGH)
+        uint16_t switch_low_threshold = 750;    // LOW/MID境界
+        uint16_t switch_high_threshold = 1500;  // MID/HIGH境界
     };
 
     // デフォルト閾値

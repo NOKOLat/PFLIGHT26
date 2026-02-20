@@ -13,8 +13,6 @@ constexpr uint32_t loop_time_μs = 20000; //20ms
 
 void init(){
 
-	printf("Program Start Build: 1\n");
-
     loop_manager.emplace(loop_time_μs);
     state_manager.emplace(StateID::INIT_STATE, loop_time_μs);
 }

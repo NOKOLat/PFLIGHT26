@@ -43,6 +43,9 @@ class StateManager {
         // 状態遷移（StateIDを受け取りFactoryで状態を生成）
         void changeState(StateID state_id);
 
+        // SBUSデータの更新・フェイルセーフ判定
+        void updateSBUS();
+
         // 初期状態ID
         StateID init_state_id_;
 

@@ -10,6 +10,13 @@ ProcessStatus EmergencyState::onUpdate(StateContext& context) {
 
 StateID EmergencyState::evaluateNextState(StateContext& context) {
 
+	while(1){
+
+		HAL_Delay(1000);
+		printf("error state stop\n");
+	}
+
+
     // 緊急状態では遷移しない
     return StateID::EMERGENCY_STATE;
 }

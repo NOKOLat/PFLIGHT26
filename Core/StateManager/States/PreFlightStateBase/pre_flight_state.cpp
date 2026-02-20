@@ -4,8 +4,11 @@
 
 ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
-    // 飛行前の準備処理
-    printf("Wait Start SBUS[9] = %d, %f\n", context.rescaled_sbus_data.aux5, context.rescaled_sbus_data.throttle);
+    loop_count++;
+	if(loop_count % 10 == 0){
+
+		printf("Channel[3]: %f SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.safety);
+	}
 
     return ProcessStatus::SUCCESS;
 }
@@ -14,9 +17,8 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 StateID PreFlightState::evaluateNextState(StateContext& context) {
 
     // 安全スティックの値を確認
-    if(context.rescaled_sbus_data.aux5){
+    if(context.rescaled_sbus_data.safety){
 
-        printf("Start SBUS[9] = %d\n", context.rescaled_sbus_data.aux5);
         return StateID::MANUAL_FLIGHT_STATE;
     }
 
