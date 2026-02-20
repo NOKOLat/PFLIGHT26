@@ -20,6 +20,9 @@ namespace ISRManager {
     static bool initial_sync_done = false;  // 初回大量受信完了フラグ
     static uint16_t receive_count = 0;
 
+    // 最後に有効なフレームを受信した時刻 [ms]
+    static uint32_t last_valid_frame_tick = 0;
+
     // SBUSフレームの定数
     static constexpr uint8_t SBUS_FRAME_SIZE = 25;
     static constexpr uint8_t SBUS_HEADER = 0x0F;
@@ -123,6 +126,9 @@ namespace ISRManager {
                     sbus_buffer[i] = valid_frame[i];
                 }
 
+                // 受信タイムスタンプを更新
+                last_valid_frame_tick = HAL_GetTick();
+
                 // パース要求フラグを立てる
                 sbus_instance->requireParse(true);
 
@@ -137,5 +143,9 @@ namespace ISRManager {
             // 次の受信を開始（初回後は25バイトずつ）
             HAL_UART_Receive_DMA(sbus_huart, sbus_temp_buffer, NORMAL_RECEIVE_SIZE);
         }
+    }
+
+    uint32_t getLastValidFrameTick() {
+        return last_valid_frame_tick;
     }
 }

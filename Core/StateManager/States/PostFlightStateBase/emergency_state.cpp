@@ -1,37 +1,24 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
+ProcessStatus EmergencyState::onUpdate(StateContext& context) {
 
-void EmergencyState::onEnter(StateContext& context) {
+    // 緊急対応の処理
+    return ProcessStatus::SUCCESS;
+}
 
-    // 緊急状態固有の初期化処理
-    // モーターの即座停止
-    // context.motor_driver->emergencyStop();
+
+StateID EmergencyState::evaluateNextState(StateContext& context) {
 
 	while(1){
 
-		printf("All Program Stop\n");
-		HAL_Delay(10000);
+		HAL_Delay(1000);
+		printf("error state stop\n");
 	}
-}
 
 
-void EmergencyState::onExit(StateContext& context) {
-
-    // 緊急状態固有のクリーンアップ処理
-}
-
-
-StateResult EmergencyState::onUpdate(StateContext& context) {
-
-    // 緊急対応の処理
-
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::EMERGENCY_STATE;
-
-    return result;
+    // 緊急状態では遷移しない
+    return StateID::EMERGENCY_STATE;
 }
 
 

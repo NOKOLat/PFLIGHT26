@@ -27,23 +27,12 @@ void StateManager::changeState(StateID state_id) {
         return;
     }
 
-    // 現在の状態の終了処理
-    if (current_state_) {
-
-        current_state_->exit(state_context_);
-    }
-
     // 新しい状態に遷移
     current_state_ = std::move(new_state);
 
-    // 新しい状態の開始処理
-    if (current_state_) {
+    // 次の状態を出力
+    printf("[StateManager] Change State To %d\n", static_cast<int>(state_id));
 
-        current_state_->enter(state_context_);
-
-        // デバッグ出力
-        printf("[StateManager] StateEnter: %d\n", static_cast<int>(current_state_->getStateID()));
-    }
 }
 
 void StateManager::update() {
@@ -55,28 +44,8 @@ void StateManager::update() {
         return;
     }
 
-    // SBUSデータの更新
-    if (state_context_.instances.sbus_receiver.has_value()) {
-
-        nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
-        const nokolat::SBUS_DATA& sbus_data = sbus.getData();
-
-
-        state_context_.control_input.data = sbus_data.data;
-        state_context_.control_input.failsafe = sbus_data.failsafe;
-        state_context_.control_input.framelost = sbus_data.framelost;
-
-        // SBUSデータをリスケーリング
-        state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
-
-        // フェイルセーフ判定
-        if(state_context_.control_input.failsafe){
-
-            printf("[StateManager::update] SBUS FailSafe\n");
-            changeState(StateID::EMERGENCY_STATE);
-        }
-
-    }
+    // SBUSデータの更新・フェイルセーフ判定
+    updateSBUS();
 
     // 無線通信データの更新
 
@@ -95,7 +64,7 @@ void StateManager::update() {
 	StateResult result = current_state_->update(state_context_);
 
 	// 処理に失敗した場合
-	if (!result.success){
+	if (result.success == ProcessStatus::FAILURE){
 
 		printf("[StateManager::update] State Update Failed\n");
 		changeState(StateID::EMERGENCY_STATE);
@@ -103,11 +72,44 @@ void StateManager::update() {
 	}
 
 	// 状態遷移が必要な場合
-	if (result.should_transition) {
+	if (result.should_transition == TransitionFlag::SHOULD_TRANSITION) {
 
 		// 状態遷移を実行（Factoryの呼び出しはchangeState内で行われる）
 		changeState(result.next_state_id);
 	}
+}
+
+void StateManager::updateSBUS() {
+
+    if (!state_context_.instances.sbus_receiver.has_value()) {
+        return;
+    }
+
+    nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
+    const nokolat::SBUS_DATA& sbus_data = sbus.getData();
+
+    state_context_.control_input.data = sbus_data.data;
+    state_context_.control_input.failsafe = sbus_data.failsafe;
+    state_context_.control_input.framelost = sbus_data.framelost;
+
+    // SBUSデータをリスケーリング
+    state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
+
+    // フェイルセーフ判定 (SBUSフレーム内のフラグ)
+    if (state_context_.control_input.failsafe) {
+
+        printf("[StateManager::updateSBUS] SBUS FailSafe\n");
+        changeState(StateID::EMERGENCY_STATE);
+    }
+
+    // タイムアウトフェイルセーフ判定 (一定時間SBUSの更新がない場合)
+    constexpr uint32_t SBUS_TIMEOUT_MS = 500;
+    if (HAL_GetTick() - ISRManager::getLastValidFrameTick() > SBUS_TIMEOUT_MS) {
+
+        printf("[StateManager::updateSBUS] SBUS Timeout FailSafe (%lu ms)\n",
+               HAL_GetTick() - ISRManager::getLastValidFrameTick());
+        changeState(StateID::EMERGENCY_STATE);
+    }
 }
 
 // 初期化処理
@@ -160,11 +162,6 @@ void StateManager::init() {
     // 3. 初期状態を生成
     current_state_ = StateFactory::createState(init_state_id_);
 
-    // 4. 初期状態のenter関数を呼ぶ
-    if (current_state_) {
 
-        current_state_->enter(state_context_);
-    }
-    
     printf("[StateManager] All Instances Generated\n");
 }

@@ -148,29 +148,33 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
 
     // アナログチャネルのリスケーリング
     result.throttle = getThrottle(sbus_data, SBUSChannel::THROTTLE, thresholds);
-    result.aileron = getControl(sbus_data, SBUSChannel::ROLL, thresholds);
-    result.elevator = getControl(sbus_data, SBUSChannel::PITCH, thresholds);
-    result.rudder = getControl(sbus_data, SBUSChannel::YAW, thresholds);
+    result.aileron = getControl(sbus_data, SBUSChannel::AILERON, thresholds);
+    result.elevator = getControl(sbus_data, SBUSChannel::ELEVATOR, thresholds);
+    result.rudder = getControl(sbus_data, SBUSChannel::RUDDER, thresholds);
 
-    // AUXチャネルのリスケーリング（3段階スイッチを 0/1 に変換）
-    // LOW -> 0, MID/HIGH -> 1
-    uint8_t drop_switch = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
-    result.aux6 = (drop_switch >= 1) ? 1 : 0;  // DROP を aux6 に割り当て
+    // AUXチャネルのリスケーリング
 
-    uint8_t aux1_switch = getSwitchInt(sbus_data, SBUSChannel::AUX1, thresholds);
-    result.aux1 = (aux1_switch >= 1) ? 1 : 0;
+    // 右エルロン: -100~100 を -90~90 deg にスケール
+    result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds) * 0.9f;
 
-    uint8_t aux2_switch = getSwitchInt(sbus_data, SBUSChannel::AUX2, thresholds);
-    result.aux2 = (aux2_switch >= 1) ? 1 : 0;
+    // 自動操縦フラグ: LOW -> 0, MID/HIGH -> 1
+    uint8_t autofly_switch = getSwitchInt(sbus_data, SBUSChannel::AUTOFLY, thresholds);
+    result.autofly = (autofly_switch >= 1) ? 1 : 0;
 
-    uint8_t aux3_switch = getSwitchInt(sbus_data, SBUSChannel::AUX3, thresholds);
-    result.aux3 = (aux3_switch >= 1) ? 1 : 0;
+    // ミッション選択: 3段階 (0 / 1 / 2)
+    result.selectmission = getSwitchInt(sbus_data, SBUSChannel::SELECT_MISSION, thresholds);
 
+    // AUX4: LOW -> 0, MID/HIGH -> 1
     uint8_t aux4_switch = getSwitchInt(sbus_data, SBUSChannel::AUX4, thresholds);
     result.aux4 = (aux4_switch >= 1) ? 1 : 0;
 
-    uint8_t aux5_switch = getSwitchInt(sbus_data, SBUSChannel::AUX5, thresholds);
-    result.aux5 = (aux5_switch >= 1) ? 1 : 0;
+    // 安全装置: LOW -> 0, MID/HIGH -> 1
+    uint8_t safety_switch = getSwitchInt(sbus_data, SBUSChannel::SAFETY, thresholds);
+    result.safety = (safety_switch >= 1) ? 1 : 0;
+
+    // 投下装置トリガー: LOW -> 0, MID/HIGH -> 1
+    uint8_t drop_switch = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
+    result.drop = (drop_switch >= 1) ? 1 : 0;
 
     return result;
 }

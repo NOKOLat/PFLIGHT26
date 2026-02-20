@@ -14,19 +14,18 @@ struct StateContext;
 // ============================================================================
 
 // 初期化状態を実装するクラス
-class InitState : public StateInterface {
+class InitState : public InitStateBase {
     public:
         virtual ~InitState() = default;
-        virtual void enter(StateContext& context) override;
-        virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateID getStateID() const override;
-        virtual StateBaseID getStateBaseID() const override;
     private:
-        StateResult initializeSensors(StateContext& context);
-        StateResult initializePWM(StateContext& context);
-        StateResult initializeAttitudeEstimation(StateContext& context);
-        StateResult initializeSBUS(StateContext& context);
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
+
+        ProcessStatus initializeSensors(StateContext& context);
+        ProcessStatus initializePWM(StateContext& context);
+        ProcessStatus initializeAttitudeEstimation(StateContext& context);
+        ProcessStatus initializeSBUS(StateContext& context);
 };
 
 
@@ -35,25 +34,24 @@ class InitState : public StateInterface {
 // ============================================================================
 
 // キャリブレーション状態を実装するクラス
-class CalibrationState : public StateInterface {
+class CalibrationState : public PreFlightStateBase {
     public:
         virtual ~CalibrationState() = default;
-        virtual void enter(StateContext& context) override;
-        virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateID getStateID() const override;
-        virtual StateBaseID getStateBaseID() const override;
+    private:
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // 飛行前の準備状態を実装するクラス
-class PreFlightState : public StateInterface {
+class PreFlightState : public PreFlightStateBase {
     public:
         virtual ~PreFlightState() = default;
-        virtual void enter(StateContext& context) override;
-        virtual StateResult update(StateContext& context) override;
-        virtual void exit(StateContext& context) override;
         virtual StateID getStateID() const override;
-        virtual StateBaseID getStateBaseID() const override;
+    private:
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
+        int loop_count = 0;
 };
 
 
@@ -67,9 +65,8 @@ class ManualFlightState : public ManualFlightStateBase {
         virtual ~ManualFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // レベルターン状態を実装するクラス
@@ -78,9 +75,8 @@ class LevelTurnState : public ManualFlightStateBase {
         virtual ~LevelTurnState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // クライミングターン状態を実装するクラス
@@ -89,9 +85,8 @@ class ClimbingTurnState : public ManualFlightStateBase {
         virtual ~ClimbingTurnState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // フュージュエイト状態を実装するクラス
@@ -100,9 +95,8 @@ class FugueEightState : public ManualFlightStateBase {
         virtual ~FugueEightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 
@@ -116,9 +110,8 @@ class PreAutoFlightState : public AutoFlightStateBase {
         virtual ~PreAutoFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // 自動離陸状態を実装するクラス
@@ -127,9 +120,8 @@ class AutoTakeoffState : public AutoFlightStateBase {
         virtual ~AutoTakeoffState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // 自動飛行状態を実装するクラス
@@ -138,9 +130,8 @@ class AutoFlightState : public AutoFlightStateBase {
         virtual ~AutoFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // 自動着陸状態を実装するクラス
@@ -149,9 +140,8 @@ class AutoLandingState : public AutoFlightStateBase {
         virtual ~AutoLandingState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 
@@ -165,9 +155,8 @@ class PostFlightState : public PostFlightStateBase {
         virtual ~PostFlightState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 // 緊急状態を実装するクラス
@@ -176,9 +165,8 @@ class EmergencyState : public PostFlightStateBase {
         virtual ~EmergencyState() = default;
         virtual StateID getStateID() const override;
     private:
-        virtual void onEnter(StateContext& context) override;
-        virtual void onExit(StateContext& context) override;
-        virtual StateResult onUpdate(StateContext& context) override;
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
 };
 
 #endif // STATE_HEADERS_HPP

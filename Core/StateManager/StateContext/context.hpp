@@ -63,10 +63,12 @@ struct ControlOutput {
 
 // オペレータからの制御入力を格納する構造体
 struct ControlInput {
-    // SBUSデータ
+
     std::array<uint16_t, 18> data = {};
     bool failsafe = false;
     bool framelost = false;
+
+    uint32_t sbus_failsafe_count = 0;
 };
 
 struct PIDGains {
