@@ -2,32 +2,16 @@
 #include "StateContext/context.hpp"
 
 
-void PreFlightStateBase::enter(StateContext& context) {
-
-    // 共通の初期化処理
-
-    // 派生クラス固有の初期化処理を呼び出す
-    onEnter(context);
-}
-
-
 StateResult PreFlightStateBase::update(StateContext& context) {
 
-    // 共通の更新処理
-
     // 派生クラス固有の更新処理を呼び出す
-    StateResult result = onUpdate(context);
+    ProcessStatus status = onUpdate(context);
 
-    return result;
-}
+    // 遷移判定
+    StateID next_state = evaluateNextState(context);
+    TransitionFlag should_transition = (next_state != getStateID()) ? TransitionFlag::SHOULD_TRANSITION : TransitionFlag::NO_TRANSITION;
 
-
-void PreFlightStateBase::exit(StateContext& context) {
-
-    // 派生クラス固有のクリーンアップ処理を呼び出す
-    onExit(context);
-
-    // 共通のクリーンアップ処理
+    return {status, should_transition, next_state};
 }
 
 

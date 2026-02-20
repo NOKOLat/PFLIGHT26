@@ -2,28 +2,28 @@
 #include "../../StateContext/context.hpp"
 
 
-void LevelTurnState::onEnter(StateContext& context) {
-
-    // レベルターン状態固有の初期化処理
-}
-
-
-void LevelTurnState::onExit(StateContext& context) {
-
-    // レベルターン状態固有のクリーンアップ処理
-}
-
-
-StateResult LevelTurnState::onUpdate(StateContext& context) {
+ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
 
     // レベルターン用の更新処理
+    return ProcessStatus::SUCCESS;
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::LEVEL_TURN_STATE;
 
-    return result;
+StateID LevelTurnState::evaluateNextState(StateContext& context) {
+
+    // 安全スティックの値を確認（飛行終了判定）
+    if(!context.rescaled_sbus_data.safety){
+
+        return StateID::POST_FLIGHT_STATE;
+    }
+
+    // 手動飛行の判定
+	if(context.rescaled_sbus_data.autofly == 0){
+
+	    return StateID::MANUAL_FLIGHT_STATE;
+	}
+
+	return StateID::LEVEL_TURN_STATE;
 }
 
 

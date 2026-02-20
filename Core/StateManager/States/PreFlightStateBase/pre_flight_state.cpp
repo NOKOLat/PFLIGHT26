@@ -2,38 +2,32 @@
 #include "../../StateContext/context.hpp"
 
 
-void PreFlightState::enter(StateContext& context) {
+ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
-    // 飛行前の準備処理の初期化
+    loop_count++;
+	if(loop_count % 10 == 0){
+
+		printf("Channel[3]: %f SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.safety);
+	}
+
+    return ProcessStatus::SUCCESS;
 }
 
 
-StateResult PreFlightState::update(StateContext& context) {
+StateID PreFlightState::evaluateNextState(StateContext& context) {
 
-    // 飛行前の準備処理
+    // 安全スティックの値を確認
+    if(context.rescaled_sbus_data.safety){
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::MANUAL_FLIGHT_STATE;
+        return StateID::MANUAL_FLIGHT_STATE;
+    }
 
-    return result;
-}
-
-
-void PreFlightState::exit(StateContext& context) {
-
-    // クリーンアップ処理
+    // 遷移せず現在の状態を継続
+    return StateID::PRE_FLIGHT_STATE;
 }
 
 
 StateID PreFlightState::getStateID() const {
 
     return StateID::PRE_FLIGHT_STATE;
-}
-
-
-StateBaseID PreFlightState::getStateBaseID() const {
-
-    return StateBaseID::PRE_FLIGHT_STATE_BASE;
 }

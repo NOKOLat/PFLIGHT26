@@ -33,38 +33,30 @@ class StateFactory {
                     return std::make_unique<ManualFlightState>();
 
                 case StateID::LEVEL_TURN_STATE:
-                    // return std::make_unique<LevelTurnState>();
-                    break;
+                    return std::make_unique<LevelTurnState>();
 
                 case StateID::CLIMBING_TURN_STATE:
-                    // return std::make_unique<ClimbingTurnState>();
-                    break;
+                    return std::make_unique<ClimbingTurnState>();
 
                 case StateID::FUGUE_EIGHT_STATE:
-                    // return std::make_unique<FugueEightState>();
-                    break;
+                	return std::make_unique<FugueEightState>();
 
                 // AutoFlightStateBase
                 case StateID::PRE_AUTO_FLIGHT_STATE:
-                    // return std::make_unique<PreAutoFlightState>();
-                    break;
+                    return std::make_unique<PreAutoFlightState>();
 
                 case StateID::AUTO_TAKEOFF_STATE:
-                    // return std::make_unique<AutoTakeoffState>();
-                    break;
+                	return std::make_unique<AutoTakeoffState>();
 
                 case StateID::AUTO_FLIGHT_STATE:
-                    // return std::make_unique<AutoFlightState>();
-                    break;
+                    return std::make_unique<AutoFlightState>();
 
                 case StateID::AUTO_LANDING_STATE:
-                    // return std::make_unique<AutoLandingState>();
-                    break;
+                    return std::make_unique<AutoLandingState>();
 
                 // PostFlightStateBase
                 case StateID::POST_FLIGHT_STATE:
-                    // return std::make_unique<PostFlightState>();
-                    break;
+                    return std::make_unique<PostFlightState>();
 
                 case StateID::EMERGENCY_STATE:
                     return std::make_unique<EmergencyState>();

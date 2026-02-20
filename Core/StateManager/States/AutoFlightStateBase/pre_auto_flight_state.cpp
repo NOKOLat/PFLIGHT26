@@ -2,28 +2,17 @@
 #include "../../StateContext/context.hpp"
 
 
-void PreAutoFlightState::onEnter(StateContext& context) {
+ProcessStatus PreAutoFlightState::onUpdate(StateContext& context) {
 
-    // 自動飛行前準備状態固有の初期化処理
+    return ProcessStatus::SUCCESS;
 }
 
 
-void PreAutoFlightState::onExit(StateContext& context) {
+StateID PreAutoFlightState::evaluateNextState(StateContext& context) {
 
-    // 自動飛行前準備状態固有のクリーンアップ処理
-}
-
-
-StateResult PreAutoFlightState::onUpdate(StateContext& context) {
-
-    // 自動飛行前準備用の更新処理
-
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::AUTO_TAKEOFF_STATE;
-
-    return result;
+    // PreAutoFlightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
+    return StateID::PRE_AUTO_FLIGHT_STATE;
 }
 
 

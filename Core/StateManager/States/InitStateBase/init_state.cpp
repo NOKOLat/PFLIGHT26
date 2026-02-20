@@ -2,112 +2,137 @@
 #include "../../StateContext/context.hpp"
 
 
-void InitState::enter(StateContext& context) {
+ProcessStatus InitState::onUpdate(StateContext& context) {
 
+    ProcessStatus result;
 
-}
+    // 初期化関数の呼び出し
+    // 具体的な処理はこのファイルの下に関数ごとに実装されています
 
-StateResult InitState::update(StateContext& context) {
+    // 1. センサーの初期化（SensorManager経由）
+    if ((result = initializeSensors(context)) == ProcessStatus::FAILURE) {
 
-    //1-1. imuの初期化・通信チェック
-    if(!context.instances.imu_sensor.has_value()){
-
-        printf("Error: IMU sensor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return result;
     }
 
-    if(context.instances.imu_sensor->Connection() != 0){
+    // 2. PWM制御（モーター・サーボ）の初期化
+    if ((result = initializePWM(context)) == ProcessStatus::FAILURE) {
 
-        printf("Error: IMU sensor connection failed.\n");
-        return {false, false, StateID::INIT_STATE};
+        return result;
     }
 
+    // 3. 姿勢推定の初期化
+    if ((result = initializeAttitudeEstimation(context)) == ProcessStatus::FAILURE) {
 
-    // 1-2. imuの設定
-    context.instances.imu_sensor->AccelConfig(ICM42688P::ACCEL_Mode::LowNoize, ICM42688P::ACCEL_SCALE::SCALE02g, ICM42688P::ACCEL_ODR::ODR00500hz, ICM42688P::ACCEL_DLPF::ODR40);
-    context.instances.imu_sensor->GyroConfig(ICM42688P::GYRO_MODE::LowNoize, ICM42688P::GYRO_SCALE::Dps0250, ICM42688P::GYRO_ODR::ODR00500hz, ICM42688P::GYRO_DLPF::ODR40);
-
-
-    // 1-3. magの初期化・通信チェック（磁気センサーは試験用基板にないためコメントアウト）
-     if(!context.instances.mag_sensor.has_value()){
-         printf("Error: Mag sensor instance is not initialized.\n");
-         return {false, false, StateID::INIT_STATE};
-     }
-     if(context.instances.mag_sensor->init()){
-         printf("Error: Mag sensor connection failed.\n");
-         return {false, false, StateID::INIT_STATE};
-     }
-
-    // 1-4. magの設定
-    context.instances.mag_sensor->config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
-
-
-    // 1-5. baroの初期化・通信チェック
-	if(!context.instances.baro_sensor.has_value()){
-
-		printf("Error: Baro sensor instance is not initialized.\n");
-		return {false, false, StateID::INIT_STATE};
-	}
-
-	if(context.instances.baro_sensor->init() != 0){
-
-		printf("Error: Baro sensor connection failed.\n");
-		return {false, false, StateID::INIT_STATE};
-	}
-
-    // 1-6. baroの設定
-    context.instances.baro_sensor->pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
-    context.instances.baro_sensor->tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
-
-
-    // 1-7 Motorの初期化チェック(成功 == 1)
-    if((context.instances.left_motor.has_value() & context.instances.right_motor.has_value()) != 1){
-
-        printf("Error: Motor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return result;
     }
 
-    if((context.instances.left_motor->isInitialized() & context.instances.right_motor->isInitialized()) != 1){
+    // 4. SBUS受信の初期化と確認
+    if ((result = initializeSBUS(context)) == ProcessStatus::FAILURE) {
 
-        printf("Error: Motor instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
+        return result;
     }
 
-    // 1-8 姿勢推定の初期化
-    if(!context.instances.madgwick.has_value()){
+    printf("All init complete! \n");
 
-        printf("Error: Madgwick instance is not initialized.\n");
-        return {false, false, StateID::INIT_STATE};
-    }
-
-    context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
-
-
-    // 初期化終了・状態遷移
-    printf("All init complate! \n");
-
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::CALIBRATION_STATE;
+    // GPIO設定
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
 
     return result;
 }
 
 
-void InitState::exit(StateContext& context) {
+StateID InitState::evaluateNextState(StateContext& context) {
 
-    // クリーンアップ処理
+    // 初期化完了後はCALIBRATION_STATEに遷移
+    return StateID::CALIBRATION_STATE;
 }
 
+
+// 1. センサーの初期化と設定
+ProcessStatus InitState::initializeSensors(StateContext& context) {
+
+    // SensorManagerインスタンスチェック
+    if (!context.instances.sensor_manager.has_value()) {
+
+        printf("Error: SensorManager instance is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    // SensorManagerのセンサー初期化
+    if (!context.instances.sensor_manager->initSensors()) {
+
+        printf("Error: Sensor initialization failed.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    // SensorManagerのセンサー設定
+    if (!context.instances.sensor_manager->configSensors()) {
+
+        printf("Error: Sensor configuration failed.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    return ProcessStatus::SUCCESS;
+}
+
+// 2. PWM制御（モーター・サーボ）の初期化
+ProcessStatus InitState::initializePWM(StateContext& context) {
+
+    // PwmManagerインスタンスチェック
+    if (!context.instances.pwm_controller.has_value()) {
+
+        printf("Error: PWM controller instance is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    // PwmManagerの初期化
+    if (!context.instances.pwm_controller->initPwm()) {
+
+        printf("Error: PWM controller initialization failed.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    printf("PWM controller initialized successfully.\n");
+    return ProcessStatus::SUCCESS;
+}
+
+// 3. 姿勢推定の初期化
+ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
+
+    // インスタンスチェック
+    if (!context.instances.madgwick.has_value()) {
+
+        printf("Error: Madgwick instance is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    // 初期化
+    context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
+
+    return ProcessStatus::SUCCESS;
+}
+
+// 4. SBUS受信の初期化と確認
+ProcessStatus InitState::initializeSBUS(StateContext& context) {
+
+    // インスタンスチェック
+    if (!context.instances.sbus_receiver.has_value()) {
+
+        printf("Error: SBUS receiver instance is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+//    if (context.rescaled_sbus_data.throttle == 0.0f) {
+//
+//        printf("Error: SBUS receiver failed to receive data.\n");
+//        return ProcessStatus::FAILURE;
+//    }
+
+    return ProcessStatus::SUCCESS;
+}
 
 StateID InitState::getStateID() const {
 
     return StateID::INIT_STATE;
-}
-
-
-StateBaseID InitState::getStateBaseID() const {
-
-    return StateBaseID::INIT_STATE_BASE;
 }

@@ -2,50 +2,77 @@
 #include "../../StateContext/context.hpp"
 
 
-void ManualFlightState::onEnter(StateContext& context) {
+ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
 
-    // 手動飛行状態固有の初期化処理
-    // PID制御の目標値を初期化
-    // context.pid_controller->setTarget(0.0f);
-}
-
-
-void ManualFlightState::onExit(StateContext& context) {
-
-    // 手動飛行状態固有のクリーンアップ処理
-    // 必要に応じてここで状態をリセット
-}
-
-
-StateResult ManualFlightState::onUpdate(StateContext& context) {
+    // GPIO設定
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
     // 手動飛行用の更新処理
+    // 制御は不要なので、sbusの値をそのまま出力に反映させる
 
-    // 現在の姿勢情報から目標値を計算
-    // （パイロット入力に基づいて）
+    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる
+    context.control_output.motor_pwm[0] = context.rescaled_sbus_data.throttle; // 右モーター
+    context.control_output.motor_pwm[1] = context.rescaled_sbus_data.throttle; // 左モーター
 
-    // PID制御の計算（ロール角制御）
-    // float roll_pwm = context.pid_controller->calculateRoll(target_roll, current_roll);
+    // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
+    context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator * 0.9; // エレベーター
+    context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder * 0.9;   // ラダー
+    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron * 0.9;  // エルロン
+
+    // 投下装置
+    if(context.rescaled_sbus_data.drop == 1) {
+
+        context.control_output.servo_pwm[3] = 90.0f;
+    }
+    else {
+
+        context.control_output.servo_pwm[3] = 0.0f;
+    }
+
+    // debug: モーター出力[%], サーボ角度[deg]
+    //printf("motor: %f %f | servo: %f %f %f %f \n",context.control_output.motor_pwm[0], context.control_output.motor_pwm[1], context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2],context.control_output.servo_pwm[3]);
+
+    return ProcessStatus::SUCCESS;
+}
 
 
-    // PID制御の計算（ピッチ角制御）
-    // float pitch_pwm = context.pid_controller->calculatePitch(target_pitch, current_pitch);
+StateID ManualFlightState::evaluateNextState(StateContext& context) {
 
-    // PID制御の計算（ヨー角速度制御）
-    // float yaw_pwm = context.pid_controller->calculateYaw(target_yaw_rate, current_yaw_rate);
+    // ManualFlightState から他の状態への遷移判定をここに実装
+    // デフォルトは現在の状態を継続
 
-    // モーター出力
-    // context.control_output.motor_pwm[0] = static_cast<uint16_t>(roll_pwm);
-    // context.control_output.motor_pwm[1] = static_cast<uint16_t>(pitch_pwm);
-    // context.control_output.motor_pwm[2] = static_cast<uint16_t>(yaw_pwm);
-    // context.control_output.motor_pwm[3] = static_cast<uint16_t>(0);
+    // 安全スティックの値を確認（飛行終了判定）
+    if(!context.rescaled_sbus_data.safety){
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = false;
-    result.next_state_id = StateID::MANUAL_FLIGHT_STATE;
+        return StateID::POST_FLIGHT_STATE;
+    }
 
-    return result;
+    // 手動飛行の判定
+	if(context.rescaled_sbus_data.autofly == 0){
+
+	    return StateID::MANUAL_FLIGHT_STATE;
+	}
+
+	// 自動飛行の分岐
+
+	// 水平旋回
+	printf("switch %d\n", context.rescaled_sbus_data.selectmission);
+	if(context.rescaled_sbus_data.selectmission == 0){
+
+		return StateID::LEVEL_TURN_STATE;
+	}
+
+	if(context.rescaled_sbus_data.selectmission == 1){
+
+		return StateID::CLIMBING_TURN_STATE;
+	}
+
+	if(context.rescaled_sbus_data.selectmission == 2){
+
+		return StateID::FUGUE_EIGHT_STATE;
+	}
+
+    return StateID::MANUAL_FLIGHT_STATE;
 }
 
 

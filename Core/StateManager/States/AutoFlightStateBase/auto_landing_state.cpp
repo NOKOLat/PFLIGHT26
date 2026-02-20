@@ -1,29 +1,17 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-
-void AutoLandingState::onEnter(StateContext& context) {
-
-    // 自動着陸状態固有の初期化処理
-}
-
-
-void AutoLandingState::onExit(StateContext& context) {
-
-    // 自動着陸状態固有のクリーンアップ処理
-}
-
-
-StateResult AutoLandingState::onUpdate(StateContext& context) {
+ProcessStatus AutoLandingState::onUpdate(StateContext& context) {
 
     // 自動着陸用の更新処理
+    return ProcessStatus::SUCCESS;
+}
 
-    StateResult result;
-    result.success = true;
-    result.should_transition = true;
-    result.next_state_id = StateID::POST_FLIGHT_STATE;
 
-    return result;
+StateID AutoLandingState::evaluateNextState(StateContext& context) {
+
+    // 自動着陸完了後はPOST_FLIGHT_STATEに遷移
+    return StateID::POST_FLIGHT_STATE;
 }
 
 

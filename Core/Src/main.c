@@ -20,7 +20,6 @@
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "wrapper.hpp"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,13 +99,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_SPI1_Init();
   MX_TIM1_Init();
   MX_USART2_UART_Init();
-  MX_TIM3_Init();
   MX_I2C1_Init();
   MX_UART5_Init();
+  MX_TIM12_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+  // bulid check code
+  printf("[main.c] program start bulid: 2\n");
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
+
+  // init code
   init();
   /* USER CODE END 2 */
 

@@ -10,17 +10,14 @@
 #include <array>
 #include <optional>
 #include "usart.h"
-#include "Vector3f.hpp"
+#include "../../Utility/Vector3f.hpp"
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "STM32_BMM350/BMM350_Class.hpp"
-#include "STM32_ICM42688P/ICM42688P_HAL_I2C.h"
-#include "STM32_DPS368/DPS368_HAL_I2C.hpp"
-#include "STM32_Motor-Servo_Driver/motor_controller.hpp"
-#include "STM32_Motor-Servo_Driver/servo_controller.hpp"
 #include "MadgwickAHRS/src/MadgwickAHRS.h"
+#include "../../Utility/Sensors/SensorManager.hpp"
+#include "../../Utility/Motor_Servo/Pwm.hpp"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -60,16 +57,18 @@ struct AttitudeState {
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    std::array<float, 2> motor_pwm; // 4つのモーターの PWM 値 [0-100] % （右、左）
+    std::array<float, 2> motor_pwm; // 2つのモーターの PWM 値 [0-100] % （右、左）
     std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体
 struct ControlInput {
-    // SBUSデータ
+
     std::array<uint16_t, 18> data = {};
     bool failsafe = false;
     bool framelost = false;
+
+    uint32_t sbus_failsafe_count = 0;
 };
 
 struct PIDGains {
@@ -96,16 +95,14 @@ struct PinConfiguration {
     std::array<uint32_t, 2> motor_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2}; 
 
     // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン、投下装置)
-    std::array<TIM_HandleTypeDef*, 4> servo_tim = {&htim3, &htim3, &htim3, &htim1};
+    std::array<TIM_HandleTypeDef*, 4> servo_tim = {&htim1, &htim1, &htim1, &htim1};
     std::array<uint32_t, 4> servo_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_1};
 };
 
 struct Instances {
 
-    // センサーインスタンス
-    std::optional<ICM42688P_HAL_I2C> imu_sensor;
-    std::optional<BMM350> mag_sensor;
-    std::optional<DPS368_HAL_I2C> baro_sensor;
+    // センサーマネージャー
+    std::optional<SensorManager> sensor_manager;
 
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
@@ -113,13 +110,8 @@ struct Instances {
     // AHRSインスタンス
     std::optional<Madgwick> madgwick;
 
-    // モーター・サーボドライバーインスタンス
-    std::optional<MotorController> left_motor;
-    std::optional<MotorController> right_motor;
-    std::optional<ServoController> elevator_servo;
-    std::optional<ServoController> rudder_servo;
-    std::optional<ServoController> aileron_servo;
-    std::optional<ServoController> drop_servo;
+    // PWM制御
+    std::optional<PwmManager> pwm_controller;
 
     // PID コントローラ
     std::optional<PID> angle_pitch_pid;

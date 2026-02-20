@@ -16,14 +16,8 @@ class StateInterface {
 
         virtual ~StateInterface() = default;
 
-        // 状態に入る際に呼ばれる初期化処理
-        virtual void enter(StateContext& context) = 0;
-
         // 状態がアクティブな間に定期的に呼ばれる処理
         virtual StateResult update(StateContext& context) = 0;
-
-        // 状態から退出する際に呼ばれるクリーンアップ処理
-        virtual void exit(StateContext& context) = 0;
 
         // 現在の状態IDを取得する
         virtual StateID getStateID() const = 0;
