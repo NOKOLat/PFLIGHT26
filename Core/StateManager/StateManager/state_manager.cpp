@@ -23,7 +23,7 @@ void StateManager::changeState(StateID state_id) {
     // ポインタの安全性を確認
     if (!new_state) {
 
-        printf("[StateManager::changeState] Failed to create state (ID: %d)\n", static_cast<int>(state_id));
+        printf("[StateManager::changeState] Failed to create state (ID: %s)\n", stateIdToString(state_id));
         return;
     }
 
@@ -31,7 +31,7 @@ void StateManager::changeState(StateID state_id) {
     current_state_ = std::move(new_state);
 
     // 次の状態を出力
-    printf("[StateManager] Change State To %d\n", static_cast<int>(state_id));
+    printf("[StateManager] Change State To %s\n", stateIdToString(state_id));
 
 }
 
