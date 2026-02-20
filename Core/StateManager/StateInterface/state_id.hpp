@@ -2,6 +2,7 @@
 #define STATE_ID_HPP
 
 #include <cstdint>
+#include <cstring>
 
 
 enum class StateID : uint8_t {
@@ -43,5 +44,39 @@ enum class StateBaseID : uint8_t {
     POST_FLIGHT_STATE_BASE = 5,
     INVALID_STATE_BASE = 255
 };
+
+// ヘルパー関数: StateIDを文字列に変換
+inline const char* stateIdToString(StateID state_id) {
+    switch (state_id) {
+        case StateID::INIT_STATE:
+            return "INIT_STATE";
+        case StateID::CALIBRATION_STATE:
+            return "CALIBRATION_STATE";
+        case StateID::PRE_FLIGHT_STATE:
+            return "PRE_FLIGHT_STATE";
+        case StateID::MANUAL_FLIGHT_STATE:
+            return "MANUAL_FLIGHT_STATE";
+        case StateID::LEVEL_TURN_STATE:
+            return "LEVEL_TURN_STATE";
+        case StateID::CLIMBING_TURN_STATE:
+            return "CLIMBING_TURN_STATE";
+        case StateID::FUGUE_EIGHT_STATE:
+            return "FUGUE_EIGHT_STATE";
+        case StateID::PRE_AUTO_FLIGHT_STATE:
+            return "PRE_AUTO_FLIGHT_STATE";
+        case StateID::AUTO_TAKEOFF_STATE:
+            return "AUTO_TAKEOFF_STATE";
+        case StateID::AUTO_FLIGHT_STATE:
+            return "AUTO_FLIGHT_STATE";
+        case StateID::AUTO_LANDING_STATE:
+            return "AUTO_LANDING_STATE";
+        case StateID::POST_FLIGHT_STATE:
+            return "POST_FLIGHT_STATE";
+        case StateID::EMERGENCY_STATE:
+            return "EMERGENCY_STATE";
+        default:
+            return "INVALID_STATE";
+    }
+}
 
 #endif // STATE_ID_HPP
