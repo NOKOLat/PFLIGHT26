@@ -157,24 +157,21 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
     // 右エルロン: -100~100 を -90~90 deg にスケール
     result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds) * 0.9f;
 
-    // 自動操縦フラグ: LOW -> 0, MID/HIGH -> 1
-    uint8_t autofly_switch = getSwitchInt(sbus_data, SBUSChannel::AUTOFLY, thresholds);
-    result.autofly = (autofly_switch >= 1) ? 1 : 0;
+    // 自動操縦フラグ: 3段階 (0 / 1 / 2)
+    result.autofly = getSwitchInt(sbus_data, SBUSChannel::AUTOFLY, thresholds);
 
     // ミッション選択: 3段階 (0 / 1 / 2)
     result.selectmission = getSwitchInt(sbus_data, SBUSChannel::SELECT_MISSION, thresholds);
 
-    // AUX4: LOW -> 0, MID/HIGH -> 1
-    uint8_t aux4_switch = getSwitchInt(sbus_data, SBUSChannel::AUX4, thresholds);
-    result.aux4 = (aux4_switch >= 1) ? 1 : 0;
+    // AUX4: 3段階 (0 / 1 / 2)
+    result.aux4 = getSwitchInt(sbus_data, SBUSChannel::AUX4, thresholds);
 
     // 安全装置: LOW -> 0, MID/HIGH -> 1
     uint8_t safety_switch = getSwitchInt(sbus_data, SBUSChannel::SAFETY, thresholds);
     result.safety = (safety_switch >= 1) ? 1 : 0;
 
-    // 投下装置トリガー: LOW -> 0, MID/HIGH -> 1
-    uint8_t drop_switch = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
-    result.drop = (drop_switch >= 1) ? 1 : 0;
+    // 投下装置トリガー: 3段階 (0 / 1 / 2)
+    result.drop = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
 
     return result;
 }

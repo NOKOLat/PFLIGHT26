@@ -16,19 +16,20 @@ enum class StateID : uint8_t {
 
     // ManualFlightStateBase
     MANUAL_FLIGHT_STATE = 4,
-    LEVEL_TURN_STATE = 5,
-    CLIMBING_TURN_STATE = 6,
-    FUGUE_EIGHT_STATE = 7,
+    LEVEL_FLIGHT_STATE = 5,
+    LEVEL_TURN_STATE = 6,
+    CLIMBING_TURN_STATE = 7,
+    FUGUE_EIGHT_STATE = 8,
 
     // AutoFlightStateBase
-    PRE_AUTO_FLIGHT_STATE = 8,
-    AUTO_TAKEOFF_STATE = 9,
-    AUTO_FLIGHT_STATE = 10,
-    AUTO_LANDING_STATE = 11,
+    PRE_AUTO_FLIGHT_STATE = 9,
+    AUTO_TAKEOFF_STATE = 10,
+    AUTO_FLIGHT_STATE = 11,
+    AUTO_LANDING_STATE = 12,
 
     // PostFlightStateBase
-    POST_FLIGHT_STATE = 12,
-    EMERGENCY_STATE = 13,
+    POST_FLIGHT_STATE = 13,
+    EMERGENCY_STATE = 14,
 
     // Invalid
     INVALID_STATE = 255
@@ -56,6 +57,8 @@ inline const char* stateIdToString(StateID state_id) {
             return "PRE_FLIGHT_STATE";
         case StateID::MANUAL_FLIGHT_STATE:
             return "MANUAL_FLIGHT_STATE";
+        case StateID::LEVEL_FLIGHT_STATE:
+            return "LEVEL_FLIGHT_STATE";
         case StateID::LEVEL_TURN_STATE:
             return "LEVEL_TURN_STATE";
         case StateID::CLIMBING_TURN_STATE:

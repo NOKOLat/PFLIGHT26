@@ -69,6 +69,16 @@ class ManualFlightState : public ManualFlightStateBase {
         virtual StateID evaluateNextState(StateContext& context) override;
 };
 
+// 水平飛行状態を実装するクラス
+class LevelFlightState : public ManualFlightStateBase {
+    public:
+        virtual ~LevelFlightState() = default;
+        virtual StateID getStateID() const override;
+    private:
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
+};
+
 // レベルターン状態を実装するクラス
 class LevelTurnState : public ManualFlightStateBase {
     public:

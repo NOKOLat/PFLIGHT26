@@ -32,6 +32,9 @@ class StateFactory {
                 case StateID::MANUAL_FLIGHT_STATE:
                     return std::make_unique<ManualFlightState>();
 
+                case StateID::LEVEL_FLIGHT_STATE:
+                    return std::make_unique<LevelFlightState>();
+
                 case StateID::LEVEL_TURN_STATE:
                     return std::make_unique<LevelTurnState>();
 

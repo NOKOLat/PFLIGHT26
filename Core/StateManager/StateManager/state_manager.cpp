@@ -31,6 +31,7 @@ void StateManager::changeState(StateID state_id) {
     current_state_ = std::move(new_state);
 
     // 次の状態を出力
+    printf("\n==================================\n");
     printf("[StateManager] Change State To %s\n", stateIdToString(state_id));
 
 }

@@ -37,7 +37,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.data());
 
 	// debug センサーデータの確認
-	//printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
+	printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
 
     // debug 角度データの確認
     //printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);

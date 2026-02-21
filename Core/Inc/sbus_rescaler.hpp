@@ -18,11 +18,11 @@ struct RescaledSBUSData {
     float right_aileron;   // 右エルロン [-90~90] deg
 
     // AUXチャネル
-    uint8_t autofly;         // 自動操縦フラグ [0:手動 / 1:自動]
+    uint8_t autofly;         // 自動操縦フラグ [0 / 1 / 2]
     uint8_t selectmission;   // ミッション選択 [0 / 1 / 2]
-    uint8_t aux4;            // AUX4 [0 or 1]
+    uint8_t aux4;            // AUX4 [0 / 1 / 2]
     uint8_t safety;          // 安全装置 [0:解除 / 1:有効]
-    uint8_t drop;            // 投下装置トリガー [0 or 1]
+    uint8_t drop;            // 投下装置トリガー [0 / 1 / 2]
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====
