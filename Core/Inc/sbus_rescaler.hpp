@@ -59,8 +59,8 @@ class SBUSRescaler {
 public:
     // ===== SBUS生データの範囲定数 =====
     static constexpr uint16_t SBUS_MIN = 360;
-    static constexpr uint16_t SBUS_MID = 1024;
-    static constexpr uint16_t SBUS_MAX = 1692;
+    static constexpr uint16_t SBUS_MID = 1000;
+    static constexpr uint16_t SBUS_MAX = 1680;
 
     // ===== 閾値設定用構造体 =====
     struct Thresholds {
