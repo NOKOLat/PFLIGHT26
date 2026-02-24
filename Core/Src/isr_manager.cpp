@@ -24,21 +24,20 @@ namespace ISRManager {
             // 初期タイムスタンプを現在時刻に設定（初回タイムアウトを防ぐ）
             last_valid_frame_tick = HAL_GetTick();
 
-            // DMA受信開始
-            HAL_StatusTypeDef status = HAL_UART_Receive_DMA(sbus_huart, sbus_receive_buffer, SBUS_FRAME_SIZE);
+            // DMA受信開始（ReceiveToIdle版）
+            HAL_StatusTypeDef status = HAL_UARTEx_ReceiveToIdle_DMA(sbus_huart, sbus_receive_buffer, SBUS_FRAME_SIZE);
             printf("[ISRManager] SBUS DMA start: %s\n", (status == HAL_OK) ? "OK" : "FAILED");
         }
     }
 
-    void handleUartRxCplt(UART_HandleTypeDef* huart) {
+    void handleUartRxEvent(UART_HandleTypeDef* huart, uint16_t size) {
 
-        // 登録されたUARTハンドルと一致する場合のみ処理
-        if (sbus_instance && sbus_huart == huart) {
+        // 登録されたUARTハンドルと一致し、かつ受信サイズが正当な場合のみ処理
+        if (sbus_instance && sbus_huart == huart && size == SBUS_FRAME_SIZE) {
 
             // 受信したデータをSBUSバッファにコピー
             uint8_t* sbus_buffer = sbus_instance->getReceiveBufferPtr();
             for (uint8_t i = 0; i < SBUS_FRAME_SIZE; i++) {
-                
                 sbus_buffer[i] = sbus_receive_buffer[i];
             }
 
@@ -48,8 +47,8 @@ namespace ISRManager {
             // パース要求フラグを立てる
             sbus_instance->requireParse(true);
 
-            // 次の受信を開始
-            HAL_UART_Receive_DMA(sbus_huart, sbus_receive_buffer, SBUS_FRAME_SIZE);
+            // 次の25バイトをアイドルライン検出で受信
+            HAL_UARTEx_ReceiveToIdle_DMA(sbus_huart, sbus_receive_buffer, SBUS_FRAME_SIZE);
         }
     }
 

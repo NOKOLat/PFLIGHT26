@@ -163,8 +163,8 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
     // ミッション選択: 3段階 (0 / 1 / 2)
     result.selectmission = getSwitchInt(sbus_data, SBUSChannel::SELECT_MISSION, thresholds);
 
-    // AUX4: 3段階 (0 / 1 / 2)
-    result.aux4 = getSwitchInt(sbus_data, SBUSChannel::AUX4, thresholds);
+    // 自動離着陸用: 3段階 (0 / 1 / 2)
+    result.auto_mission = getSwitchInt(sbus_data, SBUSChannel::AUTO_MISSION, thresholds);
 
     // 安全装置: LOW -> 0, MID/HIGH -> 1
     uint8_t safety_switch = getSwitchInt(sbus_data, SBUSChannel::SAFETY, thresholds);
@@ -172,6 +172,12 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
 
     // 投下装置トリガー: 3段階 (0 / 1 / 2)
     result.drop = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
+
+    // プリフライトデバッグ: 2段階 (0 / 1 / 2)
+    result.preflight_debug = getSwitchInt(sbus_data, SBUSChannel::PREFLIGHT_DEBUG, thresholds);
+
+    // フライトデバッグ: 2段階 (0 / 1 / 2)
+    result.flight_debug = getSwitchInt(sbus_data, SBUSChannel::FLIGHT_DEBUG, thresholds);
 
     return result;
 }
