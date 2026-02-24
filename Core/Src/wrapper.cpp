@@ -4,10 +4,8 @@
 
 #include "StateManager/state_manager.hpp"
 #include "loop_manager.hpp"
-#include "stm32f7xx_hal.h"
 #include "isr_manager.hpp"
 
-#include "usart.h"
 #include "../Config/system_config.hpp"
 
 std::optional<StateManager> state_manager;
