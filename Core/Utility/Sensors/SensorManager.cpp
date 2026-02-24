@@ -1,9 +1,10 @@
 #include "Utility/Sensors/SensorManager.hpp"
+#include "../../Config/sensor_i2c_config.hpp"
 #include <cstring>
 
-SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle) 
-    : icm42688p(i2c_handle, 0x69),
-      bmm350(i2c_handle, 0x14),
+SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle)
+    : icm42688p(i2c_handle, SensorI2CConfig::ICM42688P_ADDR),
+      bmm350(i2c_handle, SensorI2CConfig::BMM350_ADDR),
       dps368(i2c_handle) {
     // インスタンスはメンバーイニシャライザーで初期化される
 }

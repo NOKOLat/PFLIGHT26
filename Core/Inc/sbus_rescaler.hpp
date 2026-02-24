@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <array>
+#include "../Config/sbus_config.hpp"
 
 namespace nokolat {
 
@@ -31,18 +32,18 @@ struct RescaledSBUSData {
 // プロポーショナル送信機のチャンネルマッピング
 enum class SBUSChannel : uint8_t {
 
-    THROTTLE = 2,    // スロットル       (ch3)
-    AILERON = 0,     // エルロン（左）   (ch1)
-    RUDDER = 1,      // ラダー           (ch2)
-    ELEVATOR = 3,    // エレベーター     (ch4)
-    DROP = 4,        // 投下装置         (ch5)
-    RIGHT_AILERON = 5,    // エルロン（右）   (ch6)
-    AUTOFLY = 6,          // 自動操縦フラグ   (ch7)
-    SELECT_MISSION = 7,   // ミッション選択   (ch8)
-    AUTO_MISSION = 8,     // 自動離着陸用      (ch9)
-    SAFETY = 9,           // 安全装置         (ch10)
-    PREFLIGHT_DEBUG = 10, // プリフライトデバッグ (ch11)
-    FLIGHT_DEBUG = 11     // フライトデバッグ     (ch12)
+    THROTTLE        = SbusConfig::CH_THROTTLE,
+    AILERON         = SbusConfig::CH_AILERON,
+    RUDDER          = SbusConfig::CH_RUDDER,
+    ELEVATOR        = SbusConfig::CH_ELEVATOR,
+    DROP            = SbusConfig::CH_DROP,
+    RIGHT_AILERON   = SbusConfig::CH_RIGHT_AILERON,
+    AUTOFLY         = SbusConfig::CH_AUTOFLY,
+    SELECT_MISSION  = SbusConfig::CH_SELECT_MISSION,
+    AUTO_MISSION    = SbusConfig::CH_AUTO_MISSION,
+    SAFETY          = SbusConfig::CH_SAFETY,
+    PREFLIGHT_DEBUG = SbusConfig::CH_PREFLIGHT_DEBUG,
+    FLIGHT_DEBUG    = SbusConfig::CH_FLIGHT_DEBUG
 };
 
 // ===== 3段階スイッチの状態定義 =====
@@ -58,25 +59,25 @@ enum class SwitchPosition : uint8_t {
 class SBUSRescaler {
 public:
     // ===== SBUS生データの範囲定数 =====
-    static constexpr uint16_t SBUS_MIN = 360;
-    static constexpr uint16_t SBUS_MID = 1000;
-    static constexpr uint16_t SBUS_MAX = 1680;
+    static constexpr uint16_t SBUS_MIN = SbusConfig::SBUS_MIN;
+    static constexpr uint16_t SBUS_MID = SbusConfig::SBUS_MID;
+    static constexpr uint16_t SBUS_MAX = SbusConfig::SBUS_MAX;
 
     // ===== 閾値設定用構造体 =====
     struct Thresholds {
 
         // スロットル: 0~100の範囲にマッピング
-        uint16_t throttle_min = SBUS_MIN;
-        uint16_t throttle_max = SBUS_MAX;
+        uint16_t throttle_min = SbusConfig::SBUS_MIN;
+        uint16_t throttle_max = SbusConfig::SBUS_MAX;
 
         // ロール、ピッチ、ヨー: -100~100の範囲にマッピング
-        uint16_t control_min = SBUS_MIN;
-        uint16_t control_center = SBUS_MID;
-        uint16_t control_max = SBUS_MAX;
+        uint16_t control_min = SbusConfig::SBUS_MIN;
+        uint16_t control_center = SbusConfig::SBUS_MID;
+        uint16_t control_max = SbusConfig::SBUS_MAX;
 
         // 3段階スイッチの閾値 (0~750: LOW / 751~1500: MID / 1501~2047: HIGH)
-        uint16_t switch_low_threshold = 750;    // LOW/MID境界
-        uint16_t switch_high_threshold = 1500;  // MID/HIGH境界
+        uint16_t switch_low_threshold = SbusConfig::SWITCH_LOW_THRESHOLD;    // LOW/MID境界
+        uint16_t switch_high_threshold = SbusConfig::SWITCH_HIGH_THRESHOLD;  // MID/HIGH境界
     };
 
     // デフォルト閾値

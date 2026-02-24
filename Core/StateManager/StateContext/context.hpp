@@ -10,6 +10,8 @@
 #include <array>
 #include <optional>
 #include "usart.h"
+#include "../../Config/board_config.hpp"
+#include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
 
 #include "1DoF_PID/PID.h"
@@ -73,13 +75,13 @@ struct ControlInput {
 
 struct PIDGains {
 
-    float angle_kp = 1.0f;
-    float angle_ki = 0.0f;
-    float angle_kd = 0.0f;
+    float angle_kp = PidConfig::ANGLE_KP;
+    float angle_ki = PidConfig::ANGLE_KI;
+    float angle_kd = PidConfig::ANGLE_KD;
 
-    float rate_kp = 1.0f;
-    float rate_ki = 0.0f;
-    float rate_kd = 0.0f;
+    float rate_kp = PidConfig::RATE_KP;
+    float rate_ki = PidConfig::RATE_KI;
+    float rate_kd = PidConfig::RATE_KD;
 
     //dtはStateManagerのLoopManagerの値を使用する
 };
@@ -87,17 +89,33 @@ struct PIDGains {
 // ピン設定情報を格納する構造体
 struct PinConfiguration {
 
-    I2C_HandleTypeDef* sensor_i2c = &hi2c1;  // センサー用 I2C
-    UART_HandleTypeDef* sbus_uart = &huart5; // SBUS用 UART
-    UART_HandleTypeDef* debug_uart = &huart2; // デバッグ用 UART
+    I2C_HandleTypeDef*  sensor_i2c  = BoardConfig::sensor_i2c;  // センサー用 I2C
+    UART_HandleTypeDef* sbus_uart   = BoardConfig::sbus_uart;   // SBUS用 UART
+    UART_HandleTypeDef* debug_uart  = BoardConfig::debug_uart;  // デバッグ用 UART
 
-    // モーター用のTIMとチャンネル(左、右)
-    std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim3, &htim3};
-    std::array<uint32_t, 2> motor_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2}; 
+    // モーター用のTIMとチャンネル(右、左)
+    std::array<TIM_HandleTypeDef*, 2> motor_tim = {
+        BoardConfig::right_motor_tim,
+        BoardConfig::left_motor_tim
+    };
+    std::array<uint32_t, 2> motor_tim_channels = {
+        BoardConfig::RIGHT_MOTOR_CHANNEL,
+        BoardConfig::LEFT_MOTOR_CHANNEL
+    };
 
-    // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン、投下装置)
-    std::array<TIM_HandleTypeDef*, 4> servo_tim = {&htim1, &htim1, &htim1, &htim1};
-    std::array<uint32_t, 4> servo_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4};
+    // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン右、エルロン左)
+    std::array<TIM_HandleTypeDef*, 4> servo_tim = {
+        BoardConfig::elevator_servo_tim,
+        BoardConfig::rudder_servo_tim,
+        BoardConfig::right_aileron_servo_tim,
+        BoardConfig::left_aileron_servo_tim
+    };
+    std::array<uint32_t, 4> servo_tim_channels = {
+        BoardConfig::ELEVATOR_SERVO_CHANNEL,
+        BoardConfig::RUDDER_SERVO_CHANNEL,
+        BoardConfig::RIGHT_AILERON_SERVO_CHANNEL,
+        BoardConfig::LEFT_AILERON_SERVO_CHANNEL
+    };
 };
 
 struct Instances {
