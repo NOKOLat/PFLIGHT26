@@ -20,9 +20,11 @@ struct RescaledSBUSData {
     // AUXチャネル
     uint8_t autofly;         // 自動操縦フラグ [0 / 1 / 2]
     uint8_t selectmission;   // ミッション選択 [0 / 1 / 2]
-    uint8_t aux4;            // AUX4 [0 / 1 / 2]
+    uint8_t auto_mission;    // 自動離着陸用 [0 / 1 / 2]
     uint8_t safety;          // 安全装置 [0:解除 / 1:有効]
     uint8_t drop;            // 投下装置トリガー [0 / 1 / 2]
+    uint8_t preflight_debug; // プリフライトデバッグ [0 / 1 / 2]
+    uint8_t flight_debug;    // フライトデバッグ [0 / 1 / 2]
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====
@@ -33,12 +35,14 @@ enum class SBUSChannel : uint8_t {
     AILERON = 0,     // エルロン（左）   (ch1)
     RUDDER = 1,      // ラダー           (ch2)
     ELEVATOR = 3,    // エレベーター     (ch4)
-    DROP = 4,              // 投下装置         (ch5)
+    DROP = 4,        // 投下装置         (ch5)
     RIGHT_AILERON = 5,    // エルロン（右）   (ch6)
     AUTOFLY = 6,          // 自動操縦フラグ   (ch7)
     SELECT_MISSION = 7,   // ミッション選択   (ch8)
-    AUX4 = 8,             // フリー           (ch9)
-    SAFETY = 9            // 安全装置         (ch10)
+    AUTO_MISSION = 8,     // 自動離着陸用      (ch9)
+    SAFETY = 9,           // 安全装置         (ch10)
+    PREFLIGHT_DEBUG = 10, // プリフライトデバッグ (ch11)
+    FLIGHT_DEBUG = 11     // フライトデバッグ     (ch12)
 };
 
 // ===== 3段階スイッチの状態定義 =====
@@ -55,8 +59,8 @@ class SBUSRescaler {
 public:
     // ===== SBUS生データの範囲定数 =====
     static constexpr uint16_t SBUS_MIN = 360;
-    static constexpr uint16_t SBUS_MID = 1024;
-    static constexpr uint16_t SBUS_MAX = 1692;
+    static constexpr uint16_t SBUS_MID = 1000;
+    static constexpr uint16_t SBUS_MAX = 1680;
 
     // ===== 閾値設定用構造体 =====
     struct Thresholds {

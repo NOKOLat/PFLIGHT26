@@ -54,6 +54,28 @@ class PreFlightState : public PreFlightStateBase {
         int loop_count = 0;
 };
 
+// サーボ・モーターテスト状態を実装するクラス
+class ServoMotorTestState : public PreFlightStateBase {
+    public:
+        virtual ~ServoMotorTestState() = default;
+        virtual StateID getStateID() const override;
+    private:
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
+        int loop_count = 0;
+};
+
+// センサーテスト状態を実装するクラス
+class SensorTestState : public PreFlightStateBase {
+    public:
+        virtual ~SensorTestState() = default;
+        virtual StateID getStateID() const override;
+    private:
+        virtual ProcessStatus onUpdate(StateContext& context) override;
+        virtual StateID evaluateNextState(StateContext& context) override;
+        int loop_count = 0;
+};
+
 
 // ============================================================================
 // ManualFlightStateBase States

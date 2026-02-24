@@ -13,6 +13,8 @@ enum class StateID : uint8_t {
     // PreFlightStateBase
     CALIBRATION_STATE = 2,
     PRE_FLIGHT_STATE = 3,
+    SERVO_TEST_STATE = 15,
+    SENSOR_TEST_STATE = 16,
 
     // ManualFlightStateBase
     MANUAL_FLIGHT_STATE = 4,
@@ -77,6 +79,10 @@ inline const char* stateIdToString(StateID state_id) {
             return "POST_FLIGHT_STATE";
         case StateID::EMERGENCY_STATE:
             return "EMERGENCY_STATE";
+        case StateID::SERVO_TEST_STATE:
+            return "SERVO_TEST_STATE";
+        case StateID::SENSOR_TEST_STATE:
+            return "SENSOR_TEST_STATE";
         default:
             return "INVALID_STATE";
     }

@@ -157,7 +157,8 @@ void StateManager::init() {
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
-        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
+    	printf("[Debug] Using SBUS PORT: UART2\n");
+        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
     }
 
     // 3. 初期状態を生成

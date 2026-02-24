@@ -1,14 +1,15 @@
 #include "Pwm.hpp"
 #include "stdio.h"
 
+// ピン設定はPwm.hppのprivateセクションで定義
 PwmManager::PwmManager()
-    : right_motor(&htim3, TIM_CHANNEL_1),
-      left_motor(&htim3, TIM_CHANNEL_2),
-      elevator_servo(&htim1, TIM_CHANNEL_1),
-      rudder_servo(&htim1, TIM_CHANNEL_2),
-      right_aileron_servo(&htim1, TIM_CHANNEL_3),
-      left_aileron_servo(&htim1, TIM_CHANNEL_4),
-      drop_servo(&htim12, TIM_CHANNEL_2) {
+    : right_motor(right_motor_config.tim, right_motor_config.channel),
+      left_motor(left_motor_config.tim, left_motor_config.channel),
+      elevator_servo(elevator_servo_config.tim, elevator_servo_config.channel),
+      rudder_servo(rudder_servo_config.tim, rudder_servo_config.channel),
+      right_aileron_servo(right_aileron_servo_config.tim, right_aileron_servo_config.channel),
+      left_aileron_servo(left_aileron_servo_config.tim, left_aileron_servo_config.channel),
+      drop_servo(drop_servo_config.tim, drop_servo_config.channel) {
 
     printf("[PwmManager] Constructor called\n");
 }
@@ -132,12 +133,36 @@ bool PwmManager::setServoAngle(float angle[4]) {
     result |= elevator_servo.setAngle(angle[0]);
     result |= rudder_servo.setAngle(angle[1]);
     result |= right_aileron_servo.setAngle(angle[2]);
-    result |= left_aileron_servo.setAngle(-angle[2]);  // 左は右の反対
+    result |= left_aileron_servo.setAngle(angle[2]);  
     result |= drop_servo.setAngle(angle[3]);
 
     if (result != 0) {
 
         printf("[PwmManager::setServoAngle] Servo angle setting failed\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool PwmManager::setServoAngle_Independent(float angle[4]) {
+
+    // テスト用：各サーボを独立して制御（左右エルロンも独立）
+    // angle[0] = エレベーター角度 [-90 ~ 90 deg]
+    // angle[1] = ラダー角度 [-90 ~ 90 deg]
+    // angle[2] = エルロン右角度 [-90 ~ 90 deg]
+    // angle[3] = エルロン左角度 [-90 ~ 90 deg]
+
+    uint8_t result = 0;
+
+    result |= elevator_servo.setAngle(angle[0]);
+    result |= rudder_servo.setAngle(angle[1]);
+    result |= right_aileron_servo.setAngle(angle[2]);
+    result |= left_aileron_servo.setAngle(angle[3]);  // 独立制御（反転なし）
+
+    if (result != 0) {
+
+        printf("[PwmManager::setServoAngle_Independent] Servo angle setting failed\n");
         return false;
     }
 

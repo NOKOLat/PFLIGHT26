@@ -48,18 +48,18 @@ StateID ManualFlightState::evaluateNextState(StateContext& context) {
     }
 
     // 手動飛行の判定
-	if(context.rescaled_sbus_data.autofly == 0){
+	if(context.rescaled_sbus_data.autofly == 0 && context.rescaled_sbus_data.flight_debug == 0 && context.rescaled_sbus_data.preflight_debug == 0){
 
 	    return StateID::MANUAL_FLIGHT_STATE;
 	}
 
 	// デバックモード
-	if(context.rescaled_sbus_data.autofly == 1){
+	if(context.rescaled_sbus_data.autofly == 0 && context.rescaled_sbus_data.flight_debug >= 1){
 
 		return StateID::LEVEL_FLIGHT_STATE;
 	}
 
-	if(context.rescaled_sbus_data.autofly == 2){
+	if(context.rescaled_sbus_data.autofly >= 1){
 
 		// 水平旋回
 		printf("switch %d\n", context.rescaled_sbus_data.selectmission);

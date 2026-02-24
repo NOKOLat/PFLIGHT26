@@ -28,6 +28,12 @@ class StateFactory {
                 case StateID::PRE_FLIGHT_STATE:
                     return std::make_unique<PreFlightState>();
 
+                case StateID::SERVO_TEST_STATE:
+                    return std::make_unique<ServoMotorTestState>();
+
+                case StateID::SENSOR_TEST_STATE:
+                    return std::make_unique<SensorTestState>();
+
                 // ManualFlightStateBase
                 case StateID::MANUAL_FLIGHT_STATE:
                     return std::make_unique<ManualFlightState>();

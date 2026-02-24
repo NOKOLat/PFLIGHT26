@@ -11,11 +11,11 @@ ProcessStatus EmergencyState::onUpdate(StateContext& context) {
 StateID EmergencyState::evaluateNextState(StateContext& context) {
 
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_RESET);
+	printf("error state stop\n");
 
 	while(1){
 
 		HAL_Delay(1000);
-		printf("error state stop\n");
 	}
 
 

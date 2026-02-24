@@ -18,30 +18,10 @@ StateID LevelFlightState::evaluateNextState(StateContext& context) {
     }
 
     // 手動飛行の判定
-    if(context.rescaled_sbus_data.autofly == 0){
+    if(!context.rescaled_sbus_data.flight_debug){
 
         return StateID::MANUAL_FLIGHT_STATE;
     }
-
-	if(context.rescaled_sbus_data.autofly == 2){
-
-		// 水平旋回
-		printf("switch %d\n", context.rescaled_sbus_data.selectmission);
-		if(context.rescaled_sbus_data.selectmission == 0){
-
-			return StateID::LEVEL_TURN_STATE;
-		}
-
-		if(context.rescaled_sbus_data.selectmission == 1){
-
-			return StateID::CLIMBING_TURN_STATE;
-		}
-
-		if(context.rescaled_sbus_data.selectmission == 2){
-
-			return StateID::FUGUE_EIGHT_STATE;
-		}
-	}
 
     return StateID::LEVEL_FLIGHT_STATE;
 }
