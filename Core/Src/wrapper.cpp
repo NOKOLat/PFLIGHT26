@@ -28,9 +28,9 @@ void loop(){
     }
 }
 
-// UART受信完了コールバック関数
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+// UART受信イベントコールバック関数（アイドルライン検出版）
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
-    // ISRマネージャに処理のみを委譲
-    ISRManager::handleUartRxCplt(huart);
+    // ISRマネージャに処理を委譲
+    ISRManager::handleUartRxEvent(huart, Size);
 }

@@ -1,7 +1,6 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 
-
 ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
     loop_count++;
@@ -16,10 +15,22 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
 StateID PreFlightState::evaluateNextState(StateContext& context) {
 
-    // 安全スティックの値を確認
-    if(context.rescaled_sbus_data.safety){
+    // 手動飛行モード
+    if(context.rescaled_sbus_data.safety && context.rescaled_sbus_data.preflight_debug == 0 && context.rescaled_sbus_data.autofly == 0){
 
         return StateID::MANUAL_FLIGHT_STATE;
+    }
+
+    // センサーテスト
+    if(context.rescaled_sbus_data.preflight_debug == 1){
+
+        return StateID::SENSOR_TEST_STATE;
+    }
+
+    // サーボ・モーターテスト
+    if(context.rescaled_sbus_data.preflight_debug == 2){
+
+        return StateID::SERVO_TEST_STATE;
     }
 
     // 遷移せず現在の状態を継続
