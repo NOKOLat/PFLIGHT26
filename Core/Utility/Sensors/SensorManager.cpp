@@ -5,7 +5,7 @@
 SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle)
     : icm42688p(i2c_handle, SensorI2CConfig::ICM42688P_ADDR),
       bmm350(i2c_handle, SensorI2CConfig::BMM350_ADDR),
-      dps368(i2c_handle) {
+      dps368(i2c_handle, SensorI2CConfig::DPS368_ADDR) {
     // インスタンスはメンバーイニシャライザーで初期化される
 }
 
