@@ -4,14 +4,13 @@
 
 #include "StateManager/state_manager.hpp"
 #include "loop_manager.hpp"
-#include "stm32f7xx_hal.h"
 #include "isr_manager.hpp"
 
-#include "usart.h"
+#include "../Config/system_config.hpp"
 
 std::optional<StateManager> state_manager;
 std::optional<LoopManager> loop_manager;
-constexpr uint32_t loop_time_μs = 20000; //20ms
+constexpr uint32_t loop_time_μs = SystemConfig::MAIN_LOOP_PERIOD_US;
 
 void init(){
 

@@ -2,14 +2,7 @@
 #include "stdio.h"
 
 // ピン設定はPwm.hppのprivateセクションで定義
-PwmManager::PwmManager()
-    : right_motor(right_motor_config.tim, right_motor_config.channel),
-      left_motor(left_motor_config.tim, left_motor_config.channel),
-      elevator_servo(elevator_servo_config.tim, elevator_servo_config.channel),
-      rudder_servo(rudder_servo_config.tim, rudder_servo_config.channel),
-      right_aileron_servo(right_aileron_servo_config.tim, right_aileron_servo_config.channel),
-      left_aileron_servo(left_aileron_servo_config.tim, left_aileron_servo_config.channel),
-      drop_servo(drop_servo_config.tim, drop_servo_config.channel) {
+PwmManager::PwmManager() {
 
     printf("[PwmManager] Constructor called\n");
 }
