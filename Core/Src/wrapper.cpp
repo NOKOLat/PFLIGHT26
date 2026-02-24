@@ -7,6 +7,8 @@
 #include "stm32f7xx_hal.h"
 #include "isr_manager.hpp"
 
+#include "usart.h"
+
 std::optional<StateManager> state_manager;
 std::optional<LoopManager> loop_manager;
 constexpr uint32_t loop_time_μs = 20000; //20ms
