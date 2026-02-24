@@ -89,6 +89,7 @@ struct PinConfiguration {
 
     I2C_HandleTypeDef* sensor_i2c = &hi2c1;  // センサー用 I2C
     UART_HandleTypeDef* sbus_uart = &huart5; // SBUS用 UART
+    UART_HandleTypeDef* debug_uart = &huart2; // デバッグ用 UART
 
     // モーター用のTIMとチャンネル(左、右)
     std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim1, &htim1};
