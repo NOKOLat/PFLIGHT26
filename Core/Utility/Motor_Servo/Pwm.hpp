@@ -5,6 +5,12 @@
 #include "STM32_Motor-Servo_Driver/motor_controller.hpp"
 #include "STM32_Motor-Servo_Driver/servo_controller.hpp"
 
+struct PwmPinConfig{
+
+    TIM_HandleTypeDef* tim;
+    uint32_t channel;
+};
+
 class PwmManager {
 
     public:
@@ -14,13 +20,27 @@ class PwmManager {
 
         bool initPwm();
         bool setServoAngle(float angle[4]);
+        bool setServoAngle_Independent(float angle[4]);  // テスト用：各サーボを独立制御
         bool setMotorSpeed(float speed[2]);
 
     private:
 
+        // config: motor
+        PwmPinConfig right_motor_config = {&htim3, TIM_CHANNEL_1};
+        PwmPinConfig left_motor_config = {&htim3, TIM_CHANNEL_2};
+    
+        // config: servo
+        PwmPinConfig elevator_servo_config = {&htim1, TIM_CHANNEL_1};
+        PwmPinConfig rudder_servo_config = {&htim1, TIM_CHANNEL_2};
+        PwmPinConfig right_aileron_servo_config = {&htim1, TIM_CHANNEL_3};
+        PwmPinConfig left_aileron_servo_config = {&htim1, TIM_CHANNEL_4};
+        PwmPinConfig drop_servo_config = {&htim12, TIM_CHANNEL_2};
+
+        // instance motor
         MotorController right_motor;
         MotorController left_motor;
 
+        // instance servo
         ServoController elevator_servo;
         ServoController rudder_servo;
         ServoController right_aileron_servo;

@@ -92,12 +92,12 @@ struct PinConfiguration {
     UART_HandleTypeDef* debug_uart = &huart2; // デバッグ用 UART
 
     // モーター用のTIMとチャンネル(左、右)
-    std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim1, &htim1};
+    std::array<TIM_HandleTypeDef*, 2> motor_tim= {&htim3, &htim3};
     std::array<uint32_t, 2> motor_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2}; 
 
     // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン、投下装置)
     std::array<TIM_HandleTypeDef*, 4> servo_tim = {&htim1, &htim1, &htim1, &htim1};
-    std::array<uint32_t, 4> servo_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_1};
+    std::array<uint32_t, 4> servo_tim_channels = {TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_4};
 };
 
 struct Instances {
