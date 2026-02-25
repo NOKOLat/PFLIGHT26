@@ -61,7 +61,6 @@ PFLIGHT2/
 │           └── PostFlightStateBase/
 │               ├── post_flight_state.cpp
 │               └── emergency_state.cpp
-// ここより下はサブモジュールで取り込むので、ファイル作成はしない
 ├── Lib/
 │   ├── ICM42688P/
 │   │   ├── imu.hpp

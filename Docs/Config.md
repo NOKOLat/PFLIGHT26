@@ -26,7 +26,7 @@ constexpr uint32_t SERVO_MIN_PULSE_US = 1000;  // -90度
 ### センサーの I2C アドレスを変更したい
 → `sensor_i2c_config.hpp` を編集
 ```cpp
-constexpr uint8_t DPS368_ADDR = 0x77;  // PSAピンで 0x76 に変更可能
+constexpr uint8_t DPS368_ADDR = 0x77;  // 0x76 に変更可能
 ```
 
 ### PID ゲインをチューニングしたい
