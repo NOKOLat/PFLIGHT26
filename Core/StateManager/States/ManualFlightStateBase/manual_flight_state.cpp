@@ -11,26 +11,26 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     // 制御は不要なので、sbusの値をそのまま出力に反映させる
 
     // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる
-    context.control_output.motor_pwm[0] = context.rescaled_sbus_data.throttle; // 右モーター
-    context.control_output.motor_pwm[1] = context.rescaled_sbus_data.throttle; // 左モーター
+    context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::RIGHT)] = context.rescaled_sbus_data.throttle;
+    context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::LEFT)]  = context.rescaled_sbus_data.throttle;
 
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm[0] = context.rescaled_sbus_data.elevator * 0.9; // エレベーター
-    context.control_output.servo_pwm[1] = context.rescaled_sbus_data.rudder * 0.9;   // ラダー
-    context.control_output.servo_pwm[2] = context.rescaled_sbus_data.aileron * 0.9;  // エルロン
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)]    = context.rescaled_sbus_data.elevator * 0.9;
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)]      = context.rescaled_sbus_data.rudder * 0.9;
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)]   = context.rescaled_sbus_data.aileron * 0.9;
 
     // 投下装置
     if(context.rescaled_sbus_data.drop == 1) {
 
-        context.control_output.servo_pwm[3] = 90.0f;
+        context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)] = 90.0f;
     }
     else {
 
-        context.control_output.servo_pwm[3] = 0.0f;
+        context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)] = 0.0f;
     }
 
     // debug: モーター出力[%], サーボ角度[deg]
-    //printf("motor: %f %f | servo: %f %f %f %f \n",context.control_output.motor_pwm[0], context.control_output.motor_pwm[1], context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2],context.control_output.servo_pwm[3]);
+    //printf("motor: %f %f | servo: %f %f %f %f %f \n",context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::RIGHT)], context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::LEFT)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)]);
 
     return ProcessStatus::SUCCESS;
 }

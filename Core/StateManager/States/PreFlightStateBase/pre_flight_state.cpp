@@ -9,6 +9,15 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 		printf("Channel[3]: %f SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.safety);
 	}
 
+    // サーボはこの状態から動くようにする
+    // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)]    = context.rescaled_sbus_data.elevator * 0.9;
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)]      = context.rescaled_sbus_data.rudder * 0.9;
+    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)]   = context.rescaled_sbus_data.aileron * 0.9;
+
+    // PWMを出力（PreFlightStateBaseではpwmを共通処理で出力しないため、ここで記述）
+    context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.data());
+
     return ProcessStatus::SUCCESS;
 }
 
