@@ -43,7 +43,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     //printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);
 
     // debug PWMデータの確認
-    //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[0], context.control_output.servo_pwm[1], context.control_output.servo_pwm[2], context.control_output.servo_pwm[3]);
+    //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)]);
 
     return {status, TransitionFlag::NO_TRANSITION, getStateID()};
 }
