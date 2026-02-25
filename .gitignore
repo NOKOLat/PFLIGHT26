@@ -36,6 +36,9 @@ build/
 .claude
 .claudeai/
 
+# Local library copies (tracking library files, but ignoring their .git metadata)
+Core/Lib/MadgwickAHRS/.git
+
 # OS specific
 Thumbs.db
 .DS_Store
