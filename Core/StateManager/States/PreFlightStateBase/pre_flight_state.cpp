@@ -24,10 +24,16 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
 StateID PreFlightState::evaluateNextState(StateContext& context) {
 
-    // 手動飛行モード
+    // 手動飛行モード（スイッチ判定）
     if(context.rescaled_sbus_data.safety && context.rescaled_sbus_data.preflight_debug == 0 && context.rescaled_sbus_data.autofly == 0){
 
-        return StateID::MANUAL_FLIGHT_STATE;
+        // スロットが一定以上の場合は遷移しない
+        if(context.rescaled_sbus_data.throttle < 400){
+
+            return StateID::MANUAL_FLIGHT_STATE;
+        }
+        
+        return StateID::PRE_FLIGHT_STATE;
     }
 
     // センサーテスト
