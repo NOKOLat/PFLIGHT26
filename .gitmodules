@@ -20,6 +20,3 @@
 [submodule "Core/Lib/Tellicious_InertialEstimators_EKF"]
 	path = Core/Lib/Tellicious_InertialEstimators_EKF
 	url = https://github.com/NOKOLat/Tellicious_InertialEstimators_EKF
-[submodule "Core/Lib/MadgwickAHRS"]
-	path = Core/Lib/MadgwickAHRS
-	url = https://github.com/arduino-libraries/MadgwickAHRS
