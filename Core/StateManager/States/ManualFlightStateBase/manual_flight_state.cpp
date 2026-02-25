@@ -30,7 +30,14 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     }
 
     // debug: モーター出力[%], サーボ角度[deg]
-    //printf("motor: %f %f | servo: %f %f %f %f %f \n",context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::RIGHT)], context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::LEFT)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)]);
+    // printf("motor: %f %f | servo: %f %f %f %f\n",
+    //         context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::RIGHT)],
+    //         context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::LEFT)],
+    //         context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)],
+    //         context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)],
+    //         context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)],
+    //         context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)]
+    // );
 
     return ProcessStatus::SUCCESS;
 }
@@ -50,7 +57,7 @@ StateID ManualFlightState::evaluateNextState(StateContext& context) {
     // 手動飛行の判定
 	if(context.rescaled_sbus_data.autofly == 0 && context.rescaled_sbus_data.flight_debug == 0 && context.rescaled_sbus_data.preflight_debug == 0){
 
-	    return StateID::MANUAL_FLIGHT_STATE;
+        return StateID::MANUAL_FLIGHT_STATE;
 	}
 
 	// デバックモード
@@ -61,8 +68,6 @@ StateID ManualFlightState::evaluateNextState(StateContext& context) {
 
 	if(context.rescaled_sbus_data.autofly >= 1){
 
-		// 水平旋回
-		printf("switch %d\n", context.rescaled_sbus_data.selectmission);
 		if(context.rescaled_sbus_data.selectmission == 0){
 
 			return StateID::LEVEL_TURN_STATE;
