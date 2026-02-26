@@ -45,7 +45,7 @@ bool SensorManager::configSensors() {
     );
     icm42688p.GyroConfig(
         ICM42688P::GYRO_MODE::LowNoize,
-        ICM42688P::GYRO_SCALE::Dps0250,
+        ICM42688P::GYRO_SCALE::Dps0500,
         ICM42688P::GYRO_ODR::ODR00500hz,
         ICM42688P::GYRO_DLPF::ODR40
     );

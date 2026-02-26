@@ -139,7 +139,7 @@ void StateManager::init() {
 
     // 2-2 姿勢推定フィルタの初期化(6軸モード: IMUのみ使用、magnetometerなし)
     state_context_.instances.madgwick.emplace();
-    state_context_.instances.madgwick->begin(1.0f / (state_context_.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
+    state_context_.instances.madgwick->begin(50); // サンプルレート [Hz]
 
     // 2-3角度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);

@@ -21,8 +21,8 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
     context.sensor_data.angle[Axis::Y] = context.instances.madgwick->getPitch();
     context.sensor_data.angle[Axis::Z] = context.instances.madgwick->getYaw();
 
-    // 50ループに1回センサーデータと角度データを出力
-    if(loop_count % 50 == 0) {
+    // 5ループに1回センサーデータと角度データを出力
+    if(loop_count % 5 == 0) {
         printf("Angle: %f, %f, %f| Accel: %f, %f, %f| gyro: %f, %f, %f | mag: %f, %f, %f\n",
             context.sensor_data.angle[Axis::X],
             context.sensor_data.angle[Axis::Y],
