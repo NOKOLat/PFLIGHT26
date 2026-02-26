@@ -15,10 +15,10 @@ namespace BoardConfig {
 
     // ===== モーター TIM/チャンネル =====
     inline TIM_HandleTypeDef* const right_motor_tim = &htim3;
-    constexpr uint32_t RIGHT_MOTOR_CHANNEL = TIM_CHANNEL_1;  // PA6
+    constexpr uint32_t RIGHT_MOTOR_CHANNEL = TIM_CHANNEL_4;  // PA6
 
     inline TIM_HandleTypeDef* const left_motor_tim  = &htim3;
-    constexpr uint32_t LEFT_MOTOR_CHANNEL  = TIM_CHANNEL_2;  // PA7
+    constexpr uint32_t LEFT_MOTOR_CHANNEL  = TIM_CHANNEL_3;  // PA7
 
     // ===== サーボ TIM/チャンネル =====
     inline TIM_HandleTypeDef* const elevator_servo_tim      = &htim1;

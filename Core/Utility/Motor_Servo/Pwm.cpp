@@ -96,18 +96,22 @@ bool PwmManager::initPwm() {
         return false;
     }
 
-    // すべてのモーターを停止状態に設定
-    if (right_motor.stop() != 0) {
+    // すべてのモーターに0%を送信（ESC初期化: README参照）
+    if (right_motor.setSpeed(0.0f) != 0) {
 
-        printf("[PwmManager::initPwm] Failed to stop right motor\n");
+        printf("[PwmManager::initPwm] Failed to set right motor speed to 0%%\n");
         return false;
     }
 
-    if (left_motor.stop() != 0) {
+    if (left_motor.setSpeed(0.0f) != 0) {
 
-        printf("[PwmManager::initPwm] Failed to stop left motor\n");
+        printf("[PwmManager::initPwm] Failed to set left motor speed to 0%%\n");
         return false;
     }
+
+    // ESC初期化待機: 0%信号を受け取ってからESCがアームするまで待つ（README要件）
+    printf("[PwmManager::initPwm] Waiting for ESC initialization (10s)...\n");
+    HAL_Delay(3000);
 
     printf("[PwmManager::initPwm] All PWM controllers initialized successfully\n");
     return true;
