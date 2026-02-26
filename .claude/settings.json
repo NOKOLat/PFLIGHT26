@@ -1,0 +1,20 @@
+{
+  "description": "STM32CubeIDE PFLIGHT_26 プロジェクト設定",
+  "permissions": {
+    "allow": [
+      "Bash(*)"
+    ]
+  },
+  "subagents": {
+    "stm32_build_executor": {
+      "description": "STM32ファームウェアビルド自動実行",
+      "permissionMode": "dontAsk",
+      "allowedTools": [
+        "Bash",
+        "Read",
+        "Glob",
+        "Grep"
+      ]
+    }
+  }
+}
