@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell:*)",
+      "Bash(\"D:\\\\ST\\\\STM32CubeIDE_1.19.0\\\\STM32CubeIDE\\\\plugins\\\\com.st.stm32cube.ide.mcu.externaltools.make.win32_2.2.0.202409170845\\\\tools\\\\bin\\\\make.exe\" all -j24)",
+      "Bash(make all:*)",
+      "Bash(export PATH:*)",
+      "Bash(make:*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\PreFlightStateBase\\\\calibration_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\PreFlightStateBase\\\\pre_flight_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\ManualFlightStateBase\\\\level_turn_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\ManualFlightStateBase\\\\climbing_turn_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\ManualFlightStateBase\\\\fugue_eight_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\AutoFlightStateBase\\\\pre_auto_flight_state.cpp\":*)",
+      "Bash(\"d:\\\\GitLocal\\\\STM32CubeIDE\\\\PFLIGHT_26\\\\Core\\\\StateManager\\\\States\\\\AutoFlightStateBase\\\\auto_takeoff_state.cpp\":*)",
+      "Bash(find:*)",
+      "Bash(arm-none-eabi-gcc:*)",
+      "Bash(pwsh -Command @':*)",
+      "Bash(cmd /c powershell -Command:*)",
+      "Bash(make_path=\"D:\\\\ST\\\\STM32CubeIDE_1.19.0\\\\STM32CubeIDE\\\\plugins\\\\com.st.stm32cube.ide.mcu.externaltools.make.win32_2.2.0.202409170845\\\\tools\\\\bin\")",
+      "Bash(gnu_tools_path=\"D:\\\\ST\\\\STM32CubeIDE_1.19.0\\\\STM32CubeIDE\\\\plugins\\\\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344\\\\tools\\\\bin\")",
+      "Bash(export PATH=\"$gnu_tools_path:$make_path:$PATH\")",
+      "Bash(\"$make_path/make.exe\" all -j24)",
+      "Bash(\"$make_path/make.exe\" all -j1)",
+      "Bash(\"$make_path/make.exe\" clean)",
+      "Bash('D:\\\\ST\\\\STM32CubeIDE_1.19.0\\\\STM32CubeIDE\\\\plugins\\\\com.st.stm32cube.ide.mcu.externaltools.make.win32_2.2.0.202409170845\\\\tools\\\\bin\\\\make.exe' clean)",
+      "Bash('D:\\\\ST\\\\STM32CubeIDE_1.19.0\\\\STM32CubeIDE\\\\plugins\\\\com.st.stm32cube.ide.mcu.externaltools.make.win32_2.2.0.202409170845\\\\tools\\\\bin\\\\make.exe' all -j24)",
+      "Bash(echo:*)",
+      "Bash(bash build.sh:*)",
+      "Bash(export:*)",
+      "Bash(git config:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

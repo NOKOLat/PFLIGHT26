@@ -33,7 +33,6 @@ build/
 *~
 .vscode/
 .idea/
-.claude
 .claudeai/
 
 # Local library copies (tracking library files, but ignoring their .git metadata)
