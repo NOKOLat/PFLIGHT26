@@ -100,15 +100,12 @@ ProcessStatus InitState::initializePWM(StateContext& context) {
 // 3. 姿勢推定の初期化
 ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
 
-    // インスタンスチェック
-    if (!context.instances.madgwick.has_value()) {
+    // インスタンスチェック (EKFの初期化はStateManagerで実施済み)
+    if (!context.instances.attitude_ekf.has_value()) {
 
-        printf("Error: Madgwick instance is not initialized.\n");
+        printf("Error: AttitudeEKF instance is not initialized.\n");
         return ProcessStatus::FAILURE;
     }
-
-    // 初期化
-    context.instances.madgwick->begin(1.0f / (context.loop_time_us / 1000000.0f)); // サンプルレート [Hz]
 
     return ProcessStatus::SUCCESS;
 }

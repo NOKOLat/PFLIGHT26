@@ -17,7 +17,7 @@
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "MadgwickAHRS/src/MadgwickAHRS.h"
+#include "IMU_EKF/attitude_ekf.h"
 #include "../../Utility/Sensors/SensorManager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 
@@ -126,8 +126,8 @@ struct Instances {
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
-    // AHRSインスタンス
-    std::optional<Madgwick> madgwick;
+    // 姿勢推定EKFインスタンス
+    std::optional<AttitudeEKF_t> attitude_ekf;
 
     // PWM制御
     std::optional<PwmManager> pwm_controller;

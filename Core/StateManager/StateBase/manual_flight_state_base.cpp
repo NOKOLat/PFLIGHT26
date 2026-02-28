@@ -22,12 +22,24 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
     context.instances.sensor_manager->getTempData(&context.sensor_data.temperature);
 
-	// 2. 姿勢推定
-	context.instances.madgwick->updateIMU(context.sensor_data.gyro[Axis::X], context.sensor_data.gyro[Axis::Y], context.sensor_data.gyro[Axis::Z], context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
-
-    context.sensor_data.angle[Axis::X] = context.instances.madgwick->getRoll();
-    context.sensor_data.angle[Axis::Y] = context.instances.madgwick->getPitch();
-    context.sensor_data.angle[Axis::Z] = context.instances.madgwick->getYaw();
+    // 2. 姿勢推定 (EKF)
+    {
+        const float_prec accel[3] = {
+            context.sensor_data.accel[Axis::X],
+            context.sensor_data.accel[Axis::Y],
+            context.sensor_data.accel[Axis::Z]
+        };
+        const float_prec gyro[3] = {
+            context.sensor_data.gyro[Axis::X],
+            context.sensor_data.gyro[Axis::Y],
+            context.sensor_data.gyro[Axis::Z]
+        };
+        AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
+    }
+    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * RAD_TO_DEG;
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);
