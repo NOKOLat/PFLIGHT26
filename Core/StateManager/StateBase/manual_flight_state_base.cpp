@@ -31,15 +31,15 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
         };
         // ジャイロをdeg/s -> rad/sに変換
         const float_prec gyro[3] = {
-            context.sensor_data.gyro[Axis::X] * StateContext::DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Y] * StateContext::DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Z] * StateContext::DEG_TO_RAD
+            context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
         };
         AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
     }
-    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * StateContext::RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * StateContext::RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * StateContext::RAD_TO_DEG;
+    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);
