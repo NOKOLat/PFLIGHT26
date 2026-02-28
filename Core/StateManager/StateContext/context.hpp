@@ -145,6 +145,10 @@ struct Instances {
 // 状態実行時に必要なすべての情報を包含する構造体
 struct StateContext {
 
+    // 単位換算定数
+    static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
+    static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+
     // ピン設定
     PinConfiguration pin_config;
     Instances instances;

@@ -20,18 +20,16 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
             context.sensor_data.accel[Axis::Z]
         };
         // ジャイロをdeg/s -> rad/sに変換
-        constexpr float_prec DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
         const float_prec gyro[3] = {
-            context.sensor_data.gyro[Axis::X] * DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Y] * DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Z] * DEG_TO_RAD
+            context.sensor_data.gyro[Axis::X] * StateContext::DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Y] * StateContext::DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Z] * StateContext::DEG_TO_RAD
         };
         AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
     }
-    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
-    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * RAD_TO_DEG;
+    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * StateContext::RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * StateContext::RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * StateContext::RAD_TO_DEG;
 
     // 5ループに1回センサーデータと角度データを出力
     if(loop_count % 5 == 0) {
