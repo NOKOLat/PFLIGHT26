@@ -118,6 +118,13 @@ struct PinConfiguration {
     };
 };
 
+// 単位換算定数を格納する構造体
+struct UnitConversion {
+
+    static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
+    static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+};
+
 struct Instances {
 
     // センサーマネージャー
@@ -148,6 +155,9 @@ struct StateContext {
     // ピン設定
     PinConfiguration pin_config;
     Instances instances;
+
+    // 単位換算定数
+    UnitConversion unit_conversion;
 
     // データコンテナ
     SensorData sensor_data;              // センサー生データ
