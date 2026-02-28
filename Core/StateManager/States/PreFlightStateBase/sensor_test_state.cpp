@@ -11,25 +11,46 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
     context.instances.sensor_manager->getAccelData(&context.sensor_data.accel);
     context.instances.sensor_manager->getGyroData(&context.sensor_data.gyro);
     context.instances.sensor_manager->getMagData(&context.sensor_data.mag);
+    context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
 
     // 姿勢推定 (EKF)
-    {
-        const float_prec accel[3] = {
-            context.sensor_data.accel[Axis::X],
-            context.sensor_data.accel[Axis::Y],
-            context.sensor_data.accel[Axis::Z]
-        };
-        // ジャイロをdeg/s -> rad/sに変換
-        const float_prec gyro[3] = {
-            context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
-        };
-        AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
-    }
+	const float_prec accel[3] = {
+		context.sensor_data.accel[Axis::X],
+		context.sensor_data.accel[Axis::Y],
+		context.sensor_data.accel[Axis::Z]
+	};
+	// ジャイロをdeg/s -> rad/sに変換
+	const float_prec gyro[3] = {
+		context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
+		context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
+		context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
+	};
+
+    AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
+
     context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
     context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
     context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+
+    // 高度推定の更新
+    if (context.instances.altitude_estimator.has_value()) {
+        float angle_array[3] = {
+            context.sensor_data.angle[Axis::X],
+            context.sensor_data.angle[Axis::Y],
+            context.sensor_data.angle[Axis::Z]
+        };
+        context.instances.altitude_estimator->Update(
+            context.sensor_data.barometric_pressure,
+            context.sensor_data.accel.getptr(),
+            angle_array,
+            context.loop_time_us / 1000000.0f
+        );
+        float altitude_data[3];
+        context.instances.altitude_estimator->GetData(altitude_data);
+        context.sensor_data.altitude          = altitude_data[0];
+        context.sensor_data.altitude_velocity = altitude_data[1];
+        context.sensor_data.altitude_accel    = altitude_data[2];
+    }
 
     // 5ループに1回センサーデータと角度データを出力
     if(loop_count % 5 == 0) {
@@ -47,10 +68,12 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 //            context.sensor_data.mag[Axis::Y],
 //            context.sensor_data.mag[Axis::Z]);
 
-        printf("Angle: %f, %f, %f\n",
+        printf("Angle: %f, %f, %f | Alt: %.3f m, Vel: %.3f m/s\n",
             context.sensor_data.angle[Axis::X],
             context.sensor_data.angle[Axis::Y],
-            context.sensor_data.angle[Axis::Z]);
+            context.sensor_data.angle[Axis::Z],
+            context.sensor_data.altitude,
+            context.sensor_data.altitude_velocity);
     }
 
     return ProcessStatus::SUCCESS;

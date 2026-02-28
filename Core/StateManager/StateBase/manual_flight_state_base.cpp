@@ -23,23 +23,48 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.instances.sensor_manager->getTempData(&context.sensor_data.temperature);
 
     // 2. 姿勢推定 (EKF)
-    {
-        const float_prec accel[3] = {
-            context.sensor_data.accel[Axis::X],
-            context.sensor_data.accel[Axis::Y],
-            context.sensor_data.accel[Axis::Z]
-        };
-        // ジャイロをdeg/s -> rad/sに変換
-        const float_prec gyro[3] = {
-            context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
-            context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
-        };
-        AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
-    }
+	const float_prec accel[3] = {
+		context.sensor_data.accel[Axis::X],
+		context.sensor_data.accel[Axis::Y],
+		context.sensor_data.accel[Axis::Z]
+	};
+	// ジャイロをdeg/s -> rad/sに変換
+	const float_prec gyro[3] = {
+		context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
+		context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
+		context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
+	};
+
+	AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
+
     context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
     context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
     context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+
+    // 2-5. 高度推定の更新
+    if (context.instances.altitude_estimator.has_value()) {
+        // 角度配列を準備
+        float angle_array[3] = {
+            context.sensor_data.angle[Axis::X],
+            context.sensor_data.angle[Axis::Y],
+            context.sensor_data.angle[Axis::Z]
+        };
+
+        // 高度推定を更新
+        context.instances.altitude_estimator->Update(
+            context.sensor_data.barometric_pressure,
+            context.sensor_data.accel.getptr(),
+            angle_array,
+            context.loop_time_us / 1000000.0f  // μs to seconds
+        );
+
+        // 高度推定結果を取得
+        float altitude_data[3];  // [altitude, velocity, accel]
+        context.instances.altitude_estimator->GetData(altitude_data);
+        context.sensor_data.altitude = altitude_data[0];
+        context.sensor_data.altitude_velocity = altitude_data[1];
+        context.sensor_data.altitude_accel = altitude_data[2];
+    }
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);

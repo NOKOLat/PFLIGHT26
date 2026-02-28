@@ -18,6 +18,7 @@
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
 #include "IMU_EKF/attitude_ekf.h"
+#include "Altitude_estimation/altitude.h"
 #include "../../Utility/Sensors/SensorManager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 
@@ -41,6 +42,8 @@ struct SensorData {
     // 計算データ
     Vector3f angle;     // 角度 [deg]
     float altitude;       // 高度 [m]
+    float altitude_velocity;    // 高度速度 [m/s]
+    float altitude_accel;       // 高度加速度 [m/s^2]
 };
 
 
@@ -135,6 +138,9 @@ struct Instances {
 
     // 姿勢推定EKFインスタンス
     std::optional<AttitudeEKF_t> attitude_ekf;
+
+    // 高度推定インスタンス
+    std::optional<Altitude> altitude_estimator;
 
     // PWM制御
     std::optional<PwmManager> pwm_controller;
