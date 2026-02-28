@@ -54,8 +54,8 @@ bool SensorManager::configSensors() {
     bmm350.config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
 
     // 3. 気圧センサー (DPS368) の設定
-    dps368.pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
-    dps368.tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_001_times);
+    dps368.pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_002_times);
+    dps368.tempConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_002_times);
 
     return true;
 }

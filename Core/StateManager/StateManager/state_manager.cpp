@@ -141,6 +141,10 @@ void StateManager::init() {
     state_context_.instances.attitude_ekf.emplace();
     AttitudeEKF_Init(&state_context_.instances.attitude_ekf.value(), SS_DT);
 
+    // 2-2-2 高度推定の初期化
+    state_context_.instances.altitude_estimator.emplace();
+    state_context_.instances.altitude_estimator->Init();
+
     // 2-3角度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);
     state_context_.instances.angle_pitch_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);

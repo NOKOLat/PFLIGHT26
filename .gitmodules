@@ -23,3 +23,6 @@
 [submodule "Core/Lib/IMU_EKF"]
 	path = Core/Lib/IMU_EKF
 	url = https://github.com/NOKOLat/IMU_EKF
+[submodule "Core/Lib/Altitude_estimation"]
+	path = Core/Lib/Altitude_estimation
+	url = https://github.com/NOKOLat/Altitude_estimation

@@ -107,6 +107,13 @@ ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
         return ProcessStatus::FAILURE;
     }
 
+    // インスタンスチェック (高度推定の初期化はStateManagerで実施済み)
+    if (!context.instances.altitude_estimator.has_value()) {
+
+        printf("Error: Altitude estimator instance is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
     return ProcessStatus::SUCCESS;
 }
 
