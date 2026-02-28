@@ -12,30 +12,45 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
     context.instances.sensor_manager->getGyroData(&context.sensor_data.gyro);
     context.instances.sensor_manager->getMagData(&context.sensor_data.mag);
 
-    // 姿勢推定
-    context.instances.madgwick->updateIMU(
-        context.sensor_data.gyro[Axis::X],  context.sensor_data.gyro[Axis::Y],  context.sensor_data.gyro[Axis::Z],
-        context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
-
-    context.sensor_data.angle[Axis::X] = context.instances.madgwick->getRoll();
-    context.sensor_data.angle[Axis::Y] = context.instances.madgwick->getPitch();
-    context.sensor_data.angle[Axis::Z] = context.instances.madgwick->getYaw();
+    // 姿勢推定 (EKF)
+    {
+        const float_prec accel[3] = {
+            context.sensor_data.accel[Axis::X],
+            context.sensor_data.accel[Axis::Y],
+            context.sensor_data.accel[Axis::Z]
+        };
+        // ジャイロをdeg/s -> rad/sに変換
+        const float_prec gyro[3] = {
+            context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
+        };
+        AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
+    }
+    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
+    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
     // 5ループに1回センサーデータと角度データを出力
     if(loop_count % 5 == 0) {
-        printf("Angle: %f, %f, %f| Accel: %f, %f, %f| gyro: %f, %f, %f | mag: %f, %f, %f\n",
+//        printf("Angle: %f, %f, %f| Accel: %f, %f, %f| gyro: %f, %f, %f | mag: %f, %f, %f\n",
+//            context.sensor_data.angle[Axis::X],
+//            context.sensor_data.angle[Axis::Y],
+//            context.sensor_data.angle[Axis::Z],
+//            context.sensor_data.accel[Axis::X],
+//            context.sensor_data.accel[Axis::Y],
+//            context.sensor_data.accel[Axis::Z],
+//            context.sensor_data.gyro[Axis::X],
+//            context.sensor_data.gyro[Axis::Y],
+//            context.sensor_data.gyro[Axis::Z],
+//            context.sensor_data.mag[Axis::X],
+//            context.sensor_data.mag[Axis::Y],
+//            context.sensor_data.mag[Axis::Z]);
+
+        printf("Angle: %f, %f, %f\n",
             context.sensor_data.angle[Axis::X],
             context.sensor_data.angle[Axis::Y],
-            context.sensor_data.angle[Axis::Z],
-            context.sensor_data.accel[Axis::X],
-            context.sensor_data.accel[Axis::Y],
-            context.sensor_data.accel[Axis::Z],
-            context.sensor_data.gyro[Axis::X],
-            context.sensor_data.gyro[Axis::Y],
-            context.sensor_data.gyro[Axis::Z],
-            context.sensor_data.mag[Axis::X],
-            context.sensor_data.mag[Axis::Y],
-            context.sensor_data.mag[Axis::Z]);
+            context.sensor_data.angle[Axis::Z]);
     }
 
     return ProcessStatus::SUCCESS;

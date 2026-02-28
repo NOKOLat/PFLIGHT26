@@ -137,9 +137,9 @@ void StateManager::init() {
     // 2-1 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
     state_context_.instances.pwm_controller.emplace();
 
-    // 2-2 姿勢推定フィルタの初期化(6軸モード: IMUのみ使用、magnetometerなし)
-    state_context_.instances.madgwick.emplace();
-    state_context_.instances.madgwick->begin(50); // サンプルレート [Hz]
+    // 2-2 姿勢推定EKFの初期化(6軸モード: IMUのみ使用、magnetometerなし、50Hz)
+    state_context_.instances.attitude_ekf.emplace();
+    AttitudeEKF_Init(&state_context_.instances.attitude_ekf.value(), SS_DT);
 
     // 2-3角度制御用PID(kp, ki, kd, dt [秒])
     state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);
@@ -158,7 +158,8 @@ void StateManager::init() {
     if (state_context_.instances.sbus_receiver.has_value()) {
 
     	printf("[Debug] Using SBUS PORT: UART2\n");
-        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
+        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
+        //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
     }
 
     // 3. 初期状態を生成

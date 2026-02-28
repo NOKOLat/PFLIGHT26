@@ -17,7 +17,7 @@
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "MadgwickAHRS/src/MadgwickAHRS.h"
+#include "IMU_EKF/attitude_ekf.h"
 #include "../../Utility/Sensors/SensorManager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 
@@ -118,6 +118,13 @@ struct PinConfiguration {
     };
 };
 
+// 単位換算定数を格納する構造体
+struct UnitConversion {
+
+    static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
+    static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+};
+
 struct Instances {
 
     // センサーマネージャー
@@ -126,8 +133,8 @@ struct Instances {
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
-    // AHRSインスタンス
-    std::optional<Madgwick> madgwick;
+    // 姿勢推定EKFインスタンス
+    std::optional<AttitudeEKF_t> attitude_ekf;
 
     // PWM制御
     std::optional<PwmManager> pwm_controller;
@@ -148,6 +155,9 @@ struct StateContext {
     // ピン設定
     PinConfiguration pin_config;
     Instances instances;
+
+    // 単位換算定数
+    UnitConversion unit_conversion;
 
     // データコンテナ
     SensorData sensor_data;              // センサー生データ

@@ -20,3 +20,6 @@
 [submodule "Core/Lib/Tellicious_InertialEstimators_EKF"]
 	path = Core/Lib/Tellicious_InertialEstimators_EKF
 	url = https://github.com/NOKOLat/Tellicious_InertialEstimators_EKF
+[submodule "Core/Lib/IMU_EKF"]
+	path = Core/Lib/IMU_EKF
+	url = https://github.com/NOKOLat/IMU_EKF

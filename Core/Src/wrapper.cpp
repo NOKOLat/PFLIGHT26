@@ -20,10 +20,22 @@ void init(){
 
 void loop(){
 
+    static bool just_ran = false;
+
     // 20msごとにStateManager::update()を呼び出す
     if (!loop_manager->isWaitNextLoop()) {
 
+        // 前回のupdate()完了後にwait状態を経ずに再び実行 → オーバーラン
+        if (just_ran) {
+            printf("[WARN] update() overrun: did not complete within %lu us\r\n", loop_time_μs);
+        }
+
+        just_ran = true;
         state_manager->update();
+
+    } else {
+        // 待機中 = 正常なウェイト状態
+        just_ran = false;
     }
 }
 
