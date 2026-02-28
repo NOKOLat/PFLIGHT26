@@ -29,10 +29,12 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
             context.sensor_data.accel[Axis::Y],
             context.sensor_data.accel[Axis::Z]
         };
+        // ジャイロをdeg/s -> rad/sに変換
+        constexpr float_prec DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
         const float_prec gyro[3] = {
-            context.sensor_data.gyro[Axis::X],
-            context.sensor_data.gyro[Axis::Y],
-            context.sensor_data.gyro[Axis::Z]
+            context.sensor_data.gyro[Axis::X] * DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Y] * DEG_TO_RAD,
+            context.sensor_data.gyro[Axis::Z] * DEG_TO_RAD
         };
         AttitudeEKF_Update(&context.instances.attitude_ekf.value(), accel, gyro);
     }
