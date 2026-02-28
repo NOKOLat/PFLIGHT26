@@ -33,19 +33,24 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 
     // 5ループに1回センサーデータと角度データを出力
     if(loop_count % 5 == 0) {
-        printf("Angle: %f, %f, %f| Accel: %f, %f, %f| gyro: %f, %f, %f | mag: %f, %f, %f\n",
+//        printf("Angle: %f, %f, %f| Accel: %f, %f, %f| gyro: %f, %f, %f | mag: %f, %f, %f\n",
+//            context.sensor_data.angle[Axis::X],
+//            context.sensor_data.angle[Axis::Y],
+//            context.sensor_data.angle[Axis::Z],
+//            context.sensor_data.accel[Axis::X],
+//            context.sensor_data.accel[Axis::Y],
+//            context.sensor_data.accel[Axis::Z],
+//            context.sensor_data.gyro[Axis::X],
+//            context.sensor_data.gyro[Axis::Y],
+//            context.sensor_data.gyro[Axis::Z],
+//            context.sensor_data.mag[Axis::X],
+//            context.sensor_data.mag[Axis::Y],
+//            context.sensor_data.mag[Axis::Z]);
+
+        printf("Angle: %f, %f, %f\n",
             context.sensor_data.angle[Axis::X],
             context.sensor_data.angle[Axis::Y],
-            context.sensor_data.angle[Axis::Z],
-            context.sensor_data.accel[Axis::X],
-            context.sensor_data.accel[Axis::Y],
-            context.sensor_data.accel[Axis::Z],
-            context.sensor_data.gyro[Axis::X],
-            context.sensor_data.gyro[Axis::Y],
-            context.sensor_data.gyro[Axis::Z],
-            context.sensor_data.mag[Axis::X],
-            context.sensor_data.mag[Axis::Y],
-            context.sensor_data.mag[Axis::Z]);
+            context.sensor_data.angle[Axis::Z]);
     }
 
     return ProcessStatus::SUCCESS;
