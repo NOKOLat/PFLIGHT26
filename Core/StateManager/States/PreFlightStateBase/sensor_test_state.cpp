@@ -15,11 +15,11 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 
     // 姿勢推定 (EKF)
     // ジャイロをdeg/s -> rad/sに変換
-	const float_prec gyro[3] = {
-		context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
-		context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
-		context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
-	};
+    const float_prec gyro[3] = {
+        context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
+        context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
+        context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
+    };
 
     AttitudeEKF_Update(&context.instances.attitude_ekf.value(), context.sensor_data.accel.getptr(), gyro);
 
