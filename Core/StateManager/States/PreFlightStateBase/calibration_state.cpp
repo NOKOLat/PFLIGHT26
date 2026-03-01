@@ -9,10 +9,9 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
     if (!calibration_started_) {
         printf("Start Calibration\n");
         context.instances.sensor_manager->CalibrationSensors();
-        printf("End Calibration \n");
         // 高度推定キャリブレーション回数を設定
         if (context.instances.altitude_estimator.has_value()) {
-            context.instances.altitude_estimator->SetCalibMax(1000);
+            context.instances.altitude_estimator->SetCalibMax(10);
         }
         calibration_started_ = true;
     }
@@ -45,6 +44,12 @@ StateID CalibrationState::evaluateNextState(StateContext& context) {
     }
 
     // キャリブレーション完了後はPRE_FLIGHT_STATEに遷移
+
+    // GPIO設定
+    printf("End Calibration \n");
+
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
+
     return StateID::PRE_FLIGHT_STATE;
 }
 

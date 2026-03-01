@@ -35,9 +35,6 @@ ProcessStatus InitState::onUpdate(StateContext& context) {
 
     printf("All init complete! \n");
 
-    // GPIO設定
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
-
     return result;
 }
 
