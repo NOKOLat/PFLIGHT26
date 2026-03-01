@@ -14,10 +14,17 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::RIGHT)] = context.rescaled_sbus_data.throttle;
     context.control_output.motor_pwm[static_cast<int>(PwmConfig::MotorChannel::LEFT)]  = context.rescaled_sbus_data.throttle;
 
+    // angle[0] = エレベーター角度 [-90 ~ 90 deg]
+    // angle[1] = ラダー角度 [-90 ~ 90 deg]
+    // angle[2] = エルロン角度（右） [-90 ~ 90 deg]
+    // angle[3] = 投下装置角度 [-90 ~ 90 deg]
+
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)]    = context.rescaled_sbus_data.elevator * 0.9;
-    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)]      = context.rescaled_sbus_data.rudder * 0.9;
-    context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON_L)]   = context.rescaled_sbus_data.aileron * 0.9;
+    context.control_output.servo_pwm[0]   = context.rescaled_sbus_data.elevator * 0.9;
+    context.control_output.servo_pwm[1]   = context.rescaled_sbus_data.rudder * 0.9;
+    context.control_output.servo_pwm[2]   = context.rescaled_sbus_data.aileron * 0.9;
+    context.control_output.servo_pwm[2]   = context.rescaled_sbus_data.aileron * 0.9;
+
 
     // 投下装置
     if(context.rescaled_sbus_data.drop == 1) {

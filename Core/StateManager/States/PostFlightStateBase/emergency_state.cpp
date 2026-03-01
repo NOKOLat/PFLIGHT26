@@ -15,6 +15,8 @@ StateID EmergencyState::evaluateNextState(StateContext& context) {
 
 	while(1){
 
+	    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_4);
+
 		HAL_Delay(1000);
 	}
 

@@ -20,9 +20,9 @@ namespace SbusConfig {
     // ===== SBUSチャンネルマッピング =====
     // プロポーショナル送信機のチャンネル番号 (0始まりインデックス)
     constexpr uint8_t CH_AILERON         = 0;   // ch1: エルロン（左）
-    constexpr uint8_t CH_RUDDER          = 1;   // ch2: ラダー
+    constexpr uint8_t CH_RUDDER          = 3;   // ch2: ラダー
     constexpr uint8_t CH_THROTTLE        = 2;   // ch3: スロットル
-    constexpr uint8_t CH_ELEVATOR        = 3;   // ch4: エレベーター
+    constexpr uint8_t CH_ELEVATOR        = 1;   // ch4: エレベーター
     constexpr uint8_t CH_DROP            = 4;   // ch5: 投下装置
     constexpr uint8_t CH_RIGHT_AILERON   = 5;   // ch6: エルロン（右）
     constexpr uint8_t CH_AUTOFLY         = 6;   // ch7: 自動操縦フラグ

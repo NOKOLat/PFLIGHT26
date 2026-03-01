@@ -62,7 +62,7 @@ bool SensorManager::configSensors() {
 
 bool SensorManager::CalibrationSensors() {
 
-    icm42688p.Calibration(1000); // 1000サンプルでキャリブレーション
+    icm42688p.Calibration(10); // 1000サンプルでキャリブレーション
 
     return true;
 }
