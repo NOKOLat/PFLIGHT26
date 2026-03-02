@@ -40,18 +40,18 @@ ProcessStatus AutoFlightState::onUpdate(StateContext& context) {
 
     // アクティブなチャンネルのみ PID に目標値と現在値を渡して計算
     if ((active_channels & ChannelFlags::ROLL) && context.instances.angle_roll_pid.has_value()) {
-        context.instances.angle_roll_pid.value().calc(target_roll, context.attitude_state.roll);
-        printf("[AutoFlightState] Roll - Target: %.2f, Current: %.2f\n", target_roll, context.attitude_state.roll);
+        context.instances.angle_roll_pid.value().calc(target_roll, context.attitude_state.angle.roll());
+        printf("[AutoFlightState] Roll - Target: %.2f, Current: %.2f\n", target_roll, context.attitude_state.angle.roll());
     }
 
     if ((active_channels & ChannelFlags::PITCH) && context.instances.angle_pitch_pid.has_value()) {
-        context.instances.angle_pitch_pid.value().calc(target_pitch, context.attitude_state.pitch);
-        printf("[AutoFlightState] Pitch - Target: %.2f, Current: %.2f\n", target_pitch, context.attitude_state.pitch);
+        context.instances.angle_pitch_pid.value().calc(target_pitch, context.attitude_state.angle.pitch());
+        printf("[AutoFlightState] Pitch - Target: %.2f, Current: %.2f\n", target_pitch, context.attitude_state.angle.pitch());
     }
 
     if ((active_channels & ChannelFlags::YAW) && context.instances.angle_yaw_pid.has_value()) {
-        context.instances.angle_yaw_pid.value().calc(target_yaw, context.attitude_state.yaw);
-        printf("[AutoFlightState] Yaw - Target: %.2f, Current: %.2f\n", target_yaw, context.attitude_state.yaw);
+        context.instances.angle_yaw_pid.value().calc(target_yaw, context.attitude_state.angle.yaw());
+        printf("[AutoFlightState] Yaw - Target: %.2f, Current: %.2f\n", target_yaw, context.attitude_state.angle.yaw());
     }
 
     // 高度制御（今後実装）

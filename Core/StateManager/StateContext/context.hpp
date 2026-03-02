@@ -13,6 +13,8 @@
 #include "../../Config/board_config.hpp"
 #include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
+#include "../../Utility/Euler3f.hpp"
+#include "../../Utility/AltitudeAverage.hpp"
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
@@ -46,13 +48,10 @@ struct SensorData {
 // 姿勢推定結果を格納する構造体
 struct AttitudeState {
 
-    float roll;           // ロール角 [deg]
-    float pitch;          // ピッチ角 [deg]
-    float yaw;            // ヨー角 [deg]
-    float roll_rate;      // ロール角速度 [deg/s]
-    float pitch_rate;     // ピッチ角速度 [deg/s]
-    float yaw_rate;       // ヨー角速度 [deg/s]
+    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
+    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
     float altitude;       // 高度 [m]
+    float altitude_avg;   // 直近高度の移動平均 [m]
 };
 
 
@@ -158,6 +157,9 @@ struct StateContext {
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
+
+    // 高度移動平均ユーティリティ
+    AltitudeAverage altitude_average;
 
     // 現在実行中のミッション（PreAutoFlightState でセット）
     const MissionBase* current_mission = nullptr;

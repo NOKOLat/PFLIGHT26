@@ -4,6 +4,9 @@
 
 ProcessStatus PostFlightState::onUpdate(StateContext& context) {
 
+    // 飛行中に蓄積したデータをリセット
+    context.altitude_average.reset();
+
     // GPIO設定
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
 

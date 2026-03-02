@@ -33,15 +33,15 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 	AttitudeEKF_Update(&context.instances.attitude_ekf.value(), context.sensor_data.accel.getptr(), gyro);
 
     // 姿勢推定結果を AttitudeState に格納
-    context.attitude_state.roll  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.pitch = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.yaw   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.roll()  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.pitch() = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.yaw()   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
     // 2-5. 高度推定の更新
     Vector3f angle_vec;
-    angle_vec.setX(context.attitude_state.roll);
-    angle_vec.setY(context.attitude_state.pitch);
-    angle_vec.setZ(context.attitude_state.yaw);
+    angle_vec.setX(context.attitude_state.angle.roll());
+    angle_vec.setY(context.attitude_state.angle.pitch());
+    angle_vec.setZ(context.attitude_state.angle.yaw());
     context.instances.altitude_estimator->Update(
         context.sensor_data.barometric_pressure,
         context.sensor_data.accel.getptr(),
@@ -53,6 +53,9 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     float altitude_data[3];  // [altitude, velocity, accel]
     context.instances.altitude_estimator->GetData(altitude_data);
     context.attitude_state.altitude = altitude_data[0];
+
+    // 直近高度の移動平均を更新
+    context.attitude_state.altitude_avg = context.altitude_average.update(context.attitude_state.altitude);
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);
