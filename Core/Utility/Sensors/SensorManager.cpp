@@ -194,7 +194,7 @@ bool SensorManager::getGyroOffsets(int16_t offset[3]) const {
     return true;
 }
 
-bool SensorManager::SetAccelOffsets(const int16_t offset[3]) {
+bool SensorManager::setAccelOffsets(const int16_t offset[3]) {
 
     if (offset == nullptr) {
         return false;
@@ -206,7 +206,7 @@ bool SensorManager::SetAccelOffsets(const int16_t offset[3]) {
     return true;
 }
 
-bool SensorManager::SetGyroOffsets(const int16_t offset[3]) {
+bool SensorManager::setGyroOffsets(const int16_t offset[3]) {
 
     if (offset == nullptr) {
         return false;

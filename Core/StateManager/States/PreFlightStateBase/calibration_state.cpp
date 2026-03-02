@@ -85,8 +85,8 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
         CalibrationConfig::MANUAL_GYRO_OFFSET_Z
     };
 
-    context.instances.sensor_manager->SetAccelOffsets(manual_accel_offset);
-    context.instances.sensor_manager->SetGyroOffsets(manual_gyro_offset);
+    context.instances.sensor_manager->setAccelOffsets(manual_accel_offset);
+    context.instances.sensor_manager->setGyroOffsets(manual_gyro_offset);
 
     printf("[Calibration] Manual Accel Offsets - X: %d, Y: %d, Z: %d\n",
            manual_accel_offset[0], manual_accel_offset[1], manual_accel_offset[2]);

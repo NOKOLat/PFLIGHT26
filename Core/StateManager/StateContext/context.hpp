@@ -78,19 +78,6 @@ struct ControlInput {
     uint32_t sbus_failsafe_count = 0;
 };
 
-struct PIDGains {
-
-    float angle_kp = PidConfig::ANGLE_KP;
-    float angle_ki = PidConfig::ANGLE_KI;
-    float angle_kd = PidConfig::ANGLE_KD;
-
-    float rate_kp = PidConfig::RATE_KP;
-    float rate_ki = PidConfig::RATE_KI;
-    float rate_kd = PidConfig::RATE_KD;
-
-    //dtはStateManagerのLoopManagerの値を使用する
-};
-
 // ピン設定情報を格納する構造体
 struct PinConfiguration {
 
@@ -176,7 +163,6 @@ struct StateContext {
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
-    PIDGains pid_gains;                  // PIDゲイン
 
     // 現在実行中のミッション（PreAutoFlightState でセット）
     const MissionBase* current_mission = nullptr;
