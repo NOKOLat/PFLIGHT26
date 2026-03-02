@@ -160,12 +160,60 @@ bool SensorManager::getPressData(float* press) {
 bool SensorManager::getTempData(float* temp) {
 
     if (temp == nullptr) {
-        
+
         return false;
     }
 
     // バッファから温度データを取得
     *temp = temp_buffer;
+
+    return true;
+}
+
+bool SensorManager::getAccelOffsets(int16_t offset[3]) const {
+
+    if (offset == nullptr) {
+        return false;
+    }
+
+    // ICM42688P から加速度オフセットを取得
+    icm42688p.GetAccelOffsets(offset);
+
+    return true;
+}
+
+bool SensorManager::getGyroOffsets(int16_t offset[3]) const {
+
+    if (offset == nullptr) {
+        return false;
+    }
+
+    // ICM42688P からジャイロオフセットを取得
+    icm42688p.GetGyroOffsets(offset);
+
+    return true;
+}
+
+bool SensorManager::SetAccelOffsets(const int16_t offset[3]) {
+
+    if (offset == nullptr) {
+        return false;
+    }
+
+    // ICM42688P に加速度オフセットを設定
+    icm42688p.SetAccelOffsets(offset);
+
+    return true;
+}
+
+bool SensorManager::SetGyroOffsets(const int16_t offset[3]) {
+
+    if (offset == nullptr) {
+        return false;
+    }
+
+    // ICM42688P にジャイロオフセットを設定
+    icm42688p.SetGyroOffsets(offset);
 
     return true;
 }
