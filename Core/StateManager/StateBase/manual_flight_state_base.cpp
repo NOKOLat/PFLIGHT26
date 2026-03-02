@@ -61,8 +61,8 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     ProcessStatus status = onUpdate(context);
 
     // 4. PWM出力（PwmManager経由）
-    context.instances.pwm_controller->setMotorSpeed(context.control_output.motor_pwm.data());
-    context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.data());
+    context.instances.pwm_controller->setMotorSpeed(context.control_output.motor_pwm.getptr());
+    context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.getptr());
 
 	// debug センサーデータの確認
 	//printf("Accel: %f, %f, %f\n", context.sensor_data.accel[Axis::X], context.sensor_data.accel[Axis::Y], context.sensor_data.accel[Axis::Z]);
@@ -71,7 +71,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     //printf("Angle: %f, %f %f\n", context.sensor_data.angle[Axis::X], context.sensor_data.angle[Axis::Y], context.sensor_data.angle[Axis::Z]);
 
     // debug PWMデータの確認
-    //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::ELEVATOR)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::RUDDER)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::AILERON)], context.control_output.servo_pwm[static_cast<int>(PwmConfig::ServoChannel::DROP)]);
+    //printf("PWM: %f, %f, %f, %f\n", context.control_output.servo_pwm.elevator(), context.control_output.servo_pwm.rudder(), context.control_output.servo_pwm.aileron(), context.control_output.servo_pwm.drop());
 
     return {status, TransitionFlag::NO_TRANSITION, getStateID()};
 }

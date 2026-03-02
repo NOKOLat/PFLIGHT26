@@ -5,6 +5,14 @@
 #include <array>
 #include "../Config/sbus_config.hpp"
 
+// ===== 3段階スイッチの状態定義 =====
+// LOW=0 が無効（OFF）、MID/HIGH が有効（ON）
+enum class SwitchPosition : uint8_t {
+    LOW  = 0,  // スイッチ下位（無効 / OFF）
+    MID  = 1,  // スイッチ中位（有効 / ON）
+    HIGH = 2,  // スイッチ上位（有効 / ON）
+};
+
 namespace nokolat {
 
 // ===== リスケーリング後のSBUSデータ構造体 =====
@@ -19,13 +27,13 @@ struct RescaledSBUSData {
     float right_aileron;   // 右エルロン [-90~90] deg
 
     // AUXチャネル
-    uint8_t autofly;         // 自動操縦フラグ [0 / 1 / 2]
-    uint8_t selectmission;   // ミッション選択 [0 / 1 / 2]
-    uint8_t auto_mission;    // 自動離着陸用 [0 / 1 / 2]
-    uint8_t safety;          // 安全装置 [0:解除 / 1:有効]
-    uint8_t drop;            // 投下装置トリガー [0 / 1 / 2]
-    uint8_t preflight_debug; // プリフライトデバッグ [0 / 1 / 2]
-    uint8_t flight_debug;    // フライトデバッグ [0 / 1 / 2]
+    SwitchPosition autofly;         // 自動操縦フラグ [LOW / MID / HIGH]
+    SwitchPosition selectmission;   // ミッション選択 [LOW / MID / HIGH]
+    SwitchPosition auto_mission;    // 自動離着陸用 [LOW / MID / HIGH]
+    SwitchPosition safety;          // 安全装置 [LOW:解除 / MID以上:有効]
+    SwitchPosition drop;            // 投下装置トリガー [LOW / MID / HIGH]
+    SwitchPosition preflight_debug; // プリフライトデバッグ [LOW / MID / HIGH]
+    SwitchPosition flight_debug;    // フライトデバッグ [LOW / MID / HIGH]
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====
@@ -44,14 +52,6 @@ enum class SBUSChannel : uint8_t {
     SAFETY          = SbusConfig::CH_SAFETY,
     PREFLIGHT_DEBUG = SbusConfig::CH_PREFLIGHT_DEBUG,
     FLIGHT_DEBUG    = SbusConfig::CH_FLIGHT_DEBUG
-};
-
-// ===== 3段階スイッチの状態定義 =====
-enum class SwitchPosition : uint8_t {
-
-    LOW = 0,
-    MID = 1,
-    HIGH = 2
 };
 
 // ===== SBUSリスケーラークラス =====

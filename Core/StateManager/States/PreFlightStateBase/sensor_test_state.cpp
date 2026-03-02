@@ -68,13 +68,13 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 StateID SensorTestState::evaluateNextState(StateContext& context) {
 
     // プリフライトデバッグが0になったらPRE_FLIGHT_STATEに戻る
-    if(context.rescaled_sbus_data.preflight_debug == 0){
+    if(context.rescaled_sbus_data.preflight_debug == SwitchPosition::LOW){
 
         return StateID::PRE_FLIGHT_STATE;
     }
 
-    // プリフライトデバッグが2になったらSERVO_TEST_STATEに遷移
-    if(context.rescaled_sbus_data.preflight_debug == 2){
+    // プリフライトデバッグが HIGH になったらSERVO_TEST_STATEに遷移
+    if(context.rescaled_sbus_data.preflight_debug == SwitchPosition::HIGH){
 
         return StateID::SERVO_TEST_STATE;
     }

@@ -12,13 +12,13 @@ ProcessStatus ClimbingTurnState::onUpdate(StateContext& context) {
 StateID ClimbingTurnState::evaluateNextState(StateContext& context) {
 
     // 安全スティックの値を確認（飛行終了判定）
-    if(!context.rescaled_sbus_data.safety){
+    if(context.rescaled_sbus_data.safety == SwitchPosition::LOW){
 
         return StateID::POST_FLIGHT_STATE;
     }
 
     // 手動飛行の判定
-	if(context.rescaled_sbus_data.autofly == 0){
+	if(context.rescaled_sbus_data.autofly == SwitchPosition::LOW){
 
 	    return StateID::MANUAL_FLIGHT_STATE;
 	}

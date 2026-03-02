@@ -15,6 +15,8 @@
 #include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
 #include "../../Utility/AltitudeAverage.hpp"
+#include "../../Utility/ServoPwm4f.hpp"
+#include "../../Utility/MotorPwm2f.hpp"
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
@@ -58,8 +60,8 @@ struct AttitudeState {
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    std::array<float, 2> motor_pwm; // 2つのモーターの PWM 値 [0-100] % （右、左）
-    std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
+    MotorPwm2f motor_pwm;           // 2つのモーターの PWM 値 [0-100] % （右、左）
+    ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体

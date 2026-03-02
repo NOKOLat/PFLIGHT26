@@ -114,7 +114,7 @@ ProcessStatus ServoMotorTestState::onUpdate(StateContext& context) {
 StateID ServoMotorTestState::evaluateNextState(StateContext& context) {
 
     // プリフライトデバッグが0になったらPRE_FLIGHT_STATEに戻る
-    if(context.rescaled_sbus_data.preflight_debug == 0){
+    if(context.rescaled_sbus_data.preflight_debug == SwitchPosition::LOW){
 
         return StateID::PRE_FLIGHT_STATE;
     }
