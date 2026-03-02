@@ -27,6 +27,12 @@ class SensorManager {
         bool getPressData(float* press);
         bool getTempData(float* temp);
 
+        // IMU オフセット値を取得・設定
+        bool getAccelOffsets(int16_t offset[3]) const;
+        bool getGyroOffsets(int16_t offset[3]) const;
+        bool SetAccelOffsets(const int16_t offset[3]);
+        bool SetGyroOffsets(const int16_t offset[3]);
+
     private:
 
         ICM42688P_HAL_I2C icm42688p;
