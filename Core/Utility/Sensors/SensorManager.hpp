@@ -30,8 +30,8 @@ class SensorManager {
         // IMU オフセット値を取得・設定
         bool getAccelOffsets(int16_t offset[3]) const;
         bool getGyroOffsets(int16_t offset[3]) const;
-        bool SetAccelOffsets(const int16_t offset[3]);
-        bool SetGyroOffsets(const int16_t offset[3]);
+        bool setAccelOffsets(const int16_t offset[3]);
+        bool setGyroOffsets(const int16_t offset[3]);
 
     private:
 
