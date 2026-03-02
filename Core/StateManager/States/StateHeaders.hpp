@@ -100,6 +100,7 @@ class LevelFlightState : public ManualFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
+        bool mission_started_ = false;
 };
 
 // レベルターン状態を実装するクラス
@@ -165,6 +166,7 @@ class AutoFlightState : public AutoFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
+        bool mission_started_ = false;  // ミッション開始フラグ
 };
 
 // 自動着陸状態を実装するクラス

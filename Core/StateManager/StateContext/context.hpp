@@ -21,6 +21,8 @@
 #include "Altitude_estimation/altitude.h"
 #include "../../Utility/Sensors/SensorManager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
+#include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
+#include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -153,6 +155,9 @@ struct Instances {
     std::optional<PID> rate_pitch_pid;
     std::optional<PID> rate_roll_pid;
     std::optional<PID> rate_yaw_pid;
+
+    // マネューバーシーケンサー（自動操縦の目標値提供）
+    std::optional<ManeuverSequencer> maneuver_sequencer;
 };
 
 // 状態実行時に必要なすべての情報を包含する構造体
@@ -173,7 +178,10 @@ struct StateContext {
     ControlOutput control_output;        // 制御出力
     PIDGains pid_gains;                  // PIDゲイン
 
-    uint32_t loop_time_us = 0;    
+    // 現在実行中のミッション（PreAutoFlightState でセット）
+    const MissionBase* current_mission = nullptr;
+
+    uint32_t loop_time_us = 0;
 };
 
 #endif // CONTEXT_HPP

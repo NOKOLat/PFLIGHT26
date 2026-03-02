@@ -158,6 +158,9 @@ void StateManager::init() {
     // 2-4 SBUS
     state_context_.instances.sbus_receiver.emplace();
 
+    // 2-5 マネューバーシーケンサー（自動操縦の目標値提供）
+    state_context_.instances.maneuver_sequencer.emplace();
+
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
