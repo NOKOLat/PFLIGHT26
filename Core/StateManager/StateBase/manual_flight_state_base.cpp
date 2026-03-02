@@ -32,24 +32,27 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
 	AttitudeEKF_Update(&context.instances.attitude_ekf.value(), context.sensor_data.accel.getptr(), gyro);
 
-    context.sensor_data.angle[Axis::X] = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Y] = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
-    context.sensor_data.angle[Axis::Z] = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+    // 姿勢推定結果を AttitudeState に格納
+    context.attitude_state.roll  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.pitch = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.yaw   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
     // 2-5. 高度推定の更新
+    Vector3f angle_vec;
+    angle_vec.setX(context.attitude_state.roll);
+    angle_vec.setY(context.attitude_state.pitch);
+    angle_vec.setZ(context.attitude_state.yaw);
     context.instances.altitude_estimator->Update(
         context.sensor_data.barometric_pressure,
         context.sensor_data.accel.getptr(),
-        context.sensor_data.angle.getptr(),
+        angle_vec.getptr(),
         context.loop_time_us / 1000000.0f  // μs to seconds
     );
 
     // 高度推定結果を取得
     float altitude_data[3];  // [altitude, velocity, accel]
     context.instances.altitude_estimator->GetData(altitude_data);
-    context.sensor_data.altitude          = altitude_data[0];
-    context.sensor_data.altitude_velocity = altitude_data[1];
-    context.sensor_data.altitude_accel    = altitude_data[2];
+    context.attitude_state.altitude = altitude_data[0];
 
     // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);

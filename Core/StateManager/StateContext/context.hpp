@@ -40,12 +40,6 @@ struct SensorData {
     // 気圧センサー (DPS368)
     float barometric_pressure; // 気圧 [Pa]
     float temperature;    // 温度 [℃]
-
-    // 計算データ
-    Vector3f angle;     // 角度 [deg]
-    float altitude;       // 高度 [m]
-    float altitude_velocity;    // 高度速度 [m/s]
-    float altitude_accel;       // 高度加速度 [m/s^2]
 };
 
 
@@ -58,6 +52,7 @@ struct AttitudeState {
     float roll_rate;      // ロール角速度 [deg/s]
     float pitch_rate;     // ピッチ角速度 [deg/s]
     float yaw_rate;       // ヨー角速度 [deg/s]
+    float altitude;       // 高度 [m]
 };
 
 
