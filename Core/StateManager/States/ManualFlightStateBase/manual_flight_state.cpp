@@ -15,9 +15,9 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm.elevator() = context.rescaled_sbus_data.elevator * 0.9f;
-    context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * 0.9f;
-    context.control_output.servo_pwm.aileron()  = context.rescaled_sbus_data.aileron  * 0.9f;
+    context.control_output.servo_pwm.elevator() = context.rescaled_sbus_data.elevator * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.aileron()  = context.rescaled_sbus_data.aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
 
 
     // 投下装置

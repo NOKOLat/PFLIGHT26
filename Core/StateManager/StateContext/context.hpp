@@ -111,6 +111,9 @@ struct UnitConversion {
 
     static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
     static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+
+    // SBUS制御値 [-100~100] → サーボ角度 [-90~90 deg] への変換係数
+    static constexpr float SBUS_TO_SERVO_DEG = 90.0f / 100.0f;
 };
 
 struct Instances {
