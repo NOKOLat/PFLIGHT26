@@ -24,18 +24,18 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
     AttitudeEKF_Update(&context.instances.attitude_ekf.value(), context.sensor_data.accel.getptr(), gyro);
 
     // 姿勢推定結果を AttitudeState に格納
-    context.attitude_state.roll  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.pitch = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.yaw   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.roll()  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.pitch() = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
+    context.attitude_state.angle.yaw()   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
     // 高度推定の更新
     if (context.instances.altitude_estimator.has_value()) {
 
         // 角度をVector3fに変換して高度推定に渡す
         Vector3f angle_vec;
-        angle_vec.setX(context.attitude_state.roll);
-        angle_vec.setY(context.attitude_state.pitch);
-        angle_vec.setZ(context.attitude_state.yaw);
+        angle_vec.x() = context.attitude_state.angle.roll();
+        angle_vec.y() = context.attitude_state.angle.pitch();
+        angle_vec.z() = context.attitude_state.angle.yaw();
 
         context.instances.altitude_estimator->Update(
             context.sensor_data.barometric_pressure,
@@ -55,9 +55,9 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
     if(loop_count % 5 == 0) {
 
         printf("Angle: %.2f, %.2f, %.2f | Alt: %.3f m\n",
-            context.attitude_state.roll,
-            context.attitude_state.pitch,
-            context.attitude_state.yaw,
+            context.attitude_state.angle.roll(),
+            context.attitude_state.angle.pitch(),
+            context.attitude_state.angle.yaw(),
             context.attitude_state.altitude);
     }
 
@@ -68,13 +68,13 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 StateID SensorTestState::evaluateNextState(StateContext& context) {
 
     // プリフライトデバッグが0になったらPRE_FLIGHT_STATEに戻る
-    if(context.rescaled_sbus_data.preflight_debug == 0){
+    if(context.rescaled_sbus_data.preflight_debug == SwitchPosition::LOW){
 
         return StateID::PRE_FLIGHT_STATE;
     }
 
-    // プリフライトデバッグが2になったらSERVO_TEST_STATEに遷移
-    if(context.rescaled_sbus_data.preflight_debug == 2){
+    // プリフライトデバッグが HIGH になったらSERVO_TEST_STATEに遷移
+    if(context.rescaled_sbus_data.preflight_debug == SwitchPosition::HIGH){
 
         return StateID::SERVO_TEST_STATE;
     }

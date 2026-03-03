@@ -13,6 +13,10 @@
 #include "../../Config/board_config.hpp"
 #include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
+#include "../../Utility/Euler3f.hpp"
+#include "../../Utility/AltitudeAverage.hpp"
+#include "../../Utility/ServoPwm4f.hpp"
+#include "../../Utility/MotorPwm2f.hpp"
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
@@ -46,21 +50,18 @@ struct SensorData {
 // 姿勢推定結果を格納する構造体
 struct AttitudeState {
 
-    float roll;           // ロール角 [deg]
-    float pitch;          // ピッチ角 [deg]
-    float yaw;            // ヨー角 [deg]
-    float roll_rate;      // ロール角速度 [deg/s]
-    float pitch_rate;     // ピッチ角速度 [deg/s]
-    float yaw_rate;       // ヨー角速度 [deg/s]
+    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
+    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
     float altitude;       // 高度 [m]
+    float altitude_avg;   // 直近高度の移動平均 [m]
 };
 
 
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    std::array<float, 2> motor_pwm; // 2つのモーターの PWM 値 [0-100] % （右、左）
-    std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
+    MotorPwm2f motor_pwm;           // 2つのモーターの PWM 値 [0-100] % （右、左）
+    ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体
@@ -110,6 +111,9 @@ struct UnitConversion {
 
     static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
     static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+
+    // SBUS制御値 [-100~100] → サーボ角度 [-90~90 deg] への変換係数
+    static constexpr float SBUS_TO_SERVO_DEG = 90.0f / 100.0f;
 };
 
 struct Instances {
@@ -158,6 +162,9 @@ struct StateContext {
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
+
+    // 高度移動平均ユーティリティ
+    AltitudeAverage altitude_average;
 
     // 現在実行中のミッション（PreAutoFlightState でセット）
     const MissionBase* current_mission = nullptr;

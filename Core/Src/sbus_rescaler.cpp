@@ -157,27 +157,14 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
     // 右エルロン: -100~100 を -90~90 deg にスケール
     result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds) * 0.9f;
 
-    // 自動操縦フラグ: 3段階 (0 / 1 / 2)
-    result.autofly = getSwitchInt(sbus_data, SBUSChannel::AUTOFLY, thresholds);
-
-    // ミッション選択: 3段階 (0 / 1 / 2)
-    result.selectmission = getSwitchInt(sbus_data, SBUSChannel::SELECT_MISSION, thresholds);
-
-    // 自動離着陸用: 3段階 (0 / 1 / 2)
-    result.auto_mission = getSwitchInt(sbus_data, SBUSChannel::AUTO_MISSION, thresholds);
-
-    // 安全装置: LOW -> 0, MID/HIGH -> 1
-    uint8_t safety_switch = getSwitchInt(sbus_data, SBUSChannel::SAFETY, thresholds);
-    result.safety = (safety_switch >= 1) ? 1 : 0;
-
-    // 投下装置トリガー: 3段階 (0 / 1 / 2)
-    result.drop = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
-
-    // プリフライトデバッグ: 2段階 (0 / 1 / 2)
-    result.preflight_debug = getSwitchInt(sbus_data, SBUSChannel::PREFLIGHT_DEBUG, thresholds);
-
-    // フライトデバッグ: 2段階 (0 / 1 / 2)
-    result.flight_debug = getSwitchInt(sbus_data, SBUSChannel::FLIGHT_DEBUG, thresholds);
+    // AUXスイッチチャネル: SwitchPosition (LOW / MID / HIGH) に変換
+    result.autofly         = getSwitch(sbus_data, SBUSChannel::AUTOFLY,         thresholds);
+    result.selectmission   = getSwitch(sbus_data, SBUSChannel::SELECT_MISSION,  thresholds);
+    result.auto_mission    = getSwitch(sbus_data, SBUSChannel::AUTO_MISSION,    thresholds);
+    result.safety          = getSwitch(sbus_data, SBUSChannel::SAFETY,          thresholds);
+    result.drop            = getSwitch(sbus_data, SBUSChannel::DROP,            thresholds);
+    result.preflight_debug = getSwitch(sbus_data, SBUSChannel::PREFLIGHT_DEBUG, thresholds);
+    result.flight_debug    = getSwitch(sbus_data, SBUSChannel::FLIGHT_DEBUG,    thresholds);
 
     return result;
 }
