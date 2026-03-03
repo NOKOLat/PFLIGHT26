@@ -33,9 +33,9 @@ ProcessStatus SensorTestState::onUpdate(StateContext& context) {
 
         // 角度をVector3fに変換して高度推定に渡す
         Vector3f angle_vec;
-        angle_vec.setX(context.attitude_state.angle.roll());
-        angle_vec.setY(context.attitude_state.angle.pitch());
-        angle_vec.setZ(context.attitude_state.angle.yaw());
+        angle_vec.x() = context.attitude_state.angle.roll();
+        angle_vec.y() = context.attitude_state.angle.pitch();
+        angle_vec.z() = context.attitude_state.angle.yaw();
 
         context.instances.altitude_estimator->Update(
             context.sensor_data.barometric_pressure,

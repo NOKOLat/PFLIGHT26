@@ -24,7 +24,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
     // 2. 姿勢推定 (EKF)
     // ジャイロをdeg/s -> rad/sに変換
-	const float_prec gyro[3] = {
+	const float gyro[3] = {
 		context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
 		context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
 		context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
@@ -39,15 +39,11 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
 
     // 2-5. 高度推定の更新
     Vector3f angle_vec;
-    angle_vec.setX(context.attitude_state.angle.roll());
-    angle_vec.setY(context.attitude_state.angle.pitch());
-    angle_vec.setZ(context.attitude_state.angle.yaw());
-    context.instances.altitude_estimator->Update(
-        context.sensor_data.barometric_pressure,
-        context.sensor_data.accel.getptr(),
-        angle_vec.getptr(),
-        context.loop_time_us / 1000000.0f  // μs to seconds
-    );
+    angle_vec.x() = context.attitude_state.angle.roll();
+    angle_vec.y() = context.attitude_state.angle.pitch();
+    angle_vec.z() = context.attitude_state.angle.yaw();
+    
+    context.instances.altitude_estimator->Update(context.sensor_data.barometric_pressure, context.sensor_data.accel.getptr(), angle_vec.getptr(), context.loop_time_us / 1000000.0f);
 
     // 高度推定結果を取得
     float altitude_data[3];  // [altitude, velocity, accel]

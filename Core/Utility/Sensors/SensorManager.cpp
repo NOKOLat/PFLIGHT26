@@ -103,9 +103,9 @@ bool SensorManager::getAccelData(Vector3f* accel) {
     }
 
     // バッファから加速度データを取得
-    accel->setX(imu_accel_buffer[0]);
-    accel->setY(imu_accel_buffer[1]);
-    accel->setZ(imu_accel_buffer[2]);
+    accel->x() = imu_accel_buffer[0];
+    accel->y() = imu_accel_buffer[1];
+    accel->z() = imu_accel_buffer[2];
 
     return true;
 }
@@ -118,9 +118,9 @@ bool SensorManager::getGyroData(Vector3f* gyro) {
     }
 
     // バッファから角速度データを取得
-    gyro->setX(imu_gyro_buffer[0]);
-    gyro->setY(imu_gyro_buffer[1]);
-    gyro->setZ(imu_gyro_buffer[2]);
+    gyro->x() = imu_gyro_buffer[0];
+    gyro->y() = imu_gyro_buffer[1];
+    gyro->z() = imu_gyro_buffer[2];
 
     return true;
 }
@@ -132,14 +132,14 @@ bool SensorManager::getMagData(Vector3f* mag) {
     }
 
     // バッファから磁気センサーデータを取得
-    mag->setX(mag_buffer[0]);
-    mag->setY(mag_buffer[1]);
-    mag->setZ(mag_buffer[2]);
+    mag->x() = mag_buffer[0];
+    mag->y() = mag_buffer[1];
+    mag->z() = mag_buffer[2];
 
     // キャリブレーション補正を適用
-    mag->setX((mag->getX() - mag_offset[0]) * mag_scale[0]);
-    mag->setY((mag->getY() - mag_offset[1]) * mag_scale[1]);
-    mag->setZ((mag->getZ() - mag_offset[2]) * mag_scale[2]);
+    mag->x() = (mag->x() - mag_offset[0]) * mag_scale[0];
+    mag->y() = (mag->y() - mag_offset[1]) * mag_scale[1];
+    mag->z() = (mag->z() - mag_offset[2]) * mag_scale[2];
 
     return true;
 }
