@@ -3,7 +3,7 @@
 #include <cstring>
 
 SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle)
-    : icm42688p(i2c_handle, SensorI2CConfig::ICM42688P_ADDR),
+    : icm_spi(&hspi1, GPIOA, GPIO_PIN_4),
       bmm350(i2c_handle, SensorI2CConfig::BMM350_ADDR),
       dps368(i2c_handle, SensorI2CConfig::DPS368_ADDR) {
     // インスタンスはメンバーイニシャライザーで初期化される
@@ -14,7 +14,7 @@ bool SensorManager::initSensors() {
     bool success = true;
 
     // 1. IMU (ICM42688P) の初期化
-    if (icm42688p.Connection() != 0) {
+    if (icm_spi.Connection() != 0) {
         printf("ERROR: ICM42688P connection failed\n");
         success = false;
     }
@@ -37,13 +37,13 @@ bool SensorManager::initSensors() {
 bool SensorManager::configSensors() {
 
     // 1. IMU (ICM42688P) の設定
-    icm42688p.AccelConfig(
+    icm_spi.AccelConfig(
         ICM42688P::ACCEL_Mode::LowNoize,
         ICM42688P::ACCEL_SCALE::SCALE02g,
         ICM42688P::ACCEL_ODR::ODR00500hz,
         ICM42688P::ACCEL_DLPF::ODR40
     );
-    icm42688p.GyroConfig(
+    icm_spi.GyroConfig(
         ICM42688P::GYRO_MODE::LowNoize,
         ICM42688P::GYRO_SCALE::Dps0500,
         ICM42688P::GYRO_ODR::ODR00500hz,
@@ -51,7 +51,7 @@ bool SensorManager::configSensors() {
     );
 
     // 2. 磁気センサー (BMM350) の設定
-    bmm350.config(BMM350_DATA_RATE_400HZ, BMM350_NO_AVERAGING);
+    bmm350.config(0, 0);
 
     // 3. 気圧センサー (DPS368) の設定
     dps368.pressConfig(MEAS_RATE::_128pr_sec, MEAS_SAMPLING::_002_times);
@@ -62,7 +62,7 @@ bool SensorManager::configSensors() {
 
 bool SensorManager::CalibrationSensors() {
 
-    icm42688p.Calibration(10); // 1000サンプルでキャリブレーション
+    icm_spi.Calibration(10); // 1000サンプルでキャリブレーション
 
     return true;
 }
@@ -72,7 +72,7 @@ bool SensorManager::updateSensors() {
     bool success = true;
 
     // 1. IMU (ICM42688P) のデータ更新
-    if (icm42688p.GetData(imu_accel_buffer, imu_gyro_buffer) != 0) {
+    if (icm_spi.GetData(imu_accel_buffer, imu_gyro_buffer) != 0) {
 
         printf("WARNING: ICM42688P data read failed\n");
         success = false;
@@ -177,7 +177,7 @@ bool SensorManager::getAccelOffsets(int16_t offset[3]) const {
     }
 
     // ICM42688P から加速度オフセットを取得
-    icm42688p.GetAccelOffsets(offset);
+    icm_spi.GetAccelOffsets(offset);
 
     return true;
 }
@@ -189,31 +189,31 @@ bool SensorManager::getGyroOffsets(int16_t offset[3]) const {
     }
 
     // ICM42688P からジャイロオフセットを取得
-    icm42688p.GetGyroOffsets(offset);
+    icm_spi.GetGyroOffsets(offset);
 
     return true;
 }
 
-bool SensorManager::SetAccelOffsets(const int16_t offset[3]) {
+bool SensorManager::setAccelOffsets(const int16_t offset[3]) {
 
     if (offset == nullptr) {
         return false;
     }
 
     // ICM42688P に加速度オフセットを設定
-    icm42688p.SetAccelOffsets(offset);
+    icm_spi.SetAccelOffsets(offset);
 
     return true;
 }
 
-bool SensorManager::SetGyroOffsets(const int16_t offset[3]) {
+bool SensorManager::setGyroOffsets(const int16_t offset[3]) {
 
     if (offset == nullptr) {
         return false;
     }
 
     // ICM42688P にジャイロオフセットを設定
-    icm42688p.SetGyroOffsets(offset);
+    icm_spi.SetGyroOffsets(offset);
 
     return true;
 }
