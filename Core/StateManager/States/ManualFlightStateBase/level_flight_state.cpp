@@ -20,10 +20,16 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         sequencer.startMission(&level_flight_mission);
         mission_started_ = true;
 
+        // 初期値オフセットを記録（相対的な目標値計算用）
+        context.initial_yaw_offset = context.attitude_state.yaw_avg;
+        context.initial_altitude_offset = context.attitude_state.altitude_avg;
+
         printf("[LevelFlightState] Mission started - Level Flight\n");
+        printf("[LevelFlightState] Initial offsets - Yaw: %f, Altitude: %f\n",
+               context.initial_yaw_offset, context.initial_altitude_offset);
     }
 
-    // 目標値を取得
+    // 目標値を取得（相対的な目標値）
     float target_roll = 0.0f;
     float target_pitch = 0.0f;
     float target_yaw = 0.0f;
@@ -33,6 +39,10 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         printf("[LevelFlightState::onUpdate] Failed to get target values\n");
         return ProcessStatus::FAILURE;
     }
+
+    // 初期値オフセットを適用（絶対的な目標値に変換）
+    target_yaw += context.initial_yaw_offset;
+    target_altitude += context.initial_altitude_offset;
 
     // カスケードPID制御の計算
     float pid_result[3] = {0.0f, 0.0f, 0.0f};  // [pitch, roll, yaw]

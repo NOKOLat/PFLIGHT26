@@ -14,7 +14,7 @@
 #include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
-#include "../../Utility/AltitudeAverage.hpp"
+#include "../../Utility/MovingAverage.hpp"
 #include "../../Utility/ServoPwm4f.hpp"
 #include "../../Utility/MotorPwm2f.hpp"
 
@@ -52,8 +52,9 @@ struct AttitudeState {
 
     Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
     Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
+    float yaw_avg;        // 直近のヨー角の平均[deg]  
     float altitude;       // 高度 [m]
-    float altitude_avg;   // 直近高度の移動平均 [m]
+    float altitude_avg;   // 直近高度の平均 [m]
 };
 
 
@@ -163,8 +164,15 @@ struct StateContext {
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
 
-    // 高度移動平均ユーティリティ
-    AltitudeAverage altitude_average;
+    // 高度移動平均ユーティリティ（20サンプル窓）
+    MovingAverage<float, 20> altitude_average;
+
+    // ヨー角移動平均ユーティリティ（5サンプル窓）
+    MovingAverage<float, 5> yaw_average;
+
+    // 初期値オフセット（ミッション開始時に記録）
+    float initial_yaw_offset = 0.0f;           // ミッション開始時のヨー角平均値
+    float initial_altitude_offset = 0.0f;      // ミッション開始時の高度平均値
 
     // 現在実行中のミッション（PreAutoFlightState でセット）
     const MissionBase* current_mission = nullptr;

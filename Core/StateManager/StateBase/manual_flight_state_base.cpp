@@ -37,7 +37,7 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.attitude_state.angle.pitch() = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
     context.attitude_state.angle.yaw()   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
 
-    // 2-5. 高度推定の更新
+    // 3. 高度推定の更新
     Vector3f angle_vec;
     angle_vec.x() = context.attitude_state.angle.roll();
     angle_vec.y() = context.attitude_state.angle.pitch();
@@ -50,13 +50,14 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.instances.altitude_estimator->GetData(altitude_data);
     context.attitude_state.altitude = altitude_data[0];
 
-    // 直近高度の移動平均を更新
+    // 4. 移動平均の計算（高度、ヨー角）
     context.attitude_state.altitude_avg = context.altitude_average.update(context.attitude_state.altitude);
+    context.attitude_state.yaw_avg = context.yaw_average.update(context.attitude_state.angle.yaw());
 
-    // 3. 派生クラス固有の更新処理を呼び出す（制御出力）
+    // 5. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);
 
-    // 4. PWM出力（PwmManager経由）
+    // 6. PWM出力（PwmManager経由）
     context.instances.pwm_controller->setMotorSpeed(context.control_output.motor_pwm.getptr());
     context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.getptr());
 
