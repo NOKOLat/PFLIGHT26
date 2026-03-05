@@ -7,7 +7,6 @@
 #include "StateInterface/state_id.hpp"
 #include "StateContext/context.hpp"
 
-
 // 前方宣言
 class IMUSensor;
 class MagnetometerSensor;
