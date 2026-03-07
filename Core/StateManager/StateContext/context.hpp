@@ -10,52 +10,24 @@
 #include <array>
 #include <optional>
 #include "usart.h"
+
+// config
 #include "../../Config/board_config.hpp"
 #include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
-#include "../../Utility/MovingAverage.hpp"
 #include "../../Utility/ServoPwm4f.hpp"
 #include "../../Utility/MotorPwm2f.hpp"
+
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "IMU_EKF/attitude_ekf.h"
-#include "Altitude_estimation/altitude.h"
-#include "../../Utility/Sensors/SensorManager.hpp"
+//#include "IMU_EKF/attitude_ekf.h"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 #include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
 #include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
-
-// センサーデータを格納する構造体
-struct SensorData {
-
-    // IMU (ICM42688P)
-    Vector3f accel;      // 加速度 [m/s^2]
-    Vector3f gyro;       // 角速度 [rad/s]
-
-    // 磁気センサー (BMM350)
-    Vector3f mag;        // 磁気 [uT]
-
-    // LiDAR
-    Vector3f lidar_coord; // LiDARからの座標 [m]
-
-    // 気圧センサー (DPS368)
-    float barometric_pressure; // 気圧 [Pa]
-    float temperature;    // 温度 [℃]
-};
-
-
-// 姿勢推定結果を格納する構造体
-struct AttitudeState {
-
-    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
-    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
-    float yaw_avg;        // 直近のヨー角の平均[deg]  
-    float altitude;       // 高度 [m]
-    float altitude_avg;   // 直近高度の平均 [m]
-};
+#include "../../Utility/Sensors/AttitudeEstimation/attitude_estimation.hpp"
 
 
 // 制御出力を格納する構造体
@@ -119,17 +91,8 @@ struct UnitConversion {
 
 struct Instances {
 
-    // センサーマネージャー
-    std::optional<SensorManager> sensor_manager;
-
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
-
-    // 姿勢推定EKFインスタンス
-    std::optional<AttitudeEKF_t> attitude_ekf;
-
-    // 高度推定インスタンス
-    std::optional<Altitude> altitude_estimator;
 
     // PWM制御
     std::optional<PwmManager> pwm_controller;
@@ -157,18 +120,14 @@ struct StateContext {
     // 単位換算定数
     UnitConversion unit_conversion;
 
+    // 姿勢推定（生データ処理と姿勢推定を内部で行う）
+    AttitudeEstimation attitude_estimation;
+
     // データコンテナ
-    SensorData sensor_data;              // センサー生データ
-    AttitudeState attitude_state;        // 姿勢推定結果
+    AttitudeState attitude_state;        // 姿勢推定結果（sensor_pipelineから取得）
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
-
-    // 高度移動平均ユーティリティ（20サンプル窓）
-    MovingAverage<float, 20> altitude_average;
-
-    // ヨー角移動平均ユーティリティ（5サンプル窓）
-    MovingAverage<float, 5> yaw_average;
 
     // 初期値オフセット（ミッション開始時に記録）
     float initial_yaw_offset = 0.0f;           // ミッション開始時のヨー角平均値

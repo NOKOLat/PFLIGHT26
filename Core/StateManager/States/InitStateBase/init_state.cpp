@@ -55,22 +55,23 @@ StateID InitState::evaluateNextState(StateContext& context) {
 // 1. センサーの初期化と設定
 ProcessStatus InitState::initializeSensors(StateContext& context) {
 
-    // SensorManagerインスタンスチェック
-    if (!context.instances.sensor_manager.has_value()) {
+    // SensorManagerインスタンス取得
+    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
+    if (sensor_mgr == nullptr) {
 
         printf("Error: SensorManager instance is not initialized.\n");
         return ProcessStatus::FAILURE;
     }
 
     // SensorManagerのセンサー初期化
-    if (!context.instances.sensor_manager->initSensors()) {
+    if (!sensor_mgr->initSensors()) {
 
         printf("Error: Sensor initialization failed.\n");
         return ProcessStatus::FAILURE;
     }
 
     // SensorManagerのセンサー設定
-    if (!context.instances.sensor_manager->configSensors()) {
+    if (!sensor_mgr->configSensors()) {
 
         printf("Error: Sensor configuration failed.\n");
         return ProcessStatus::FAILURE;
@@ -103,17 +104,25 @@ ProcessStatus InitState::initializePWM(StateContext& context) {
 // 3. 姿勢推定の初期化
 ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
 
-    // インスタンスチェック (EKFの初期化はStateManagerで実施済み)
-    if (!context.instances.attitude_ekf.has_value()) {
+    // AttitudeEstimation が初期化されているか確認
+    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
+    if (sensor_mgr == nullptr) {
 
-        printf("Error: AttitudeEKF instance is not initialized.\n");
+        printf("Error: AttitudeEstimation is not properly initialized.\n");
         return ProcessStatus::FAILURE;
     }
 
-    // インスタンスチェック (高度推定の初期化はStateManagerで実施済み)
-    if (!context.instances.altitude_estimator.has_value()) {
+    AttitudeEKF_t* ekf = context.attitude_estimation.getAttitudeEKF();
+    if (ekf == nullptr) {
 
-        printf("Error: Altitude estimator instance is not initialized.\n");
+        printf("Error: AttitudeEKF is not initialized.\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    Altitude* alt_est = context.attitude_estimation.getAltitudeEstimator();
+    if (alt_est == nullptr) {
+
+        printf("Error: Altitude estimator is not initialized.\n");
         return ProcessStatus::FAILURE;
     }
 

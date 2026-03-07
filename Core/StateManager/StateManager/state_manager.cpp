@@ -131,19 +131,11 @@ void StateManager::init() {
 
     // 2. 使用するインスタンスの初期化
 
-    // 2-0 センサーマネージャーの初期化
-    state_context_.instances.sensor_manager.emplace(state_context_.pin_config.sensor_i2c);
+    // 2-1 姿勢推定の初期化（SensorManagerとEKF、高度推定を一括管理）
+    state_context_.attitude_estimation.initialize(state_context_.pin_config.sensor_i2c);
 
-    // 2-1 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
+    // 2-2 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
     state_context_.instances.pwm_controller.emplace();
-
-    // 2-2 姿勢推定EKFの初期化(6軸モード: IMUのみ使用、magnetometerなし、50Hz)
-    state_context_.instances.attitude_ekf.emplace();
-    AttitudeEKF_Init(&state_context_.instances.attitude_ekf.value(), SS_DT);
-
-    // 2-2-2 高度推定の初期化
-    state_context_.instances.altitude_estimator.emplace();
-    state_context_.instances.altitude_estimator->Init();
 
     // 2-3 角度制御用PID（外側ループ）と角速度制御用PID（内側ループ）
     // Note: InitStateの initializeCascadePID で初期化されるため、ここではコメント化

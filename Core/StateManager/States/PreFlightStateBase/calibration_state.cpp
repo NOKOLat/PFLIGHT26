@@ -22,26 +22,25 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
         }
 
         // 高度推定キャリブレーション回数を設定
-        if (context.instances.altitude_estimator.has_value()) {
+        Altitude* alt_est = context.attitude_estimation.getAltitudeEstimator();
+        if (alt_est != nullptr) {
 
-            context.instances.altitude_estimator->SetCalibMax(10);
+            alt_est->SetCalibMax(10);
         }
         calibration_started_ = true;
     }
 
-    // センサーデータの取得
-    context.instances.sensor_manager->updateSensors();
-    context.instances.sensor_manager->getAccelData(&context.sensor_data.accel);
-    context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
+    // センサーデータの取得と高度推定のキャリブレーション
+    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
+    Altitude* alt_est = context.attitude_estimation.getAltitudeEstimator();
 
-    // 高度推定のキャリブレーション
-    // キャリブレーションで、加速度のz成分が重力加速度と等しいと仮定
-    if (context.instances.altitude_estimator.has_value()) {
+    if (sensor_mgr != nullptr && alt_est != nullptr) {
+        float pressure = 0.0f;
+        sensor_mgr->getPressData(&pressure);
 
-        context.instances.altitude_estimator->Calibration(
-            context.sensor_data.barometric_pressure,
-            9.80665f
-        );
+        // 高度推定のキャリブレーション
+        // キャリブレーションで、加速度のz成分が重力加速度と等しいと仮定
+        alt_est->Calibration(pressure, 9.80665f);
     }
 
     return ProcessStatus::SUCCESS;
@@ -51,18 +50,25 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
 ProcessStatus CalibrationState::PerformSensorCalibration(StateContext& context) {
 
     printf("[Calibration] Executing sensor calibration...\n");
-    context.instances.sensor_manager->CalibrationSensors();
+    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
+
+    if (sensor_mgr == nullptr) {
+        printf("[Calibration] Error: SensorManager not available\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    sensor_mgr->CalibrationSensors();
 
     // オフセットの値を出力
     int16_t accel_offset[3] = {0};
     int16_t gyro_offset[3] = {0};
 
-    if (context.instances.sensor_manager->getAccelOffsets(accel_offset)) {
+    if (sensor_mgr->getAccelOffsets(accel_offset)) {
         printf("[Calibration] Accel Offsets - X: %d, Y: %d, Z: %d\n",
                accel_offset[0], accel_offset[1], accel_offset[2]);
     }
 
-    if (context.instances.sensor_manager->getGyroOffsets(gyro_offset)) {
+    if (sensor_mgr->getGyroOffsets(gyro_offset)) {
         printf("[Calibration] Gyro Offsets - X: %d, Y: %d, Z: %d\n",
                gyro_offset[0], gyro_offset[1], gyro_offset[2]);
     }
@@ -73,6 +79,12 @@ ProcessStatus CalibrationState::PerformSensorCalibration(StateContext& context) 
 
 ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& context) {
     printf("[Calibration] Using manual offset values from config\n");
+
+    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
+    if (sensor_mgr == nullptr) {
+        printf("[Calibration] Error: SensorManager not available\n");
+        return ProcessStatus::FAILURE;
+    }
 
     int16_t manual_accel_offset[3] = {
         CalibrationConfig::MANUAL_ACCEL_OFFSET_X,
@@ -85,8 +97,8 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
         CalibrationConfig::MANUAL_GYRO_OFFSET_Z
     };
 
-    context.instances.sensor_manager->setAccelOffsets(manual_accel_offset);
-    context.instances.sensor_manager->setGyroOffsets(manual_gyro_offset);
+    sensor_mgr->setAccelOffsets(manual_accel_offset);
+    sensor_mgr->setGyroOffsets(manual_gyro_offset);
 
     printf("[Calibration] Manual Accel Offsets - X: %d, Y: %d, Z: %d\n",
            manual_accel_offset[0], manual_accel_offset[1], manual_accel_offset[2]);
@@ -100,9 +112,10 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
 StateID CalibrationState::evaluateNextState(StateContext& context) {
 
     // 高度推定のキャリブレーション完了確認
-    if (context.instances.altitude_estimator.has_value()) {
+    Altitude* alt_est = context.attitude_estimation.getAltitudeEstimator();
+    if (alt_est != nullptr) {
 
-        if (!context.instances.altitude_estimator->isCalibrated()) {
+        if (!alt_est->isCalibrated()) {
 
             // キャリブレーション継続中
             return StateID::CALIBRATION_STATE;
