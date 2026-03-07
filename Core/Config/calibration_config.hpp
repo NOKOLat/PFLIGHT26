@@ -6,7 +6,7 @@ namespace CalibrationConfig {
     // ===== キャリブレーション有効フラグ =====
     // true: センサーキャリブレーションを実行
     // false: 手動設定値を使用（キャリブレーション実行をスキップ）
-    constexpr bool ENABLE_CALIBRATION = true;
+    constexpr bool ENABLE_CALIBRATION = false;
 
     // ===== 手動設定用オフセット値 =====
     // ENABLE_CALIBRATION = false の場合に使用される値
