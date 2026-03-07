@@ -6,12 +6,14 @@
 #include "../../Test/MockBMM350/MockBMM350.hpp"
 #include "../../Lib/STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "../Vector3f.hpp"
+#include "../../Config/sensor_config.hpp"
 
 class SensorManager {
 
     public:
 
-        SensorManager(I2C_HandleTypeDef* i2c_handle);
+        // I2C アドレスを SensorConfig から受け取る（DI）
+        SensorManager(I2C_HandleTypeDef* i2c_handle, const SensorI2CAddresses& i2c_addrs);
 
         bool initSensors();
 

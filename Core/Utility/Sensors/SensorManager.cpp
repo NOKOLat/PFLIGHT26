@@ -2,11 +2,10 @@
 #include "../../Config/sensor_i2c_config.hpp"
 #include <cstring>
 
-SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle)
+SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle, const SensorI2CAddresses& i2c_addrs)
     : icm_spi(&hspi1, GPIOA, GPIO_PIN_4),
-      bmm350(i2c_handle, SensorI2CConfig::BMM350_ADDR),
-      dps368(i2c_handle, SensorI2CConfig::DPS368_ADDR) {
-    // インスタンスはメンバーイニシャライザーで初期化される
+      bmm350(i2c_handle, i2c_addrs.bmm350_addr),
+      dps368(i2c_handle, i2c_addrs.dps368_addr) {
 }
 
 bool SensorManager::initSensors() {

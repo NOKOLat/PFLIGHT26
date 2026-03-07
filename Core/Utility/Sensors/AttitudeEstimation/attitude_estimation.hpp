@@ -10,6 +10,7 @@
 #include "../SensorManager.hpp"
 #include "../../../Lib/IMU_EKF/attitude_ekf.h"
 #include "../../../Lib/Altitude_estimation/altitude.h"
+#include "../../../Config/sensor_config.hpp"
 
 // センサーから読み込まれる生データ
 struct SensorRawData {
@@ -46,10 +47,10 @@ public:
 
     /**
      * @brief 姿勢推定の初期化（内部でSensorManagerも初期化）
-     * @param i2c_handle I2Cハンドルへのポインタ
+     * @param config センサー設定（I2Cハンドルと有効フラグを含む）
      * @return 初期化成功時true
      */
-    bool initialize(I2C_HandleTypeDef* i2c_handle);
+    bool initialize(const SensorConfig& config);
 
     /**
      * @brief センサーデータを処理し、姿勢推定結果を計算・更新

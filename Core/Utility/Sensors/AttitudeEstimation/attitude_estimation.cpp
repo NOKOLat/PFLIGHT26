@@ -3,9 +3,11 @@
 
 AttitudeEstimation::AttitudeEstimation() = default;
 
-bool AttitudeEstimation::initialize(I2C_HandleTypeDef* i2c_handle) {
+bool AttitudeEstimation::initialize(const SensorConfig& config) {
+
     // SensorManagerの初期化（内部で保持）
-    sensor_manager_.emplace(i2c_handle);
+    // SensorConfig から I2C ハンドルと I2C アドレスを取得（DI）
+    sensor_manager_.emplace(config.i2c_handle, config.i2c_addresses);
 
     // EKFの初期化
     attitude_ekf_.emplace();
@@ -15,7 +17,7 @@ bool AttitudeEstimation::initialize(I2C_HandleTypeDef* i2c_handle) {
     altitude_estimator_.emplace();
     altitude_estimator_->Init();
 
-    printf("[AttitudeEstimation] Initialized\n");
+    printf("[AttitudeEstimation] Initialized with sensor config\n");
     return true;
 }
 

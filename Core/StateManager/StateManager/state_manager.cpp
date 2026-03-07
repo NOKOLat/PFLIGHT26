@@ -1,6 +1,7 @@
 #include "StateManager/state_manager.hpp"
 #include "StateFactory/state_factory.hpp"
 #include "isr_manager.hpp"
+#include "../../Config/sensor_config.hpp"
 
 
 // コンストラクタ
@@ -131,20 +132,32 @@ void StateManager::init() {
 
     // 2. 使用するインスタンスの初期化
 
-    // 2-1 姿勢推定の初期化（SensorManagerとEKF、高度推定を一括管理）
-    state_context_.attitude_estimation.initialize(state_context_.pin_config.sensor_i2c);
+    // 2-1 センサー設定を準備（StateManager がファサード層として集約）
+    SensorConfig sensor_config = {
+        .i2c_handle = state_context_.pin_config.sensor_i2c,
+        .i2c_addresses = {
+            .bmm350_addr = 0x14,  // BMM350（磁気） デフォルトアドレス
+            .dps368_addr = 0x77   // DPS368（気圧・温度） デフォルトアドレス
+        },
+        .enable_imu = true,
+        .enable_magnetometer = true,
+        .enable_barometer = true
+    };
 
-    // 2-2 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
+    // 2-2 姿勢推定の初期化（SensorConfigを渡す）
+    state_context_.attitude_estimation.initialize(sensor_config);
+
+    // 2-3 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
     state_context_.instances.pwm_controller.emplace();
 
-    // 2-3 角度制御用PID（外側ループ）と角速度制御用PID（内側ループ）
+    // 2-4 角度制御用PID（外側ループ）と角速度制御用PID（内側ループ）
     // Note: InitStateの initializeCascadePID で初期化されるため、ここではコメント化
     // 各軸ごとの設定は pid_config.hpp の Pitch/Roll/Yaw 名前空間で管理
 
-    // 2-4 SBUS
+    // 2-5 SBUS
     state_context_.instances.sbus_receiver.emplace();
 
-    // 2-5 マネューバーシーケンサー（自動操縦の目標値提供）
+    // 2-6 マネューバーシーケンサー（自動操縦の目標値提供）
     state_context_.instances.maneuver_sequencer.emplace();
 
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
