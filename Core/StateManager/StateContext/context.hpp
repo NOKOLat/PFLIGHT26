@@ -21,8 +21,6 @@
 #include "../../Utility/ServoPwm4f.hpp"
 #include "../../Utility/MotorPwm2f.hpp"
 
-
-#include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
@@ -97,15 +95,6 @@ struct Instances {
 
     // PWM制御
     std::optional<PwmManager> pwm_controller;
-
-    // PID コントローラ
-    std::optional<PID> angle_pitch_pid;
-    std::optional<PID> angle_roll_pid;
-    std::optional<PID> angle_yaw_pid;
-
-    std::optional<PID> rate_pitch_pid;
-    std::optional<PID> rate_roll_pid;
-    std::optional<PID> rate_yaw_pid;
 
     // マネューバーシーケンサー（自動操縦の目標値提供）
     std::optional<ManeuverSequencer> maneuver_sequencer;
