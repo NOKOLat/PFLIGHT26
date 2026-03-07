@@ -1,5 +1,4 @@
 #include "Utility/Sensors/SensorManager.hpp"
-#include "../../Config/sensor_i2c_config.hpp"
 #include <cstring>
 
 SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle, const SensorI2CAddresses& i2c_addrs)

@@ -66,22 +66,10 @@ public:
     const AttitudeState& getAttitudeState() const;
 
     /**
-     * @brief 高度推定ユーティリティへのアクセス
-     * @return Altitude* 高度推定インスタンス
+     * @brief 高度推定のキャリブレーションが完了しているか確認する
+     * @return キャリブレーション完了時 true
      */
-    Altitude* getAltitudeEstimator();
-
-    /**
-     * @brief 姿勢推定EKFへのアクセス
-     * @return AttitudeEKF_t* EKFインスタンス
-     */
-    AttitudeEKF_t* getAttitudeEKF();
-
-    /**
-     * @brief 内部のSensorManagerへのアクセス
-     * @return SensorManager* SensorManagerインスタンス（nullptr の場合もある）
-     */
-    SensorManager* getSensorManager();
+    bool isAltitudeCalibrated();
 
 private:
     // センサーマネージャー（内部で完全に管理）
@@ -97,6 +85,9 @@ private:
 
     // 現在の推定結果
     AttitudeState current_attitude_state_;
+
+    // キャリブレーション設定の保持
+    AltitudeCalibConfig altitude_calib_config_;
 
     /**
      * @brief センサーマネージャーから生データを読み込み

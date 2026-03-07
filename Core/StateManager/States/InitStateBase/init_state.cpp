@@ -55,28 +55,9 @@ StateID InitState::evaluateNextState(StateContext& context) {
 // 1. センサーの初期化と設定
 ProcessStatus InitState::initializeSensors(StateContext& context) {
 
-    // SensorManagerインスタンス取得
-    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
-    if (sensor_mgr == nullptr) {
-
-        printf("Error: SensorManager instance is not initialized.\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    // SensorManagerのセンサー初期化
-    if (!sensor_mgr->initSensors()) {
-
-        printf("Error: Sensor initialization failed.\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    // SensorManagerのセンサー設定
-    if (!sensor_mgr->configSensors()) {
-
-        printf("Error: Sensor configuration failed.\n");
-        return ProcessStatus::FAILURE;
-    }
-
+    // センサーの初期化・設定・キャリブレーションは
+    // AttitudeEstimation::initialize() 内で完了済み
+    printf("[InitState] Sensors initialized via AttitudeEstimation\n");
     return ProcessStatus::SUCCESS;
 }
 
@@ -104,28 +85,8 @@ ProcessStatus InitState::initializePWM(StateContext& context) {
 // 3. 姿勢推定の初期化
 ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
 
-    // AttitudeEstimation が初期化されているか確認
-    SensorManager* sensor_mgr = context.attitude_estimation.getSensorManager();
-    if (sensor_mgr == nullptr) {
-
-        printf("Error: AttitudeEstimation is not properly initialized.\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    AttitudeEKF_t* ekf = context.attitude_estimation.getAttitudeEKF();
-    if (ekf == nullptr) {
-
-        printf("Error: AttitudeEKF is not initialized.\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    Altitude* alt_est = context.attitude_estimation.getAltitudeEstimator();
-    if (alt_est == nullptr) {
-
-        printf("Error: Altitude estimator is not initialized.\n");
-        return ProcessStatus::FAILURE;
-    }
-
+    // AttitudeEstimation の初期化はStateManager::init()で実行済み
+    printf("[InitState] AttitudeEstimation initialized\n");
     return ProcessStatus::SUCCESS;
 }
 

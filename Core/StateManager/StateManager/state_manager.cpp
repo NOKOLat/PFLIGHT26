@@ -136,12 +136,30 @@ void StateManager::init() {
     SensorConfig sensor_config = {
         .i2c_handle = state_context_.pin_config.sensor_i2c,
         .i2c_addresses = {
+            .icm42688p_addr = 0x69,
             .bmm350_addr = 0x14,  // BMM350（磁気） デフォルトアドレス
             .dps368_addr = 0x77   // DPS368（気圧・温度） デフォルトアドレス
         },
         .enable_imu = true,
         .enable_magnetometer = true,
-        .enable_barometer = true
+        .enable_barometer = true,
+        .imu_calib = {
+            .enable_auto_calibration = CalibrationConfig::ENABLE_CALIBRATION,
+            .manual_accel_offset = {
+                CalibrationConfig::MANUAL_ACCEL_OFFSET_X,
+                CalibrationConfig::MANUAL_ACCEL_OFFSET_Y,
+                CalibrationConfig::MANUAL_ACCEL_OFFSET_Z
+            },
+            .manual_gyro_offset = {
+                CalibrationConfig::MANUAL_GYRO_OFFSET_X,
+                CalibrationConfig::MANUAL_GYRO_OFFSET_Y,
+                CalibrationConfig::MANUAL_GYRO_OFFSET_Z
+            }
+        },
+        .altitude_calib = {
+            .sample_count = 10,
+            .reference_gravity = 9.80665f
+        }
     };
 
     // 2-2 姿勢推定の初期化（SensorConfigを渡す）

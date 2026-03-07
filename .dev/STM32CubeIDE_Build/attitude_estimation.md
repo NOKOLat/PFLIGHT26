@@ -8,6 +8,9 @@
 - **クリーンな依存関係**: データが上から下へ流れる単方向フロー
 - **シンプルなAPI**: 外部からの呼び出しは少数のメソッドのみ
 
+各センサーライブラリをまとめた、SensorManager（自作）と姿勢推定ライブラリを統合したものが
+AttitudeEstimationクラスになっています
+
 ---
 
 ## アーキテクチャ図
@@ -330,3 +333,104 @@ class IAttitudeEstimator {
 | 姿勢データがおかしい | EKF が発散 | AttitudeEKF_Init() のパラメータを確認 |
 | 高度がジッター | フィルター不足 | MovingAverage のウィンドウサイズを増加 |
 
+
+### 想定している実装
+- 実際の実装では名前空間の代わりにファイルがわかれていたり、クラスになっていたりします
+```cpp
+#include "Inc/wrapper.hpp"
+
+#include "Inc/i2c.h"
+#include "stdio.h"
+#include "AttitudeEstimation/attitude_estimation.hpp"
+
+namespace {
+
+	constexpr float ATTITUDE_ESTIMATION_DT = 0.01f;
+	constexpr uint32_t ATTITUDE_ESTIMATION_LOG_INTERVAL = 10;
+
+	AttitudeEstimation g_attitude_estimation;
+
+	SensorConfig createDefaultSensorConfig() {
+		SensorConfig config;
+
+		// 1. I2C ハンドルを設定
+		config.i2c_handle = &hi2c1;
+
+		// 2. I2C アドレスを設定
+		config.i2c_addresses.icm42688p_addr = 0x69;
+		config.i2c_addresses.bmm350_addr = 0x14;
+		config.i2c_addresses.dps368_addr = 0x77;
+
+		// 3. 使用するセンサーを有効化
+		config.enable_imu = true;
+		config.enable_magnetometer = true;
+		config.enable_barometer = true;
+
+		// 4. IMU キャリブレーション設定
+		config.imu_calib.enable_auto_calibration = false;
+		config.imu_calib.manual_accel_offset[0] = -286;
+		config.imu_calib.manual_accel_offset[1] = -277;
+		config.imu_calib.manual_accel_offset[2] = 0;
+		config.imu_calib.manual_gyro_offset[0] = -5;
+		config.imu_calib.manual_gyro_offset[1] = -8;
+		config.imu_calib.manual_gyro_offset[2] = -37;
+
+		// 5. 高度推定キャリブレーション設定
+		config.altitude_calib.sample_count = 10;
+		config.altitude_calib.reference_gravity = 9.80665f;
+
+		return config;
+	}
+
+}
+
+void init() {
+	printf("Initializing sensor system...\r\n");
+
+	const SensorConfig config = createDefaultSensorConfig();
+
+	if (g_attitude_estimation.initialize(config)) {
+		printf("Sensor system initialized successfully\r\n");
+	}
+	else {
+		printf("Failed to initialize sensor system\r\n");
+	}
+}
+
+void loop() {
+	static uint32_t last_time = 0;
+	static uint32_t log_count = 0;
+	static bool is_calib_logged = false;
+
+	const uint32_t current_time = HAL_GetTick();
+	const uint32_t target_ms = static_cast<uint32_t>(ATTITUDE_ESTIMATION_DT * 1000.0f);
+
+	if (current_time - last_time < target_ms) {
+		return;
+	}
+
+	last_time = current_time;
+
+	if (!g_attitude_estimation.update(ATTITUDE_ESTIMATION_DT)) {
+		printf("[ERROR] Sensor update failed\r\n");
+		return;
+	}
+
+	const AttitudeState& state = g_attitude_estimation.getAttitudeState();
+
+	if (log_count++ % ATTITUDE_ESTIMATION_LOG_INTERVAL == 0) {
+		printf(
+			"Attitude - Roll: %.2f, Pitch: %.2f, Yaw: %.2f, Altitude: %.2f m\r\n",
+			state.angle.roll(),
+			state.angle.pitch(),
+			state.angle.yaw(),
+			state.altitude
+		);
+	}
+
+	if (g_attitude_estimation.isAltitudeCalibrated() && !is_calib_logged) {
+		printf("[INFO] Altitude calibration completed\r\n");
+		is_calib_logged = true;
+	}
+}
+```

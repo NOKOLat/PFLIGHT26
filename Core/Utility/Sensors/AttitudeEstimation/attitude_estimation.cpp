@@ -6,38 +6,75 @@ AttitudeEstimation::AttitudeEstimation() = default;
 bool AttitudeEstimation::initialize(const SensorConfig& config) {
 
     // SensorManagerの初期化（内部で保持）
-    // SensorConfig から I2C ハンドルと I2C アドレスを取得（DI）
     sensor_manager_.emplace(config.i2c_handle, config.i2c_addresses);
+
+    // センサーハードウェア初期化と設定（内部で自動化）
+    if (!sensor_manager_->initSensors()) {
+        printf("[AttitudeEstimation::initialize] Failed to initialize sensors\n");
+        return false;
+    }
+
+    if (!sensor_manager_->configSensors()) {
+        printf("[AttitudeEstimation::initialize] Failed to configure sensors\n");
+        return false;
+    }
+
+    // IMUキャリブレーション（自動 or 手動）
+    if (config.imu_calib.enable_auto_calibration) {
+        printf("[AttitudeEstimation::initialize] Performing IMU auto-calibration...\n");
+        if (!sensor_manager_->CalibrationSensors()) {
+            printf("[AttitudeEstimation::initialize] IMU calibration failed\n");
+            return false;
+        }
+    } else {
+        printf("[AttitudeEstimation::initialize] Applying manual IMU offsets\n");
+        sensor_manager_->setAccelOffsets(config.imu_calib.manual_accel_offset);
+        sensor_manager_->setGyroOffsets(config.imu_calib.manual_gyro_offset);
+    }
 
     // EKFの初期化
     attitude_ekf_.emplace();
     AttitudeEKF_Init(&attitude_ekf_.value(), 0.02f);  // 50Hz (dt=0.02s)
 
-    // 高度推定の初期化
+    // 高度推定の初期化とキャリブレーション設定
     altitude_estimator_.emplace();
     altitude_estimator_->Init();
+    altitude_estimator_->SetCalibMax(config.altitude_calib.sample_count);
 
-    printf("[AttitudeEstimation] Initialized with sensor config\n");
+    // キャリブレーション設定を保持（update()で使用）
+    altitude_calib_config_ = config.altitude_calib;
+
+    printf("[AttitudeEstimation::initialize] Initialized successfully\n");
     return true;
 }
 
 bool AttitudeEstimation::update(float dt) {
-    // センサーマネージャーが初期化されているか確認
-    if (!sensor_manager_.has_value()) {
-        printf("[AttitudeEstimation::update] SensorManager not initialized\n");
+    if (!sensor_manager_.has_value() || !altitude_estimator_.has_value()) {
+        printf("[AttitudeEstimation::update] Components not initialized\n");
         return false;
     }
 
-    // 1. センサーから生データを読み込み
+    // 高度推定キャリブレーション中
+    if (!altitude_estimator_->isCalibrated()) {
+        float pressure = 0.0f;
+        if (!sensor_manager_->getPressData(&pressure)) {
+            printf("[AttitudeEstimation::update] Failed to get pressure for calibration\n");
+            return false;
+        }
+        altitude_estimator_->Calibration(pressure, altitude_calib_config_.reference_gravity);
+        return true;
+    }
+
+    // 通常の推定処理
     SensorRawData raw_data;
     if (!readSensorData(raw_data)) {
         return false;
     }
 
-    // 2. EKFと高度推定を更新
+    // EKFと高度推定を更新
     updateEstimators(raw_data, dt);
 
-    // 3. 推定結果を内部状態に反映
+    // 推定結果を内部状態に反映
     updateAttitudeState();
 
     return true;
@@ -162,23 +199,9 @@ const AttitudeState& AttitudeEstimation::getAttitudeState() const {
     return current_attitude_state_;
 }
 
-Altitude* AttitudeEstimation::getAltitudeEstimator() {
+bool AttitudeEstimation::isAltitudeCalibrated() {
     if (altitude_estimator_.has_value()) {
-        return &altitude_estimator_.value();
+        return altitude_estimator_->isCalibrated();
     }
-    return nullptr;
-}
-
-AttitudeEKF_t* AttitudeEstimation::getAttitudeEKF() {
-    if (attitude_ekf_.has_value()) {
-        return &attitude_ekf_.value();
-    }
-    return nullptr;
-}
-
-SensorManager* AttitudeEstimation::getSensorManager() {
-    if (sensor_manager_.has_value()) {
-        return &sensor_manager_.value();
-    }
-    return nullptr;
+    return false;
 }

@@ -36,6 +36,7 @@ class InitState : public InitStateBase {
 // ============================================================================
 
 // キャリブレーション状態を実装するクラス
+// 高度推定のキャリブレーション完了まで待機
 class CalibrationState : public PreFlightStateBase {
     public:
         virtual ~CalibrationState() = default;
@@ -43,11 +44,6 @@ class CalibrationState : public PreFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
-        ProcessStatus PerformSensorCalibration(StateContext& context);
-        ProcessStatus ApplyManualCalibrationOffsets(StateContext& context);
-        bool calibration_started_ = false;
-        // キャリブレーション実行フラグ（false=手動設定値を使用、true=センサーキャリブレーション実行）
-        bool enable_calibration_ = CalibrationConfig::ENABLE_CALIBRATION;
 };
 
 // 飛行前の準備状態を実装するクラス
