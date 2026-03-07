@@ -89,15 +89,15 @@ void StateManager::updateSBUS() {
     nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
     const nokolat::SBUS_DATA& sbus_data = sbus.getData();
 
-    state_context_.control_input.data = sbus_data.data;
-    state_context_.control_input.failsafe = sbus_data.failsafe;
-    state_context_.control_input.framelost = sbus_data.framelost;
-
     // SBUSデータをリスケーリング
     state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
 
+    // SBUSプロトコルフラグをセット
+    state_context_.rescaled_sbus_data.failsafe = sbus_data.failsafe;
+    state_context_.rescaled_sbus_data.framelost = sbus_data.framelost;
+
     // フェイルセーフ判定 (SBUSフレーム内のフラグ)
-    if (state_context_.control_input.failsafe) {
+    if (state_context_.rescaled_sbus_data.failsafe) {
 
         printf("[StateManager::updateSBUS] SBUS FailSafe\n");
         changeState(StateID::EMERGENCY_STATE);

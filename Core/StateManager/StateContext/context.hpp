@@ -14,6 +14,8 @@
 // config
 #include "../../Config/board_config.hpp"
 #include "../../Config/pid_config.hpp"
+
+// types
 #include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
 #include "../../Utility/ServoPwm4f.hpp"
@@ -23,7 +25,6 @@
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-//#include "IMU_EKF/attitude_ekf.h"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 #include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
 #include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
@@ -37,7 +38,7 @@ struct ControlOutput {
     ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
-// オペレータからの制御入力を格納する構造体
+// 制御入力を格納する構造体
 struct ControlInput {
 
     std::array<uint16_t, 18> data = {};

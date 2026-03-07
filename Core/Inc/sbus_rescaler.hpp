@@ -34,6 +34,10 @@ struct RescaledSBUSData {
     SwitchPosition drop;            // 投下装置トリガー [LOW / MID / HIGH]
     SwitchPosition preflight_debug; // プリフライトデバッグ [LOW / MID / HIGH]
     SwitchPosition flight_debug;    // フライトデバッグ [LOW / MID / HIGH]
+
+    // SBUSプロトコルフラグ
+    bool failsafe = false;   // SBUSフェイルセーフフラグ
+    bool framelost = false;  // SBUSフレーム喪失フラグ
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====
