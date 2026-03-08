@@ -118,9 +118,11 @@ bool LevelFlightState::calculateCascadePID(StateContext& context, float target_p
     angle_pitch_pid.calc(target_pitch, attitude.angle.pitch());
     float target_pitch_rate = angle_pitch_pid.getData();
 
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力
+    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
     PID& rate_pitch_pid = context.instances.rate_pitch_pid.value();
-    rate_pitch_pid.calc(target_pitch_rate, attitude.rate.pitch());
+    if (inner_loop_counter_ == 0) {
+        rate_pitch_pid.calc(target_pitch_rate, attitude.rate.pitch());
+    }
     pid_result[0] = rate_pitch_pid.getData();
 
     // ========== Roll軸 ==========
@@ -129,9 +131,11 @@ bool LevelFlightState::calculateCascadePID(StateContext& context, float target_p
     angle_roll_pid.calc(target_roll, attitude.angle.roll());
     float target_roll_rate = angle_roll_pid.getData();
 
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力
+    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
     PID& rate_roll_pid = context.instances.rate_roll_pid.value();
-    rate_roll_pid.calc(target_roll_rate, attitude.rate.roll());
+    if (inner_loop_counter_ == 0) {
+        rate_roll_pid.calc(target_roll_rate, attitude.rate.roll());
+    }
     pid_result[1] = rate_roll_pid.getData();
 
     // ========== Yaw軸 ==========
@@ -140,10 +144,15 @@ bool LevelFlightState::calculateCascadePID(StateContext& context, float target_p
     angle_yaw_pid.calc(target_yaw, attitude.angle.yaw());
     float target_yaw_rate = angle_yaw_pid.getData();
 
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力
+    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
     PID& rate_yaw_pid = context.instances.rate_yaw_pid.value();
-    rate_yaw_pid.calc(target_yaw_rate, attitude.rate.yaw());
+    if (inner_loop_counter_ == 0) {
+        rate_yaw_pid.calc(target_yaw_rate, attitude.rate.yaw());
+    }
     pid_result[2] = rate_yaw_pid.getData();
+
+    // カウンターを更新（0と1を交互に）
+    inner_loop_counter_ = (inner_loop_counter_ + 1) % 2;
 
     return true;
 }
