@@ -51,6 +51,17 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         printf("[LevelFlightState::onUpdate] Failed to calculate cascade PID\n");
         return ProcessStatus::FAILURE;
     }
+    
+    // PIDの値をサーボの角度に入力
+    context.control_output.servo_pwm.elevator() = pid_result[0]; // pitch制御
+    context.control_output.servo_pwm.rudder()   = pid_result[2]; // yaw制御
+    context.control_output.servo_pwm.aileron()  = pid_result[1]; // roll制御
+
+
+    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる（ここは手動操縦）
+    context.control_output.motor_pwm.right() = context.rescaled_sbus_data.throttle;
+    context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
+
 
     printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
 
