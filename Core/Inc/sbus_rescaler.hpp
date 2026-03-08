@@ -63,20 +63,28 @@ public:
     static constexpr uint16_t SBUS_MID = SbusConfig::SBUS_MID;
     static constexpr uint16_t SBUS_MAX = SbusConfig::SBUS_MAX;
 
+    // ===== 軸ごとのキャリブレーション値構造体 =====
+    struct AxisCalib {
+        uint16_t min;     // SBUS最小値
+        uint16_t center;  // SBUS中立値
+        uint16_t max;     // SBUS最大値
+    };
+
     // ===== 閾値設定用構造体 =====
     struct Thresholds {
 
         // スロットル: 0~100の範囲にマッピング
-        uint16_t throttle_min = SbusConfig::SBUS_MIN;
-        uint16_t throttle_max = SbusConfig::SBUS_MAX;
+        uint16_t throttle_min = SbusConfig::THROTTLE_MIN;
+        uint16_t throttle_max = SbusConfig::THROTTLE_MAX;
 
-        // ロール、ピッチ、ヨー: -100~100の範囲にマッピング
-        uint16_t control_min = SbusConfig::SBUS_MIN;
-        uint16_t control_center = SbusConfig::SBUS_MID;
-        uint16_t control_max = SbusConfig::SBUS_MAX;
+        // 各軸のキャリブレーション: -100~100の範囲にマッピング
+        AxisCalib aileron       = {SbusConfig::AILERON_MIN,       SbusConfig::AILERON_MID,       SbusConfig::AILERON_MAX};
+        AxisCalib elevator      = {SbusConfig::ELEVATOR_MIN,      SbusConfig::ELEVATOR_MID,      SbusConfig::ELEVATOR_MAX};
+        AxisCalib rudder        = {SbusConfig::RUDDER_MIN,        SbusConfig::RUDDER_MID,        SbusConfig::RUDDER_MAX};
+        AxisCalib right_aileron = {SbusConfig::RIGHT_AILERON_MIN, SbusConfig::RIGHT_AILERON_MID, SbusConfig::RIGHT_AILERON_MAX};
 
         // 3段階スイッチの閾値 (0~750: LOW / 751~1500: MID / 1501~2047: HIGH)
-        uint16_t switch_low_threshold = SbusConfig::SWITCH_LOW_THRESHOLD;    // LOW/MID境界
+        uint16_t switch_low_threshold  = SbusConfig::SWITCH_LOW_THRESHOLD;   // LOW/MID境界
         uint16_t switch_high_threshold = SbusConfig::SWITCH_HIGH_THRESHOLD;  // MID/HIGH境界
     };
 
@@ -90,8 +98,7 @@ public:
 
     // ===== 制御入力変換メソッド =====
     // SBUS値を-100~100の範囲にリスケール（ロール、ピッチ、ヨー用）
-    static float rescaleControl(uint16_t sbus_value,
-                                 const Thresholds& thresholds = default_thresholds);
+    static float rescaleControl(uint16_t sbus_value, const AxisCalib& calib);
 
     // ===== 3段階スイッチ変換メソッド =====
     // SBUS値をSwitchPosition（LOW/MID/HIGH）に変換
@@ -111,7 +118,7 @@ public:
     // 制御入力取得（-100~100）
     static float getControl(const std::array<uint16_t, 18>& sbus_data,
                             SBUSChannel channel,
-                            const Thresholds& thresholds = default_thresholds);
+                            const AxisCalib& calib);
 
     // 3段階スイッチ取得（SwitchPosition）
     static SwitchPosition getSwitch(const std::array<uint16_t, 18>& sbus_data,

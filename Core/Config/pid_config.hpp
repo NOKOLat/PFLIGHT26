@@ -7,7 +7,7 @@ namespace PidConfig {
     namespace Pitch {
         // 角度制御（外側ループ）
         namespace Angle {
-            constexpr float KP = 1.0f;
+            constexpr float KP = 0.9f;
             constexpr float KI = 0.0f;
             constexpr float KD = 0.0f;
         }
@@ -23,13 +23,13 @@ namespace PidConfig {
     namespace Roll {
         // 角度制御（外側ループ）
         namespace Angle {
-            constexpr float KP = 1.0f;
+            constexpr float KP = 3.0f;
             constexpr float KI = 0.0f;
             constexpr float KD = 0.0f;
         }
         // 角速度制御（内側ループ）
         namespace Rate {
-            constexpr float KP = 1.0f;
+            constexpr float KP = 2.0f;
             constexpr float KI = 0.0f;
             constexpr float KD = 0.0f;
         }

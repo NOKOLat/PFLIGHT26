@@ -6,8 +6,13 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
     loop_count++;
 	if(loop_count % 10 == 0){
 
-		printf("Channel[3]: %f SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, static_cast<int>(context.rescaled_sbus_data.safety));
+		printf("Channel: %f %f %f %f, SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.rudder, context.rescaled_sbus_data.aileron, context.rescaled_sbus_data.elevator, static_cast<int>(context.rescaled_sbus_data.safety));
 	}
+
+    if(1){
+
+        printf("value: %d %d %d %d\n", context.control_input.data[0], context.control_input.data[1], context.control_input.data[2], context.control_input.data[3]);
+    }
 
     // サーボはこの状態から動くようにする
     

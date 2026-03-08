@@ -47,15 +47,21 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
     // カスケードPID制御の計算
     float pid_result[3] = {0.0f, 0.0f, 0.0f};  // [pitch, roll, yaw]
 
+    target_roll -= 5.0f;
+
     if (!calculateCascadePID(context, target_pitch, target_roll, target_yaw, pid_result)) {
         printf("[LevelFlightState::onUpdate] Failed to calculate cascade PID\n");
         return ProcessStatus::FAILURE;
     }
     
     // PIDの値をサーボの角度に入力
-    context.control_output.servo_pwm.elevator() = pid_result[0]; // pitch制御
-    context.control_output.servo_pwm.rudder()   = pid_result[2]; // yaw制御
-    context.control_output.servo_pwm.aileron()  = pid_result[1]; // roll制御
+    context.control_output.servo_pwm.elevator() = pid_result[0] + 1.58; // pitch制御
+    context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    //context.control_output.servo_pwm.rudder()   = pid_result[2]; // yaw制御
+    context.control_output.servo_pwm.aileron()  = pid_result[1] - 0.79; // roll制御
+
+    // エレベーターのリバースを適応
+    context.control_output.servo_pwm.elevator() *= -1;
 
 
     // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる（ここは手動操縦）
