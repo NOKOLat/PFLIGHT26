@@ -5,6 +5,7 @@
 #include "../../Lib/STM32_ICM42688P/ICM42688P_HAL_SPI.h"
 #include "../../Test/MockBMM350/MockBMM350.hpp"
 #include "../../Lib/STM32_DPS368/DPS368_HAL_I2C.hpp"
+#include "../../Config/sensor_config.hpp"
 #include "../Vector3f.hpp"
 
 class SensorManager {

@@ -11,51 +11,18 @@
 #include <optional>
 #include "usart.h"
 #include "../../Config/board_config.hpp"
-#include "../../Config/pid_config.hpp"
-#include "../../Utility/Vector3f.hpp"
-#include "../../Utility/Euler3f.hpp"
 #include "../../Utility/MovingAverage.hpp"
 #include "../../Utility/ServoPwm4f.hpp"
 #include "../../Utility/MotorPwm2f.hpp"
 
-#include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "IMU_EKF/attitude_ekf.h"
-#include "Altitude_estimation/altitude.h"
-#include "../../Utility/Sensors/SensorManager.hpp"
+#include "../../Utility/Sensors/sensor_fusion_manager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
+#include "../../Utility/CascadePID/cascade_pid_manager.hpp"
 #include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
 #include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
-// センサーデータを格納する構造体
-struct SensorData {
-
-    // IMU (ICM42688P)
-    Vector3f accel;      // 加速度 [m/s^2]
-    Vector3f gyro;       // 角速度 [rad/s]
-
-    // 磁気センサー (BMM350)
-    Vector3f mag;        // 磁気 [uT]
-
-    // LiDAR
-    Vector3f lidar_coord; // LiDARからの座標 [m]
-
-    // 気圧センサー (DPS368)
-    float barometric_pressure; // 気圧 [Pa]
-    float temperature;    // 温度 [℃]
-};
-
-
-// 姿勢推定結果を格納する構造体
-struct AttitudeState {
-
-    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
-    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
-    float yaw_avg;        // 直近のヨー角の平均[deg]  
-    float altitude;       // 高度 [m]
-    float altitude_avg;   // 直近高度の平均 [m]
-};
 
 
 // 制御出力を格納する構造体
@@ -119,29 +86,17 @@ struct UnitConversion {
 
 struct Instances {
 
-    // センサーマネージャー
-    std::optional<SensorManager> sensor_manager;
+    // センサー融合マネージャー（姿勢推定・高度推定を統合）
+    std::optional<SensorFusionManager> sensor_fusion_manager;
 
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
-    // 姿勢推定EKFインスタンス
-    std::optional<AttitudeEKF_t> attitude_ekf;
-
-    // 高度推定インスタンス
-    std::optional<Altitude> altitude_estimator;
-
     // PWM制御
     std::optional<PwmManager> pwm_controller;
 
-    // PID コントローラ
-    std::optional<PID> angle_pitch_pid;
-    std::optional<PID> angle_roll_pid;
-    std::optional<PID> angle_yaw_pid;
-
-    std::optional<PID> rate_pitch_pid;
-    std::optional<PID> rate_roll_pid;
-    std::optional<PID> rate_yaw_pid;
+    // カスケードPIDコントローラ（6つのPID: 角度+レート×3軸）
+    std::optional<CascadePIDManager> cascade_pid_manager;
 
     // マネューバーシーケンサー（自動操縦の目標値提供）
     std::optional<ManeuverSequencer> maneuver_sequencer;
@@ -158,8 +113,9 @@ struct StateContext {
     UnitConversion unit_conversion;
 
     // データコンテナ
-    SensorData sensor_data;              // センサー生データ
-    AttitudeState attitude_state;        // 姿勢推定結果
+    Euler3f attitude;                    // 推定された姿勢角 [deg]
+    float altitude = 0.0f;               // 推定された高度 [m]
+
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力

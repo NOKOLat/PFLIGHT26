@@ -107,7 +107,6 @@ class LevelFlightState : public ManualFlightStateBase {
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
         bool mission_started_ = false;
-        int inner_loop_counter_ = 0;  // 内側ループの実行制御用カウンター（2回に1回実行）
 
         bool calculateCascadePID(StateContext& context, float target_pitch, float target_roll, float target_yaw, float pid_result[3]);
 };

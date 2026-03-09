@@ -55,26 +55,16 @@ StateID InitState::evaluateNextState(StateContext& context) {
 // 1. センサーの初期化と設定
 ProcessStatus InitState::initializeSensors(StateContext& context) {
 
-    // SensorManagerインスタンスチェック
-    if (!context.instances.sensor_manager.has_value()) {
+    // SensorFusionManagerインスタンスチェック
+    if (!context.instances.sensor_fusion_manager.has_value()) {
 
-        printf("Error: SensorManager instance is not initialized.\n");
+        printf("Error: SensorFusionManager instance is not initialized.\n");
         return ProcessStatus::FAILURE;
     }
 
-    // SensorManagerのセンサー初期化
-    if (!context.instances.sensor_manager->initSensors()) {
-
-        printf("Error: Sensor initialization failed.\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    // SensorManagerのセンサー設定
-    if (!context.instances.sensor_manager->configSensors()) {
-
-        printf("Error: Sensor configuration failed.\n");
-        return ProcessStatus::FAILURE;
-    }
+    // センサーは StateManager の init() で既に初期化されているため、
+    // ここではインスタンスの確認のみを行う
+    printf("[InitState] Sensor initialization confirmed.\n");
 
     return ProcessStatus::SUCCESS;
 }
@@ -103,20 +93,14 @@ ProcessStatus InitState::initializePWM(StateContext& context) {
 // 3. 姿勢推定の初期化
 ProcessStatus InitState::initializeAttitudeEstimation(StateContext& context) {
 
-    // インスタンスチェック (EKFの初期化はStateManagerで実施済み)
-    if (!context.instances.attitude_ekf.has_value()) {
+    // インスタンスチェック (SensorFusionManagerの初期化はStateManagerで実施済み)
+    if (!context.instances.sensor_fusion_manager.has_value()) {
 
-        printf("Error: AttitudeEKF instance is not initialized.\n");
+        printf("Error: SensorFusionManager instance is not initialized.\n");
         return ProcessStatus::FAILURE;
     }
 
-    // インスタンスチェック (高度推定の初期化はStateManagerで実施済み)
-    if (!context.instances.altitude_estimator.has_value()) {
-
-        printf("Error: Altitude estimator instance is not initialized.\n");
-        return ProcessStatus::FAILURE;
-    }
-
+    printf("[InitState] Attitude estimation confirmed.\n");
     return ProcessStatus::SUCCESS;
 }
 
@@ -145,61 +129,19 @@ ProcessStatus InitState::initializeCascadePID(StateContext& context) {
     // 制御周期をマイクロ秒から秒に変換
     float dt = context.loop_time_us / 1000000.0f;
 
-    // === Pitch軸 PID ===
-    context.instances.angle_pitch_pid.emplace(
-        PidConfig::Pitch::Angle::KP,
-        PidConfig::Pitch::Angle::KI,
-        PidConfig::Pitch::Angle::KD,
-        dt
-    );
-
-    context.instances.rate_pitch_pid.emplace(
-        PidConfig::Pitch::Rate::KP,
-        PidConfig::Pitch::Rate::KI,
-        PidConfig::Pitch::Rate::KD,
-        dt
-    );
-
-    // === Roll軸 PID ===
-    context.instances.angle_roll_pid.emplace(
-        PidConfig::Roll::Angle::KP,
-        PidConfig::Roll::Angle::KI,
-        PidConfig::Roll::Angle::KD,
-        dt
-    );
-
-    context.instances.rate_roll_pid.emplace(
-        PidConfig::Roll::Rate::KP,
-        PidConfig::Roll::Rate::KI,
-        PidConfig::Roll::Rate::KD,
-        dt
-    );
-
-    // === Yaw軸 PID ===
-    context.instances.angle_yaw_pid.emplace(
-        PidConfig::Yaw::Angle::KP,
-        PidConfig::Yaw::Angle::KI,
-        PidConfig::Yaw::Angle::KD,
-        dt
-    );
-
-    context.instances.rate_yaw_pid.emplace(
-        PidConfig::Yaw::Rate::KP,
-        PidConfig::Yaw::Rate::KI,
-        PidConfig::Yaw::Rate::KD,
-        dt
-    );
+    // CascadePIDManagerの初期化（6つのPID: 角度+レート×3軸）
+    context.instances.cascade_pid_manager.emplace(dt);
 
     printf("[InitState] Cascade PID initialized successfully\n");
     printf("  Pitch - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
-           PidConfig::Pitch::Angle::KP, PidConfig::Pitch::Angle::KI, PidConfig::Pitch::Angle::KD,
-           PidConfig::Pitch::Rate::KP, PidConfig::Pitch::Rate::KI, PidConfig::Pitch::Rate::KD);
+           CascadePidConfig::Pitch::Angle::KP, CascadePidConfig::Pitch::Angle::KI, CascadePidConfig::Pitch::Angle::KD,
+           CascadePidConfig::Pitch::Rate::KP, CascadePidConfig::Pitch::Rate::KI, CascadePidConfig::Pitch::Rate::KD);
     printf("  Roll  - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
-           PidConfig::Roll::Angle::KP, PidConfig::Roll::Angle::KI, PidConfig::Roll::Angle::KD,
-           PidConfig::Roll::Rate::KP, PidConfig::Roll::Rate::KI, PidConfig::Roll::Rate::KD);
+           CascadePidConfig::Roll::Angle::KP, CascadePidConfig::Roll::Angle::KI, CascadePidConfig::Roll::Angle::KD,
+           CascadePidConfig::Roll::Rate::KP, CascadePidConfig::Roll::Rate::KI, CascadePidConfig::Roll::Rate::KD);
     printf("  Yaw   - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
-           PidConfig::Yaw::Angle::KP, PidConfig::Yaw::Angle::KI, PidConfig::Yaw::Angle::KD,
-           PidConfig::Yaw::Rate::KP, PidConfig::Yaw::Rate::KI, PidConfig::Yaw::Rate::KD);
+           CascadePidConfig::Yaw::Angle::KP, CascadePidConfig::Yaw::Angle::KI, CascadePidConfig::Yaw::Angle::KD,
+           CascadePidConfig::Yaw::Rate::KP, CascadePidConfig::Yaw::Rate::KI, CascadePidConfig::Yaw::Rate::KD);
     printf("  Control period: %.6f seconds\n", dt);
 
     return ProcessStatus::SUCCESS;

@@ -98,15 +98,23 @@ bool SensorManager::updateSensors() {
 bool SensorManager::getAccelData(Vector3f* accel) {
 
     if (accel == nullptr) {
-        
+
         return false;
     }
 
     // バッファから加速度データを取得
-    // IMUが基板上で上下逆に実装されているためZ軸を反転する
     accel->x() = imu_accel_buffer[0];
     accel->y() = imu_accel_buffer[1];
-    accel->z() = -imu_accel_buffer[2];
+
+    // Z軸反転オプションを適用（SensorConfig::ACCEL_INVERT_Z に基づいて）
+    if (SensorConfig::ACCEL_INVERT_Z) {
+        
+        accel->z() = -imu_accel_buffer[2];
+    } 
+    else {
+        
+        accel->z() = imu_accel_buffer[2];
+    }
 
     return true;
 }
