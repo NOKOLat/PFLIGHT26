@@ -13,6 +13,10 @@
 #include "../../Config/board_config.hpp"
 #include "../../Config/pid_config.hpp"
 #include "../../Utility/Vector3f.hpp"
+#include "../../Utility/Euler3f.hpp"
+#include "../../Utility/MovingAverage.hpp"
+#include "../../Utility/ServoPwm4f.hpp"
+#include "../../Utility/MotorPwm2f.hpp"
 
 #include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
@@ -21,6 +25,8 @@
 #include "Altitude_estimation/altitude.h"
 #include "../../Utility/Sensors/SensorManager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
+#include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
+#include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
 // センサーデータを格納する構造体
 struct SensorData {
@@ -38,32 +44,25 @@ struct SensorData {
     // 気圧センサー (DPS368)
     float barometric_pressure; // 気圧 [Pa]
     float temperature;    // 温度 [℃]
-
-    // 計算データ
-    Vector3f angle;     // 角度 [deg]
-    float altitude;       // 高度 [m]
-    float altitude_velocity;    // 高度速度 [m/s]
-    float altitude_accel;       // 高度加速度 [m/s^2]
 };
 
 
 // 姿勢推定結果を格納する構造体
 struct AttitudeState {
 
-    float roll;           // ロール角 [deg]
-    float pitch;          // ピッチ角 [deg]
-    float yaw;            // ヨー角 [deg]
-    float roll_rate;      // ロール角速度 [deg/s]
-    float pitch_rate;     // ピッチ角速度 [deg/s]
-    float yaw_rate;       // ヨー角速度 [deg/s]
+    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
+    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
+    float yaw_avg;        // 直近のヨー角の平均[deg]  
+    float altitude;       // 高度 [m]
+    float altitude_avg;   // 直近高度の平均 [m]
 };
 
 
 // 制御出力を格納する構造体
 struct ControlOutput {
 
-    std::array<float, 2> motor_pwm; // 2つのモーターの PWM 値 [0-100] % （右、左）
-    std::array<float, 4> servo_pwm; // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
+    MotorPwm2f motor_pwm;           // 2つのモーターの PWM 値 [0-100] % （右、左）
+    ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
 // オペレータからの制御入力を格納する構造体
@@ -74,19 +73,6 @@ struct ControlInput {
     bool framelost = false;
 
     uint32_t sbus_failsafe_count = 0;
-};
-
-struct PIDGains {
-
-    float angle_kp = PidConfig::ANGLE_KP;
-    float angle_ki = PidConfig::ANGLE_KI;
-    float angle_kd = PidConfig::ANGLE_KD;
-
-    float rate_kp = PidConfig::RATE_KP;
-    float rate_ki = PidConfig::RATE_KI;
-    float rate_kd = PidConfig::RATE_KD;
-
-    //dtはStateManagerのLoopManagerの値を使用する
 };
 
 // ピン設定情報を格納する構造体
@@ -126,6 +112,9 @@ struct UnitConversion {
 
     static constexpr float DEG_TO_RAD = 3.14159265358979323846f / 180.0f;
     static constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+
+    // SBUS制御値 [-100~100] → サーボ角度 [-90~90 deg] への変換係数
+    static constexpr float SBUS_TO_SERVO_DEG = 90.0f / 100.0f;
 };
 
 struct Instances {
@@ -153,6 +142,9 @@ struct Instances {
     std::optional<PID> rate_pitch_pid;
     std::optional<PID> rate_roll_pid;
     std::optional<PID> rate_yaw_pid;
+
+    // マネューバーシーケンサー（自動操縦の目標値提供）
+    std::optional<ManeuverSequencer> maneuver_sequencer;
 };
 
 // 状態実行時に必要なすべての情報を包含する構造体
@@ -171,9 +163,21 @@ struct StateContext {
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
-    PIDGains pid_gains;                  // PIDゲイン
 
-    uint32_t loop_time_us = 0;    
+    // 高度移動平均ユーティリティ（20サンプル窓）
+    MovingAverage<float, 20> altitude_average;
+
+    // ヨー角移動平均ユーティリティ（5サンプル窓）
+    MovingAverage<float, 5> yaw_average;
+
+    // 初期値オフセット（ミッション開始時に記録）
+    float initial_yaw_offset = 0.0f;           // ミッション開始時のヨー角平均値
+    float initial_altitude_offset = 0.0f;      // ミッション開始時の高度平均値
+
+    // 現在実行中のミッション（PreAutoFlightState でセット）
+    const MissionBase* current_mission = nullptr;
+
+    uint32_t loop_time_us = 0;
 };
 
 #endif // CONTEXT_HPP

@@ -3,30 +3,32 @@
 
 #include <cstdint>
 
+// 前方宣言（完全な定義は maneuver_sequencer.cpp で include）
+class MissionBase;
+
+// チャンネルフラグ（ミッションが制御するチャンネルを示す）
+namespace ChannelFlags {
+
+    constexpr uint8_t ROLL     = 0x01;
+    constexpr uint8_t PITCH    = 0x02;
+    constexpr uint8_t YAW      = 0x04;
+    constexpr uint8_t ALTITUDE = 0x08;
+
+    constexpr uint8_t ATTITUDE = 0x07;  // ROLL | PITCH | YAW
+    constexpr uint8_t ALL      = 0x0F;  // ROLL | PITCH | YAW | ALTITUDE
+}
+
 // キーフレーム構造体
 // ミッション中の各フレームの時刻と目標値を保持する
 struct KeyFrame {
-    uint32_t time_ms;       // フレームの時刻[ms]
 
-    float    roll_deg;      // ロール目標値[deg]
-    float    pitch_deg;     // ピッチ目標値[deg]
-    float    yaw_deg;       // ヨー目標値[deg]
+    uint32_t time_ms;       // フレームの時刻 [ms]
 
-    float    altitude_m;    // 高度目標値[m]
-};
+    float    roll_deg;      // ロール目標値 [deg]
+    float    pitch_deg;     // ピッチ目標値 [deg]
+    float    yaw_deg;       // ヨー目標値 [deg]
 
-// ミッション基底クラス
-// 各ミッション固有のキーフレームデータを提供するインターフェース
-class MissionBase {
-
-    public:
-
-        virtual ~MissionBase() = default;
-
-        // キーフレーム配列を取得する
-        // [out] numFrames - キーフレーム数
-        // [return] KeyFrame配列へのポインタ
-        virtual const KeyFrame* getKeyFrames(int& num_frames) const = 0;
+    float    altitude_m;    // 高度目標値 [m]
 };
 
 // マネューバーシーケンサークラス
@@ -38,82 +40,64 @@ class ManeuverSequencer {
         ManeuverSequencer();
         ~ManeuverSequencer();
 
+        // ミッション開始（現在時刻を記録）
+        // [in] mission - ミッションのポインタ
+        void startMission(const MissionBase* mission);
+
         // ミッション完了判定
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [return] ミッションが完了している場合true、未完了の場合false
-        bool isMissionComplete(uint32_t current_time_ms, const MissionBase* mission) const;
+        // [return] ミッションが完了している場合 true、未完了の場合 false
+        bool isMissionComplete() const;
 
-        // 現在時刻での目標値を計算する（ロール角）
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [return] ロール目標値[deg]
-        float getTargetRoll(uint32_t current_time_ms, const MissionBase* mission) const;
-
-        // 現在時刻での目標値を計算する（ピッチ角）
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [return] ピッチ目標値[deg]
-        float getTargetPitch(uint32_t current_time_ms, const MissionBase* mission) const;
-
-        // 現在時刻での目標値を計算する（ヨー角）
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [return] ヨー目標値[deg]
-        float getTargetYaw(uint32_t current_time_ms, const MissionBase* mission) const;
-
-        // 現在時刻での目標値を計算する（高度）
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [return] 高度目標値[m]
-        float getTargetAltitude(uint32_t current_time_ms, const MissionBase* mission) const;
-
-        // 全目標値を一度に取得する
-        // [in] current_time_ms - 現在時刻[ms]
-        // [in] mission - ミッション基底クラスのポインタ
-        // [out] target_roll_deg - ロール目標値[deg]
-        // [out] target_pitch_deg - ピッチ目標値[deg]
-        // [out] target_yaw_deg - ヨー目標値[deg]
-        // [out] target_altitude_m - 高度目標値[m]
-        // [return] 成功時true、失敗時false
+        // 現在時刻での目標値を計算する
+        // [out] roll_deg - ロール目標値 [deg]
+        // [out] pitch_deg - ピッチ目標値 [deg]
+        // [out] yaw_deg - ヨー目標値 [deg]
+        // [out] altitude_m - 高度目標値 [m]
+        // [return] 取得成功時 true、失敗時 false（ミッション未設定やキーフレーム不足）
         bool getTargetValues(
-            uint32_t current_time_ms,
-            const MissionBase* mission,
-            float& target_roll_deg,
-            float& target_pitch_deg,
-            float& target_yaw_deg,
-            float& target_altitude_m
+            float& roll_deg,
+            float& pitch_deg,
+            float& yaw_deg,
+            float& altitude_m
         ) const;
+
+        // アクティブチャンネルのビットマスクを取得する
+        // [return] ChannelFlags の組み合わせ（ミッション未設定の場合 0）
+        uint8_t getActiveChannels() const;
 
     private:
 
         // 与えられた時刻に対して、その前後のキーフレームを検索する
-        // [in] current_time_ms - 現在時刻[ms]
+        // [in] current_ms - 現在時刻 [ms]
         // [in] key_frames - キーフレーム配列
         // [in] num_frames - キーフレーム数
         // [out] frame_index - 現在時刻の直前のキーフレームのインデックス
-        // [return] 有効なフレームペアが見つかった場合true、それ以外false
+        // [return] 有効なフレームペアが見つかった場合 true、それ以外 false
         bool findFrameIndices(
-            uint32_t current_time_ms,
+            uint32_t current_ms,
             const KeyFrame* key_frames,
             int num_frames,
             int& frame_index
         ) const;
 
         // 線形補間により、与えられた値を計算する
-        // [in] time_a - 補間開始時刻[ms]
+        // [in] time_a - 補間開始時刻 [ms]
         // [in] value_a - 補間開始値
-        // [in] time_b - 補間終了時刻[ms]
+        // [in] time_b - 補間終了時刻 [ms]
         // [in] value_b - 補間終了値
-        // [in] current_time_ms - 現在時刻[ms]
+        // [in] current_ms - 現在時刻 [ms]
         // [return] 補間後の値
         float linearInterpolation(
             uint32_t time_a,
             float value_a,
             uint32_t time_b,
             float value_b,
-            uint32_t current_time_ms
+            uint32_t current_ms
         ) const;
+
+        const MissionBase* current_mission_   = nullptr;
+        uint32_t           mission_start_ms_  = 0;
+        bool               mission_started_   = false;
 };
 
 #endif // MANEUVER_SEQUENCER_HPP

@@ -5,10 +5,35 @@
 
 namespace SbusConfig {
 
-    // ===== SBUS 生データ範囲 =====
-    constexpr uint16_t SBUS_MIN = 360;
-    constexpr uint16_t SBUS_MID = 1000;
-    constexpr uint16_t SBUS_MAX = 1680;
+    // ===== SBUS 生データ範囲（共通デフォルト値） =====
+    constexpr uint16_t SBUS_MIN = 352;
+    constexpr uint16_t SBUS_MID = 1024;
+    constexpr uint16_t SBUS_MAX = 1696;
+
+    // ===== 各軸ごとのSBUS生データ範囲（キャリブレーション値） =====
+    // スロットル
+    constexpr uint16_t THROTTLE_MIN = 360;
+    constexpr uint16_t THROTTLE_MAX = 1680;
+
+    // エルロン（左）
+    constexpr uint16_t AILERON_MIN = 179;
+    constexpr uint16_t AILERON_MID = 849;
+    constexpr uint16_t AILERON_MAX = 1518;
+
+    // エレベーター
+    constexpr uint16_t ELEVATOR_MIN = 438;
+    constexpr uint16_t ELEVATOR_MID = 1112;
+    constexpr uint16_t ELEVATOR_MAX = 1780;
+
+    // ラダー
+    constexpr uint16_t RUDDER_MIN = 400;
+    constexpr uint16_t RUDDER_MID = 1072;
+    constexpr uint16_t RUDDER_MAX = 1745;
+
+    // エルロン（右）
+    constexpr uint16_t RIGHT_AILERON_MIN = 352;
+    constexpr uint16_t RIGHT_AILERON_MID = 1024;
+    constexpr uint16_t RIGHT_AILERON_MAX = 1696;
 
     // ===== 3段階スイッチ判定閾値 =====
     // LOW: 0 ~ switch_low_threshold

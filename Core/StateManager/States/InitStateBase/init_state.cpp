@@ -33,6 +33,12 @@ ProcessStatus InitState::onUpdate(StateContext& context) {
         return result;
     }
 
+    // 5. カスケードPID制御の初期化（角度制御＋角速度制御）
+    if ((result = initializeCascadePID(context)) == ProcessStatus::FAILURE) {
+
+        return result;
+    }
+
     printf("All init complete! \n");
 
     return result;
@@ -129,6 +135,72 @@ ProcessStatus InitState::initializeSBUS(StateContext& context) {
 //        printf("Error: SBUS receiver failed to receive data.\n");
 //        return ProcessStatus::FAILURE;
 //    }
+
+    return ProcessStatus::SUCCESS;
+}
+
+// 5. カスケードPID制御の初期化（角度制御＋角速度制御）
+ProcessStatus InitState::initializeCascadePID(StateContext& context) {
+
+    // 制御周期をマイクロ秒から秒に変換
+    float dt = context.loop_time_us / 1000000.0f;
+
+    // === Pitch軸 PID ===
+    context.instances.angle_pitch_pid.emplace(
+        PidConfig::Pitch::Angle::KP,
+        PidConfig::Pitch::Angle::KI,
+        PidConfig::Pitch::Angle::KD,
+        dt
+    );
+
+    context.instances.rate_pitch_pid.emplace(
+        PidConfig::Pitch::Rate::KP,
+        PidConfig::Pitch::Rate::KI,
+        PidConfig::Pitch::Rate::KD,
+        dt
+    );
+
+    // === Roll軸 PID ===
+    context.instances.angle_roll_pid.emplace(
+        PidConfig::Roll::Angle::KP,
+        PidConfig::Roll::Angle::KI,
+        PidConfig::Roll::Angle::KD,
+        dt
+    );
+
+    context.instances.rate_roll_pid.emplace(
+        PidConfig::Roll::Rate::KP,
+        PidConfig::Roll::Rate::KI,
+        PidConfig::Roll::Rate::KD,
+        dt
+    );
+
+    // === Yaw軸 PID ===
+    context.instances.angle_yaw_pid.emplace(
+        PidConfig::Yaw::Angle::KP,
+        PidConfig::Yaw::Angle::KI,
+        PidConfig::Yaw::Angle::KD,
+        dt
+    );
+
+    context.instances.rate_yaw_pid.emplace(
+        PidConfig::Yaw::Rate::KP,
+        PidConfig::Yaw::Rate::KI,
+        PidConfig::Yaw::Rate::KD,
+        dt
+    );
+
+    printf("[InitState] Cascade PID initialized successfully\n");
+    printf("  Pitch - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
+           PidConfig::Pitch::Angle::KP, PidConfig::Pitch::Angle::KI, PidConfig::Pitch::Angle::KD,
+           PidConfig::Pitch::Rate::KP, PidConfig::Pitch::Rate::KI, PidConfig::Pitch::Rate::KD);
+    printf("  Roll  - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
+           PidConfig::Roll::Angle::KP, PidConfig::Roll::Angle::KI, PidConfig::Roll::Angle::KD,
+           PidConfig::Roll::Rate::KP, PidConfig::Roll::Rate::KI, PidConfig::Roll::Rate::KD);
+    printf("  Yaw   - Angle: Kp=%.2f, Ki=%.2f, Kd=%.2f | Rate: Kp=%.2f, Ki=%.2f, Kd=%.2f\n",
+           PidConfig::Yaw::Angle::KP, PidConfig::Yaw::Angle::KI, PidConfig::Yaw::Angle::KD,
+           PidConfig::Yaw::Rate::KP, PidConfig::Yaw::Rate::KI, PidConfig::Yaw::Rate::KD);
+    printf("  Control period: %.6f seconds\n", dt);
 
     return ProcessStatus::SUCCESS;
 }

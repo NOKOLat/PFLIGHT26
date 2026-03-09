@@ -145,26 +145,23 @@ void StateManager::init() {
     state_context_.instances.altitude_estimator.emplace();
     state_context_.instances.altitude_estimator->Init();
 
-    // 2-3角度制御用PID(kp, ki, kd, dt [秒])
-    state_context_.instances.angle_roll_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd,  state_context_.loop_time_us / 1000000.0f);
-    state_context_.instances.angle_pitch_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
-    state_context_.instances.angle_yaw_pid.emplace(state_context_.pid_gains.angle_kp, state_context_.pid_gains.angle_ki, state_context_.pid_gains.angle_kd, state_context_.loop_time_us / 1000000.0f);
-
-    // 2-3-2角速度制御用PID(kp, ki, kd, dt [秒])
-    state_context_.instances.rate_roll_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
-    state_context_.instances.rate_pitch_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
-    state_context_.instances.rate_yaw_pid.emplace(state_context_.pid_gains.rate_kp, state_context_.pid_gains.rate_ki, state_context_.pid_gains.rate_kd, state_context_.loop_time_us / 1000000.0f);
+    // 2-3 角度制御用PID（外側ループ）と角速度制御用PID（内側ループ）
+    // Note: InitStateの initializeCascadePID で初期化されるため、ここではコメント化
+    // 各軸ごとの設定は pid_config.hpp の Pitch/Roll/Yaw 名前空間で管理
 
     // 2-4 SBUS
     state_context_.instances.sbus_receiver.emplace();
 
+    // 2-5 マネューバーシーケンサー（自動操縦の目標値提供）
+    state_context_.instances.maneuver_sequencer.emplace();
+
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
-    	printf("[Debug] Using SBUS PORT: UART2\n");
-        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
+    	//printf("[Debug] Using SBUS PORT: UART2\n");
+        //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
 
-        //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
+        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
     }
 
     // 3. 初期状態を生成

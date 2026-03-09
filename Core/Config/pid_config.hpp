@@ -3,15 +3,53 @@
 
 namespace PidConfig {
 
-    // ===== 角度制御 PID ゲイン初期値 =====
-    constexpr float ANGLE_KP = 1.0f;
-    constexpr float ANGLE_KI = 0.0f;
-    constexpr float ANGLE_KD = 0.0f;
+    // ===== Pitch軸 PID ゲイン =====
+    namespace Pitch {
+        // 角度制御（外側ループ）
+        namespace Angle {
+            constexpr float KP = 0.9f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+        // 角速度制御（内側ループ）
+        namespace Rate {
+            constexpr float KP = 1.0f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+    }
 
-    // ===== 角速度制御 PID ゲイン初期値 =====
-    constexpr float RATE_KP = 1.0f;
-    constexpr float RATE_KI = 0.0f;
-    constexpr float RATE_KD = 0.0f;
+    // ===== Roll軸 PID ゲイン =====
+    namespace Roll {
+        // 角度制御（外側ループ）
+        namespace Angle {
+            constexpr float KP = 3.0f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+        // 角速度制御（内側ループ）
+        namespace Rate {
+            constexpr float KP = 2.0f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+    }
+
+    // ===== Yaw軸 PID ゲイン =====
+    namespace Yaw {
+        // 角度制御（外側ループ）
+        namespace Angle {
+            constexpr float KP = 1.0f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+        // 角速度制御（内側ループ）
+        namespace Rate {
+            constexpr float KP = 1.0f;
+            constexpr float KI = 0.0f;
+            constexpr float KD = 0.0f;
+        }
+    }
 
 } // namespace PidConfig
 

@@ -33,17 +33,17 @@ float SBUSRescaler::rescaleThrottle(uint16_t sbus_value, const Thresholds& thres
 }
 
 // ===== 制御入力変換: SBUS値 -> -100~100 =====
-float SBUSRescaler::rescaleControl(uint16_t sbus_value, const Thresholds& thresholds) {
+float SBUSRescaler::rescaleControl(uint16_t sbus_value, const AxisCalib& calib) {
 
-    if (sbus_value < thresholds.control_center) {
+    if (sbus_value < calib.center) {
 
         // センター以下: min -> center を -100 -> 0 にマップ
-        return linearMap(sbus_value, thresholds.control_min, thresholds.control_center, -100.0f, 0.0f);
+        return linearMap(sbus_value, calib.min, calib.center, -100.0f, 0.0f);
     }
     else {
 
         // センター以上: center -> max を 0 -> 100 にマップ
-        return linearMap(sbus_value, thresholds.control_center, thresholds.control_max, 0.0f, 100.0f);
+        return linearMap(sbus_value, calib.center, calib.max, 0.0f, 100.0f);
     }
 }
 
@@ -88,7 +88,7 @@ float SBUSRescaler::getThrottle(const std::array<uint16_t, 18>& sbus_data,
 // ===== 配列から制御入力取得 =====
 float SBUSRescaler::getControl(const std::array<uint16_t, 18>& sbus_data,
                                 SBUSChannel channel,
-                                const Thresholds& thresholds) {
+                                const AxisCalib& calib) {
 
     uint8_t index = static_cast<uint8_t>(channel);
 
@@ -97,7 +97,7 @@ float SBUSRescaler::getControl(const std::array<uint16_t, 18>& sbus_data,
         return 0.0f;  // 範囲外の場合は0を返す
     }
 
-    return rescaleControl(sbus_data[index], thresholds);
+    return rescaleControl(sbus_data[index], calib);
 }
 
 // ===== 配列からスイッチ取得 =====
@@ -146,38 +146,25 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
 
     RescaledSBUSData result = {};
 
-    // アナログチャネルのリスケーリング
+    // アナログチャネルのリスケーリング（各軸ごとのキャリブレーション値を使用）
     result.throttle = getThrottle(sbus_data, SBUSChannel::THROTTLE, thresholds);
-    result.aileron = getControl(sbus_data, SBUSChannel::AILERON, thresholds);
-    result.elevator = getControl(sbus_data, SBUSChannel::ELEVATOR, thresholds);
-    result.rudder = getControl(sbus_data, SBUSChannel::RUDDER, thresholds);
+    result.aileron  = getControl(sbus_data, SBUSChannel::AILERON,  thresholds.aileron);
+    result.elevator = getControl(sbus_data, SBUSChannel::ELEVATOR, thresholds.elevator);
+    result.rudder   = getControl(sbus_data, SBUSChannel::RUDDER,   thresholds.rudder);
 
     // AUXチャネルのリスケーリング
 
     // 右エルロン: -100~100 を -90~90 deg にスケール
-    result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds) * 0.9f;
+    result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds.right_aileron) * 0.9f;
 
-    // 自動操縦フラグ: 3段階 (0 / 1 / 2)
-    result.autofly = getSwitchInt(sbus_data, SBUSChannel::AUTOFLY, thresholds);
-
-    // ミッション選択: 3段階 (0 / 1 / 2)
-    result.selectmission = getSwitchInt(sbus_data, SBUSChannel::SELECT_MISSION, thresholds);
-
-    // 自動離着陸用: 3段階 (0 / 1 / 2)
-    result.auto_mission = getSwitchInt(sbus_data, SBUSChannel::AUTO_MISSION, thresholds);
-
-    // 安全装置: LOW -> 0, MID/HIGH -> 1
-    uint8_t safety_switch = getSwitchInt(sbus_data, SBUSChannel::SAFETY, thresholds);
-    result.safety = (safety_switch >= 1) ? 1 : 0;
-
-    // 投下装置トリガー: 3段階 (0 / 1 / 2)
-    result.drop = getSwitchInt(sbus_data, SBUSChannel::DROP, thresholds);
-
-    // プリフライトデバッグ: 2段階 (0 / 1 / 2)
-    result.preflight_debug = getSwitchInt(sbus_data, SBUSChannel::PREFLIGHT_DEBUG, thresholds);
-
-    // フライトデバッグ: 2段階 (0 / 1 / 2)
-    result.flight_debug = getSwitchInt(sbus_data, SBUSChannel::FLIGHT_DEBUG, thresholds);
+    // AUXスイッチチャネル: SwitchPosition (LOW / MID / HIGH) に変換
+    result.autofly         = getSwitch(sbus_data, SBUSChannel::AUTOFLY,         thresholds);
+    result.selectmission   = getSwitch(sbus_data, SBUSChannel::SELECT_MISSION,  thresholds);
+    result.auto_mission    = getSwitch(sbus_data, SBUSChannel::AUTO_MISSION,    thresholds);
+    result.safety          = getSwitch(sbus_data, SBUSChannel::SAFETY,          thresholds);
+    result.drop            = getSwitch(sbus_data, SBUSChannel::DROP,            thresholds);
+    result.preflight_debug = getSwitch(sbus_data, SBUSChannel::PREFLIGHT_DEBUG, thresholds);
+    result.flight_debug    = getSwitch(sbus_data, SBUSChannel::FLIGHT_DEBUG,    thresholds);
 
     return result;
 }
