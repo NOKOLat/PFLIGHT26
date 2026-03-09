@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "SensorManager.hpp"
-#include "../../Lib/IMU_EKF/attitude_estimator.hpp"
+#include "attitude_ekf_adapter.hpp"
 #include "../../Lib/Altitude_estimation/altitude.h"
 #include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
@@ -76,15 +76,13 @@ class SensorFusionManager {
         // センサーマネージャー（外部から提供される）
         SensorManager* sensor_manager_;
 
-        // 姿勢推定（EKFベース）
-        AttitudeEstimator attitude_estimator_;
+        // 姿勢推定（EKFベース）- IMU_EKFアダプタ
+        AttitudeEkfAdapter attitude_ekf_adapter_;
 
         // 高度推定（カルマンフィルタベース）
         Altitude altitude_estimator_;
 
         // 最後に取得したセンサーデータ
-        Vector3f last_accel_;
-        Vector3f last_gyro_;
         float last_altitude_;
         float last_climb_rate_;
 

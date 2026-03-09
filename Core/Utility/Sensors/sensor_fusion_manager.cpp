@@ -21,9 +21,9 @@ bool SensorFusionManager::init(float dt) {
     }
 
     // 2. 姿勢推定器を初期化
-    if (!attitude_estimator_.init(dt)) {
+    if (!attitude_ekf_adapter_.init(dt)) {
 
-        printf("Error: AttitudeEstimator init failed\n");
+        printf("Error: AttitudeEkfAdapter init failed\n");
         return false;
     }
 
@@ -68,11 +68,7 @@ bool SensorFusionManager::update() {
         return false;
     }
 
-    // 4. センサーデータを保存
-    last_accel_ = accel;
-    last_gyro_ = gyro;
-
-    // 5. 姿勢推定を実行（加速度 + ジャイロ + 磁気）
+    // 5. 姿勢推定を実行（加速度 + ジャイロ）
     // 加速度をノーマライズする（重力加速度で割る）
     float accel_magnitude = sqrtf(accel.x() * accel.x() +
                                    accel.y() * accel.y() +
@@ -97,20 +93,20 @@ bool SensorFusionManager::update() {
     gyro_rad.y() = gyro.y() * DEG_TO_RAD;
     gyro_rad.z() = gyro.z() * DEG_TO_RAD;
 
-    if (!attitude_estimator_.update(normalized_accel, gyro_rad)) {
+    // Vector3f を float[] に詰め替えてアダプタに渡す
+    float accel_f[3] = {normalized_accel.x(), normalized_accel.y(), normalized_accel.z()};
+    float gyro_f[3]  = {gyro_rad.x(),         gyro_rad.y(),         gyro_rad.z()};
 
-        printf("Warning: AttitudeEstimator update failed\n");
+    if (!attitude_ekf_adapter_.update(accel_f, gyro_f)) {
+
+        printf("Warning: AttitudeEkfAdapter update failed\n");
         return false;
     }
 
     // 6. 高度推定を実行（気圧 + 加速度の垂直成分 + 姿勢）
-    // 姿勢情報を取得
-    Euler3f attitude = attitude_estimator_.getAttitude();
-    float attitude_array[3] = {
-        attitude.roll() * 3.14159265358979323846f / 180.0f,   // deg → rad
-        attitude.pitch() * 3.14159265358979323846f / 180.0f,
-        attitude.yaw() * 3.14159265358979323846f / 180.0f
-    };
+    // 姿勢情報をラジアンで取得（二重変換が解消される）
+    float attitude_array[3];
+    attitude_ekf_adapter_.getAttitudeRad(attitude_array);  // [rad]
 
     float accel_array[3] = {accel.x(), accel.y(), accel.z()};
 
@@ -128,28 +124,36 @@ bool SensorFusionManager::update() {
     return true;
 }
 
-// 推定された姿勢を取得
+// 推定された姿勢を取得 [deg]
 Euler3f SensorFusionManager::getAttitude() const {
 
-    return attitude_estimator_.getAttitude();
+    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+    Euler3f result;
+    result.roll()  = attitude_ekf_adapter_.getRollRad()  * RAD_TO_DEG;
+    result.pitch() = attitude_ekf_adapter_.getPitchRad() * RAD_TO_DEG;
+    result.yaw()   = attitude_ekf_adapter_.getYawRad()   * RAD_TO_DEG;
+    return result;
 }
 
-// ロール角を取得
+// ロール角を取得 [deg]
 float SensorFusionManager::getRoll() const {
 
-    return attitude_estimator_.getRoll();
+    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+    return attitude_ekf_adapter_.getRollRad() * RAD_TO_DEG;
 }
 
-// ピッチ角を取得
+// ピッチ角を取得 [deg]
 float SensorFusionManager::getPitch() const {
 
-    return attitude_estimator_.getPitch();
+    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+    return attitude_ekf_adapter_.getPitchRad() * RAD_TO_DEG;
 }
 
-// ヨー角を取得
+// ヨー角を取得 [deg]
 float SensorFusionManager::getYaw() const {
 
-    return attitude_estimator_.getYaw();
+    constexpr float RAD_TO_DEG = 180.0f / 3.14159265358979323846f;
+    return attitude_ekf_adapter_.getYawRad() * RAD_TO_DEG;
 }
 
 // 推定された高度を取得
