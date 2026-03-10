@@ -43,4 +43,4 @@ private:
     float calcPitch(float target_angle, float measured_angle, float measured_rate = 0.0f);
     float calcRoll(float target_angle, float measured_angle, float measured_rate = 0.0f);
     float calcYaw(float target_angle, float measured_angle, float measured_rate = 0.0f);
-
+};
