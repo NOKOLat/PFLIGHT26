@@ -50,10 +50,15 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
 
     target_roll -= 5.0f;
 
-    if (!calculateCascadePID(context, target_pitch, target_roll, target_yaw, pid_result)) {
-        printf("[LevelFlightState::onUpdate] Failed to calculate cascade PID\n");
-        return ProcessStatus::FAILURE;
-    }
+    // 全軸のカスケードPIDを計算
+    const Euler3f& attitude = context.attitude;
+    CascadePIDManager& pid_manager = context.instances.cascade_pid_manager.value();
+    pid_manager.calcCascadePIDAllAxes(
+        target_pitch, attitude.pitch(),
+        target_roll, attitude.roll(),
+        target_yaw, attitude.yaw(),
+        pid_result
+    );
     
     // PIDの値をサーボの角度に入力
     context.control_output.servo_pwm.elevator() = pid_result[0] + 1.58; // pitch制御
@@ -101,25 +106,3 @@ StateID LevelFlightState::getStateID() const {
     return StateID::LEVEL_FLIGHT_STATE;
 }
 
-
-bool LevelFlightState::calculateCascadePID(StateContext& context, float target_pitch, float target_roll, float target_yaw, float pid_result[3]) {
-
-    // CascadePIDManagerインスタンスの確認
-    if (!context.instances.cascade_pid_manager.has_value()) {
-        printf("[LevelFlightState::calculateCascadePID] Cascade PID manager not initialized\n");
-        return false;
-    }
-
-    // 現在の姿勢状態を取得
-    const Euler3f& attitude = context.attitude;
-
-    // CascadePIDManagerで全軸のPIDを計算
-    // NOTE: 角速度は SensorFusionManager から直接取得する必要があるが、
-    // 暫定的にここでは使用せず、外側ループのみで制御する
-    CascadePIDManager& pid_manager = context.instances.cascade_pid_manager.value();
-    pid_result[0] = pid_manager.calcPitch(target_pitch, attitude.pitch(), 0.0f);
-    pid_result[1] = pid_manager.calcRoll(target_roll, attitude.roll(), 0.0f);
-    pid_result[2] = pid_manager.calcYaw(target_yaw, attitude.yaw(), 0.0f);
-
-    return true;
-}
