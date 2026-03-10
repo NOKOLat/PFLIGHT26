@@ -30,15 +30,7 @@ struct ControlOutput {
     ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
-// オペレータからの制御入力を格納する構造体
-struct ControlInput {
 
-    std::array<uint16_t, 18> data = {};
-    bool failsafe = false;
-    bool framelost = false;
-
-    uint32_t sbus_failsafe_count = 0;
-};
 
 // 通信ペリフェラル設定を格納する構造体
 struct PinConfiguration {
@@ -90,8 +82,7 @@ struct StateContext {
     Euler3f attitude;                    // 推定された姿勢角 [deg]
     float altitude = 0.0f;               // 推定された高度 [m]
 
-    ControlInput control_input;          // 制御入力 (SBUS生データ)
-    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
+    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ (failsafe/framelostフラグを含む)
     ControlOutput control_output;        // 制御出力
 
     // 初期値オフセット（ミッション開始時に記録）
