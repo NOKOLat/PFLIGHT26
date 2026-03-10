@@ -1,8 +1,6 @@
 #include "attitude_ekf_adapter.hpp"
-#include <cstring>
 
-AttitudeEkfAdapter::AttitudeEkfAdapter() {
-    memset(&ekf_sys_, 0, sizeof(ekf_sys_));
+AttitudeEkfAdapter::AttitudeEkfAdapter() : ekf_sys_{} {
 }
 
 bool AttitudeEkfAdapter::init(float dt) {
