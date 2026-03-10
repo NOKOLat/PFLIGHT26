@@ -17,7 +17,9 @@
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 #include "../../Utility/CascadePID/cascade_pid_manager.hpp"
 #include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
-#include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
+
+// 前方宣言: MissionBase (ポインタでのみ使用)
+class MissionBase;
 
 
 
