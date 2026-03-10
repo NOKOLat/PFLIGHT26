@@ -1,11 +1,11 @@
 #include "Utility/Sensors/SensorManager.hpp"
-#include "../../Config/sensor_i2c_config.hpp"
+#include "../../Config/sensor_config.hpp"
 #include <cstring>
 
 SensorManager::SensorManager(I2C_HandleTypeDef* i2c_handle)
     : icm_spi(&hspi1, GPIOA, GPIO_PIN_4),
-      bmm350(i2c_handle, SensorI2CConfig::BMM350_ADDR),
-      dps368(i2c_handle, SensorI2CConfig::DPS368_ADDR) {
+      bmm350(i2c_handle, SensorConfig::BMM350_ADDR),
+      dps368(i2c_handle, SensorConfig::DPS368_ADDR) {
     // インスタンスはメンバーイニシャライザーで初期化される
 }
 
@@ -64,6 +64,16 @@ bool SensorManager::CalibrationSensors() {
 
     icm_spi.Calibration(1000); // 1000サンプルでキャリブレーション
 
+    return true;
+}
+
+
+bool SensorManager::performCalibrationIfNeeded() {
+
+    if (enable_calibration_) {
+        return CalibrationSensors();
+    }
+    // 手動オフセット値はすでに設定されているため、ここでは何もしない
     return true;
 }
 
@@ -225,4 +235,30 @@ bool SensorManager::setGyroOffsets(const int16_t offset[3]) {
     icm_spi.SetGyroOffsets(offset);
 
     return true;
+}
+
+
+float SensorManager::getAltitudeAverage() const {
+
+    return altitude_average.getAverage();
+}
+
+
+float SensorManager::getYawAverage() const {
+
+    return yaw_average.getAverage();
+}
+
+
+void SensorManager::updateMovingAverages(float altitude, float yaw) {
+
+    altitude_average.update(altitude);
+    yaw_average.update(yaw);
+}
+
+
+void SensorManager::resetMovingAverages() {
+
+    altitude_average.reset();
+    yaw_average.reset();
 }

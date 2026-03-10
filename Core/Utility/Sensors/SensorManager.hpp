@@ -6,7 +6,9 @@
 #include "../../Test/MockBMM350/MockBMM350.hpp"
 #include "../../Lib/STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "../../Config/sensor_config.hpp"
+#include "../../Config/calibration_config.hpp"
 #include "../Vector3f.hpp"
+#include "../MovingAverage.hpp"
 
 class SensorManager {
 
@@ -19,6 +21,7 @@ class SensorManager {
         bool configSensors();
 
         bool CalibrationSensors();
+        bool performCalibrationIfNeeded();  // enable_calibration_ に基づいてキャリブレーション実行
 
         bool updateSensors();
 
@@ -33,6 +36,16 @@ class SensorManager {
         bool getGyroOffsets(int16_t offset[3]) const;
         bool setAccelOffsets(const int16_t offset[3]);
         bool setGyroOffsets(const int16_t offset[3]);
+
+        // 移動平均アクセサ
+        float getAltitudeAverage() const;
+        float getYawAverage() const;
+        void updateMovingAverages(float altitude, float yaw);
+        void resetMovingAverages();
+
+        // キャリブレーション設定
+        void setEnableCalibration(bool enable) { enable_calibration_ = enable; }
+        bool isCalibrationEnabled() const { return enable_calibration_; }
 
     private:
 
@@ -50,6 +63,13 @@ class SensorManager {
         // 地磁気センサーキャリブレーション値
         float mag_offset[3] = {0.0f, 0.0f, 0.0f};
         float mag_scale[3] = {1.0f, 1.0f, 1.0f};
+
+        // 移動平均ユーティリティ（高度、ヨー角）
+        MovingAverage<float, 20> altitude_average;
+        MovingAverage<float, 5> yaw_average;
+
+        // キャリブレーション設定
+        bool enable_calibration_ = CalibrationConfig::ENABLE_CALIBRATION;
 };
 
 #endif // SENSOR_MANAGER_HPP

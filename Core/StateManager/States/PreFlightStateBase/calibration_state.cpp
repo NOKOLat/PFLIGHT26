@@ -17,14 +17,27 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
 
         printf("Start Calibration\n");
 
-        // キャリブレーション有効フラグに応じた処理
-        if (enable_calibration_) {
-
-            PerformSensorCalibration(context);
+        // SensorManager にアクセス
+        SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+        if (sensor_mgr == nullptr) {
+            printf("[Calibration] Error: Cannot access SensorManager\n");
+            return ProcessStatus::FAILURE;
         }
-        else {
 
-            ApplyManualCalibrationOffsets(context);
+        // キャリブレーション有効フラグに応じた処理（SensorManager が管理）
+        if (!sensor_mgr->performCalibrationIfNeeded()) {
+
+            printf("[Calibration] Error: performCalibrationIfNeeded failed\n");
+            return ProcessStatus::FAILURE;
+        }
+
+        // 手動設定値を使用する場合は適用
+        if (!sensor_mgr->isCalibrationEnabled()) {
+
+            if (ApplyManualCalibrationOffsets(context) != ProcessStatus::SUCCESS) {
+
+                return ProcessStatus::FAILURE;
+            }
         }
 
         // 高度推定キャリブレーション回数を設定
@@ -42,38 +55,6 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
         context.instances.sensor_fusion_manager->getAltitude(),  // 現在の高度推定値を気圧値として使用
         9.80665f  // 標準重力加速度 [m/s^2]
     );
-
-    return ProcessStatus::SUCCESS;
-}
-
-
-ProcessStatus CalibrationState::PerformSensorCalibration(StateContext& context) {
-
-    // SensorManager にアクセス
-    SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
-
-    if (sensor_mgr == nullptr) {
-
-        printf("[Calibration] Error: Cannot access SensorManager\n");
-        return ProcessStatus::FAILURE;
-    }
-
-    printf("[Calibration] Executing sensor calibration...\n");
-    sensor_mgr->CalibrationSensors();
-
-    // オフセットの値を出力
-    int16_t accel_offset[3] = {0};
-    int16_t gyro_offset[3] = {0};
-
-    if (sensor_mgr->getAccelOffsets(accel_offset)) {
-        printf("[Calibration] Accel Offsets - X: %d, Y: %d, Z: %d\n",
-               accel_offset[0], accel_offset[1], accel_offset[2]);
-    }
-
-    if (sensor_mgr->getGyroOffsets(gyro_offset)) {
-        printf("[Calibration] Gyro Offsets - X: %d, Y: %d, Z: %d\n",
-               gyro_offset[0], gyro_offset[1], gyro_offset[2]);
-    }
 
     return ProcessStatus::SUCCESS;
 }

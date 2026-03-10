@@ -13,6 +13,8 @@
                 <target_options_enabled>1</target_options_enabled>
             </cross_compilation>
             <header_search_paths>
+                <header_search_path>Core</header_search_path>
+                <header_search_path>Core/Lib</header_search_path>
                 <header_search_path>Core/StateManager</header_search_path>
             </header_search_paths>
             <name>C++ Source Group</name>
@@ -26,8 +28,6 @@
             </source_extensions>
             <source_paths>
                 <source_path>Core</source_path>
-                <source_path>Drivers</source_path>
-                <source_path>D:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344/tools/lib/gcc/arm-none-eabi/13.3.1/include</source_path>
             </source_paths>
             <status>enabled</status>
             <type>C++ Source Group</type>

@@ -9,11 +9,7 @@
 #include <cstdint>
 #include <array>
 #include <optional>
-#include "usart.h"
-#include "../../Config/board_config.hpp"
-#include "../../Utility/MovingAverage.hpp"
-#include "../../Utility/ServoPwm4f.hpp"
-#include "../../Utility/MotorPwm2f.hpp"
+#include "usart.h" 
 
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
@@ -42,36 +38,12 @@ struct ControlInput {
     uint32_t sbus_failsafe_count = 0;
 };
 
-// ピン設定情報を格納する構造体
+// 通信ペリフェラル設定を格納する構造体
 struct PinConfiguration {
 
-    I2C_HandleTypeDef*  sensor_i2c  = BoardConfig::sensor_i2c;  // センサー用 I2C
-    UART_HandleTypeDef* sbus_uart   = BoardConfig::sbus_uart;   // SBUS用 UART
-    UART_HandleTypeDef* debug_uart  = BoardConfig::debug_uart;  // デバッグ用 UART
-
-    // モーター用のTIMとチャンネル(右、左)
-    std::array<TIM_HandleTypeDef*, 2> motor_tim = {
-        BoardConfig::right_motor_tim,
-        BoardConfig::left_motor_tim
-    };
-    std::array<uint32_t, 2> motor_tim_channels = {
-        BoardConfig::RIGHT_MOTOR_CHANNEL,
-        BoardConfig::LEFT_MOTOR_CHANNEL
-    };
-
-    // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン右、エルロン左)
-    std::array<TIM_HandleTypeDef*, 4> servo_tim = {
-        BoardConfig::elevator_servo_tim,
-        BoardConfig::rudder_servo_tim,
-        BoardConfig::right_aileron_servo_tim,
-        BoardConfig::left_aileron_servo_tim
-    };
-    std::array<uint32_t, 4> servo_tim_channels = {
-        BoardConfig::ELEVATOR_SERVO_CHANNEL,
-        BoardConfig::RUDDER_SERVO_CHANNEL,
-        BoardConfig::RIGHT_AILERON_SERVO_CHANNEL,
-        BoardConfig::LEFT_AILERON_SERVO_CHANNEL
-    };
+    I2C_HandleTypeDef*  sensor_i2c  = SensorConfig::i2c_handle;  // センサー用 I2C
+    UART_HandleTypeDef* sbus_uart   = &huart5;                   // SBUS用 UART
+    UART_HandleTypeDef* debug_uart  = &huart2;                   // デバッグ用 UART
 };
 
 // 単位換算定数を格納する構造体
@@ -119,12 +91,6 @@ struct StateContext {
     ControlInput control_input;          // 制御入力 (SBUS生データ)
     nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
     ControlOutput control_output;        // 制御出力
-
-    // 高度移動平均ユーティリティ（20サンプル窓）
-    MovingAverage<float, 20> altitude_average;
-
-    // ヨー角移動平均ユーティリティ（5サンプル窓）
-    MovingAverage<float, 5> yaw_average;
 
     // 初期値オフセット（ミッション開始時に記録）
     float initial_yaw_offset = 0.0f;           // ミッション開始時のヨー角平均値

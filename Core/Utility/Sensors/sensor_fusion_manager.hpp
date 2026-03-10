@@ -5,7 +5,6 @@
 #include "SensorManager.hpp"
 #include "attitude_ekf_adapter.hpp"
 #include "../../Lib/Altitude_estimation/altitude.h"
-#include "../../Utility/Vector3f.hpp"
 #include "../../Utility/Euler3f.hpp"
 
 // ===== SensorFusionManager =====

@@ -27,9 +27,11 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
     context.attitude = context.instances.sensor_fusion_manager->getAttitude();
     context.altitude = context.instances.sensor_fusion_manager->getAltitude();
 
-    // 3. 移動平均の計算（高度、ヨー角）
-    context.altitude_average.update(context.altitude);
-    context.yaw_average.update(context.attitude.yaw());
+    // 3. 移動平均の計算（高度、ヨー角）をセンサーマネージャーで実行
+    SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+    if (sensor_mgr != nullptr) {
+        sensor_mgr->updateMovingAverages(context.altitude, context.attitude.yaw());
+    }
 
     // 5. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);
