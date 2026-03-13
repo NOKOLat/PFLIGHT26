@@ -34,8 +34,11 @@ build/
 .vscode/
 .idea/
 .claudeai/
+
+# Sourcetrail files
 *.srctrlbm
 *.srctrldb
+*.srctrlprj
 
 # Local library copies (tracking library files, but ignoring their .git metadata)
 Core/Lib/MadgwickAHRS/.git
