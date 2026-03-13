@@ -9,53 +9,18 @@
 #include <cstdint>
 #include <array>
 #include <optional>
-#include "usart.h"
-#include "../../Config/board_config.hpp"
-#include "../../Config/pid_config.hpp"
-#include "../../Utility/Vector3f.hpp"
-#include "../../Utility/Euler3f.hpp"
-#include "../../Utility/MovingAverage.hpp"
-#include "../../Utility/ServoPwm4f.hpp"
-#include "../../Utility/MotorPwm2f.hpp"
+#include "usart.h" 
 
-#include "1DoF_PID/PID.h"
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
-#include "IMU_EKF/attitude_ekf.h"
-#include "Altitude_estimation/altitude.h"
-#include "../../Utility/Sensors/SensorManager.hpp"
+#include "../../Utility/Sensors/sensor_fusion_manager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
+#include "../../Utility/CascadePID/cascade_pid_manager.hpp"
 #include "../../Utility/ManeuverSequencer/maneuver_sequencer.hpp"
-#include "../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
-// センサーデータを格納する構造体
-struct SensorData {
+// 前方宣言: MissionBase (ポインタでのみ使用)
+class MissionBase;
 
-    // IMU (ICM42688P)
-    Vector3f accel;      // 加速度 [m/s^2]
-    Vector3f gyro;       // 角速度 [rad/s]
-
-    // 磁気センサー (BMM350)
-    Vector3f mag;        // 磁気 [uT]
-
-    // LiDAR
-    Vector3f lidar_coord; // LiDARからの座標 [m]
-
-    // 気圧センサー (DPS368)
-    float barometric_pressure; // 気圧 [Pa]
-    float temperature;    // 温度 [℃]
-};
-
-
-// 姿勢推定結果を格納する構造体
-struct AttitudeState {
-
-    Euler3f angle;        // ロール・ピッチ・ヨー角 [deg]
-    Euler3f rate;         // ロール・ピッチ・ヨー角速度 [deg/s]
-    float yaw_avg;        // 直近のヨー角の平均[deg]  
-    float altitude;       // 高度 [m]
-    float altitude_avg;   // 直近高度の平均 [m]
-};
 
 
 // 制御出力を格納する構造体
@@ -65,46 +30,14 @@ struct ControlOutput {
     ServoPwm4f servo_pwm;           // 4つのサーボの 角度 [-90 ~ 90] deg （エレベーター、ラダー、エルロン、投下装置）
 };
 
-// オペレータからの制御入力を格納する構造体
-struct ControlInput {
 
-    std::array<uint16_t, 18> data = {};
-    bool failsafe = false;
-    bool framelost = false;
 
-    uint32_t sbus_failsafe_count = 0;
-};
-
-// ピン設定情報を格納する構造体
+// 通信ペリフェラル設定を格納する構造体
 struct PinConfiguration {
 
-    I2C_HandleTypeDef*  sensor_i2c  = BoardConfig::sensor_i2c;  // センサー用 I2C
-    UART_HandleTypeDef* sbus_uart   = BoardConfig::sbus_uart;   // SBUS用 UART
-    UART_HandleTypeDef* debug_uart  = BoardConfig::debug_uart;  // デバッグ用 UART
-
-    // モーター用のTIMとチャンネル(右、左)
-    std::array<TIM_HandleTypeDef*, 2> motor_tim = {
-        BoardConfig::right_motor_tim,
-        BoardConfig::left_motor_tim
-    };
-    std::array<uint32_t, 2> motor_tim_channels = {
-        BoardConfig::RIGHT_MOTOR_CHANNEL,
-        BoardConfig::LEFT_MOTOR_CHANNEL
-    };
-
-    // サーボ用のTIMとチャンネル(エレベーター、ラダー、エルロン右、エルロン左)
-    std::array<TIM_HandleTypeDef*, 4> servo_tim = {
-        BoardConfig::elevator_servo_tim,
-        BoardConfig::rudder_servo_tim,
-        BoardConfig::right_aileron_servo_tim,
-        BoardConfig::left_aileron_servo_tim
-    };
-    std::array<uint32_t, 4> servo_tim_channels = {
-        BoardConfig::ELEVATOR_SERVO_CHANNEL,
-        BoardConfig::RUDDER_SERVO_CHANNEL,
-        BoardConfig::RIGHT_AILERON_SERVO_CHANNEL,
-        BoardConfig::LEFT_AILERON_SERVO_CHANNEL
-    };
+    I2C_HandleTypeDef*  sensor_i2c  = SensorConfig::i2c_handle;  // センサー用 I2C
+    UART_HandleTypeDef* sbus_uart   = &huart5;                   // SBUS用 UART
+    UART_HandleTypeDef* debug_uart  = &huart2;                   // デバッグ用 UART
 };
 
 // 単位換算定数を格納する構造体
@@ -119,29 +52,17 @@ struct UnitConversion {
 
 struct Instances {
 
-    // センサーマネージャー
-    std::optional<SensorManager> sensor_manager;
+    // センサー融合マネージャー（姿勢推定・高度推定を統合）
+    std::optional<SensorFusionManager> sensor_fusion_manager;
 
     // 通信インスタンス
     std::optional<nokolat::SBUS> sbus_receiver;
 
-    // 姿勢推定EKFインスタンス
-    std::optional<AttitudeEKF_t> attitude_ekf;
-
-    // 高度推定インスタンス
-    std::optional<Altitude> altitude_estimator;
-
     // PWM制御
     std::optional<PwmManager> pwm_controller;
 
-    // PID コントローラ
-    std::optional<PID> angle_pitch_pid;
-    std::optional<PID> angle_roll_pid;
-    std::optional<PID> angle_yaw_pid;
-
-    std::optional<PID> rate_pitch_pid;
-    std::optional<PID> rate_roll_pid;
-    std::optional<PID> rate_yaw_pid;
+    // カスケードPIDコントローラ（6つのPID: 角度+レート×3軸）
+    std::optional<CascadePIDManager> cascade_pid_manager;
 
     // マネューバーシーケンサー（自動操縦の目標値提供）
     std::optional<ManeuverSequencer> maneuver_sequencer;
@@ -158,17 +79,11 @@ struct StateContext {
     UnitConversion unit_conversion;
 
     // データコンテナ
-    SensorData sensor_data;              // センサー生データ
-    AttitudeState attitude_state;        // 姿勢推定結果
-    ControlInput control_input;          // 制御入力 (SBUS生データ)
-    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ
+    Euler3f attitude;                    // 推定された姿勢角 [deg]
+    float altitude = 0.0f;               // 推定された高度 [m]
+
+    nokolat::RescaledSBUSData rescaled_sbus_data; // リスケール済みSBUSデータ (failsafe/framelostフラグを含む)
     ControlOutput control_output;        // 制御出力
-
-    // 高度移動平均ユーティリティ（20サンプル窓）
-    MovingAverage<float, 20> altitude_average;
-
-    // ヨー角移動平均ユーティリティ（5サンプル窓）
-    MovingAverage<float, 5> yaw_average;
 
     // 初期値オフセット（ミッション開始時に記録）
     float initial_yaw_offset = 0.0f;           // ミッション開始時のヨー角平均値

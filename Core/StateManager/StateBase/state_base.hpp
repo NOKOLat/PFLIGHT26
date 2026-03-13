@@ -2,9 +2,6 @@
 #define STATE_BASE_HPP
 
 #include "StateInterface/state_interface.hpp"
-#include "StateInterface/state_id.hpp"
-#include "StateInterface/state_result.hpp"
-
 
 // 前方宣言
 struct StateContext;

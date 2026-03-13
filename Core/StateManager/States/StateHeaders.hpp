@@ -1,11 +1,7 @@
 #ifndef STATE_HEADERS_HPP
 #define STATE_HEADERS_HPP
 
-#include "StateInterface/state_interface.hpp"
-#include "StateInterface/state_id.hpp"
-#include "StateInterface/state_result.hpp"
 #include "StateBase/state_base.hpp"
-#include "../../Config/calibration_config.hpp"
 
 // 前方宣言
 struct StateContext;
@@ -43,11 +39,8 @@ class CalibrationState : public PreFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
-        ProcessStatus PerformSensorCalibration(StateContext& context);
         ProcessStatus ApplyManualCalibrationOffsets(StateContext& context);
         bool calibration_started_ = false;
-        // キャリブレーション実行フラグ（false=手動設定値を使用、true=センサーキャリブレーション実行）
-        bool enable_calibration_ = CalibrationConfig::ENABLE_CALIBRATION;
 };
 
 // 飛行前の準備状態を実装するクラス
@@ -107,9 +100,6 @@ class LevelFlightState : public ManualFlightStateBase {
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
         bool mission_started_ = false;
-        int inner_loop_counter_ = 0;  // 内側ループの実行制御用カウンター（2回に1回実行）
-
-        bool calculateCascadePID(StateContext& context, float target_pitch, float target_roll, float target_yaw, float pid_result[3]);
 };
 
 // レベルターン状態を実装するクラス

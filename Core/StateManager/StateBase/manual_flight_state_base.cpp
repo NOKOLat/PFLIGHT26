@@ -14,45 +14,24 @@ StateResult ManualFlightStateBase::update(StateContext& context) {
         return {ProcessStatus::SUCCESS, TransitionFlag::SHOULD_TRANSITION, next_state};
     }
 
-    // 1. センサーデータの取得
-    context.instances.sensor_manager->updateSensors();
-    context.instances.sensor_manager->getAccelData(&context.sensor_data.accel);
-    context.instances.sensor_manager->getGyroData(&context.sensor_data.gyro);
-    context.instances.sensor_manager->getMagData(&context.sensor_data.mag);
-    context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
-    context.instances.sensor_manager->getTempData(&context.sensor_data.temperature);
+    // 1. センサー融合を実行
+    if (!context.instances.sensor_fusion_manager.has_value()) {
 
-    // 2. 姿勢推定 (EKF)
-    // ジャイロをdeg/s -> rad/sに変換
-	const float gyro[3] = {
-		context.sensor_data.gyro[Axis::X] * context.unit_conversion.DEG_TO_RAD,
-		context.sensor_data.gyro[Axis::Y] * context.unit_conversion.DEG_TO_RAD,
-		context.sensor_data.gyro[Axis::Z] * context.unit_conversion.DEG_TO_RAD
-	};
+        printf("[ManualFlightStateBase] Error: SensorFusionManager is not initialized\n");
+        return {ProcessStatus::FAILURE, TransitionFlag::NO_TRANSITION, getStateID()};
+    }
 
-	AttitudeEKF_Update(&context.instances.attitude_ekf.value(), context.sensor_data.accel.getptr(), gyro);
+    context.instances.sensor_fusion_manager->update();
 
-    // 姿勢推定結果を AttitudeState に格納
-    context.attitude_state.angle.roll()  = AttitudeEKF_GetRoll(&context.instances.attitude_ekf.value())  * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.angle.pitch() = AttitudeEKF_GetPitch(&context.instances.attitude_ekf.value()) * context.unit_conversion.RAD_TO_DEG;
-    context.attitude_state.angle.yaw()   = AttitudeEKF_GetYaw(&context.instances.attitude_ekf.value())   * context.unit_conversion.RAD_TO_DEG;
+    // 2. 推定結果を StateContext に保存
+    context.attitude = context.instances.sensor_fusion_manager->getAttitude();
+    context.altitude = context.instances.sensor_fusion_manager->getAltitude();
 
-    // 3. 高度推定の更新
-    Vector3f angle_vec;
-    angle_vec.x() = context.attitude_state.angle.roll();
-    angle_vec.y() = context.attitude_state.angle.pitch();
-    angle_vec.z() = context.attitude_state.angle.yaw();
-    
-    context.instances.altitude_estimator->Update(context.sensor_data.barometric_pressure, context.sensor_data.accel.getptr(), angle_vec.getptr(), context.loop_time_us / 1000000.0f);
-
-    // 高度推定結果を取得
-    float altitude_data[3];  // [altitude, velocity, accel]
-    context.instances.altitude_estimator->GetData(altitude_data);
-    context.attitude_state.altitude = altitude_data[0];
-
-    // 4. 移動平均の計算（高度、ヨー角）
-    context.attitude_state.altitude_avg = context.altitude_average.update(context.attitude_state.altitude);
-    context.attitude_state.yaw_avg = context.yaw_average.update(context.attitude_state.angle.yaw());
+    // 3. 移動平均の計算（高度、ヨー角）をセンサーマネージャーで実行
+    SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+    if (sensor_mgr != nullptr) {
+        sensor_mgr->updateMovingAverages(context.altitude, context.attitude.yaw());
+    }
 
     // 5. 派生クラス固有の更新処理を呼び出す（制御出力）
     ProcessStatus status = onUpdate(context);

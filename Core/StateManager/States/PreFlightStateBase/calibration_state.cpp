@@ -1,71 +1,60 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
-#include "Altitude_estimation/altitude.h"
 #include "../../../Config/calibration_config.hpp"
 
 
 ProcessStatus CalibrationState::onUpdate(StateContext& context) {
+
+    // 初期化確認
+    if (!context.instances.sensor_fusion_manager.has_value()) {
+
+        printf("Error: SensorFusionManager is not initialized\n");
+        return ProcessStatus::FAILURE;
+    }
 
     // imuキャリブレーション（初回のみ）
     if (!calibration_started_) {
 
         printf("Start Calibration\n");
 
-        // キャリブレーション有効フラグに応じた処理
-        if (enable_calibration_) {
+        // SensorManager にアクセス
+        SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+        if (sensor_mgr == nullptr) {
+            printf("[Calibration] Error: Cannot access SensorManager\n");
+            return ProcessStatus::FAILURE;
+        }
 
-            PerformSensorCalibration(context);
-        } 
-        else {
+        // キャリブレーション有効フラグに応じた処理（SensorManager が管理）
+        if (!sensor_mgr->performCalibrationIfNeeded()) {
 
-            ApplyManualCalibrationOffsets(context);
+            printf("[Calibration] Error: performCalibrationIfNeeded failed\n");
+            return ProcessStatus::FAILURE;
+        }
+
+        // 手動設定値を使用する場合は適用
+        if (!sensor_mgr->isCalibrationEnabled()) {
+
+            if (ApplyManualCalibrationOffsets(context) != ProcessStatus::SUCCESS) {
+
+                return ProcessStatus::FAILURE;
+            }
         }
 
         // 高度推定キャリブレーション回数を設定
-        if (context.instances.altitude_estimator.has_value()) {
+        context.instances.sensor_fusion_manager->setAltitudeCalibMax(10);
 
-            context.instances.altitude_estimator->SetCalibMax(10);
-        }
         calibration_started_ = true;
     }
 
-    // センサーデータの取得
-    context.instances.sensor_manager->updateSensors();
-    context.instances.sensor_manager->getAccelData(&context.sensor_data.accel);
-    context.instances.sensor_manager->getPressData(&context.sensor_data.barometric_pressure);
+    // センサー融合を更新
+    context.instances.sensor_fusion_manager->update();
 
     // 高度推定のキャリブレーション
-    // キャリブレーションで、加速度のz成分が重力加速度と等しいと仮定
-    if (context.instances.altitude_estimator.has_value()) {
-
-        context.instances.altitude_estimator->Calibration(
-            context.sensor_data.barometric_pressure,
-            9.80665f
-        );
-    }
-
-    return ProcessStatus::SUCCESS;
-}
-
-
-ProcessStatus CalibrationState::PerformSensorCalibration(StateContext& context) {
-
-    printf("[Calibration] Executing sensor calibration...\n");
-    context.instances.sensor_manager->CalibrationSensors();
-
-    // オフセットの値を出力
-    int16_t accel_offset[3] = {0};
-    int16_t gyro_offset[3] = {0};
-
-    if (context.instances.sensor_manager->getAccelOffsets(accel_offset)) {
-        printf("[Calibration] Accel Offsets - X: %d, Y: %d, Z: %d\n",
-               accel_offset[0], accel_offset[1], accel_offset[2]);
-    }
-
-    if (context.instances.sensor_manager->getGyroOffsets(gyro_offset)) {
-        printf("[Calibration] Gyro Offsets - X: %d, Y: %d, Z: %d\n",
-               gyro_offset[0], gyro_offset[1], gyro_offset[2]);
-    }
+    // キャリブレーション中は機体が静止しているため、加速度は重力加速度（下向き）
+    context.instances.sensor_fusion_manager->calibrateAltitude(
+        context.instances.sensor_fusion_manager->getAltitude(),  // 現在の高度推定値を気圧値として使用
+        9.80665f  // 標準重力加速度 [m/s^2]
+    );
 
     return ProcessStatus::SUCCESS;
 }
@@ -73,6 +62,15 @@ ProcessStatus CalibrationState::PerformSensorCalibration(StateContext& context) 
 
 ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& context) {
     printf("[Calibration] Using manual offset values from config\n");
+
+    // SensorManager にアクセス
+    SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+
+    if (sensor_mgr == nullptr) {
+
+        printf("[Calibration] Error: Cannot access SensorManager\n");
+        return ProcessStatus::FAILURE;
+    }
 
     int16_t manual_accel_offset[3] = {
         CalibrationConfig::MANUAL_ACCEL_OFFSET_X,
@@ -85,8 +83,8 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
         CalibrationConfig::MANUAL_GYRO_OFFSET_Z
     };
 
-    context.instances.sensor_manager->setAccelOffsets(manual_accel_offset);
-    context.instances.sensor_manager->setGyroOffsets(manual_gyro_offset);
+    sensor_mgr->setAccelOffsets(manual_accel_offset);
+    sensor_mgr->setGyroOffsets(manual_gyro_offset);
 
     printf("[Calibration] Manual Accel Offsets - X: %d, Y: %d, Z: %d\n",
            manual_accel_offset[0], manual_accel_offset[1], manual_accel_offset[2]);
@@ -100,9 +98,9 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
 StateID CalibrationState::evaluateNextState(StateContext& context) {
 
     // 高度推定のキャリブレーション完了確認
-    if (context.instances.altitude_estimator.has_value()) {
+    if (context.instances.sensor_fusion_manager.has_value()) {
 
-        if (!context.instances.altitude_estimator->isCalibrated()) {
+        if (!context.instances.sensor_fusion_manager->isAltitudeCalibrated()) {
 
             // キャリブレーション継続中
             return StateID::CALIBRATION_STATE;

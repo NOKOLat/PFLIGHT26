@@ -117,7 +117,19 @@ bool PwmManager::initPwm() {
     return true;
 }
 
-bool PwmManager::setServoAngle(float angle[4]) {
+bool PwmManager::setServoAngle(const ServoPwm4f& servo_pwm) {
+
+    return setServoAngle(servo_pwm.getptr());
+}
+
+
+bool PwmManager::setMotorSpeed(const MotorPwm2f& motor_pwm) {
+
+    return setMotorSpeed(motor_pwm.getptr());
+}
+
+
+bool PwmManager::setServoAngle(const float angle[4]) {
 
     // angle[0] = エレベーター角度 [-90 ~ 90 deg]
     // angle[1] = ラダー角度 [-90 ~ 90 deg]
@@ -142,7 +154,7 @@ bool PwmManager::setServoAngle(float angle[4]) {
     return true;
 }
 
-bool PwmManager::setServoAngle_Independent(float angle[4]) {
+bool PwmManager::setServoAngle_Independent(const float angle[4]) {
 
     // テスト用：各サーボを独立して制御（左右エルロンも独立）
     // angle[0] = エレベーター角度 [-90 ~ 90 deg]
@@ -166,7 +178,7 @@ bool PwmManager::setServoAngle_Independent(float angle[4]) {
     return true;
 }
 
-bool PwmManager::setMotorSpeed(float speed[2]) {
+bool PwmManager::setMotorSpeed(const float speed[2]) {
 
     // speed[0] = 右モータースピード [-100 ~ 100%]（リバースモード対応）
     // speed[1] = 左モータースピード [-100 ~ 100%]（リバースモード対応）

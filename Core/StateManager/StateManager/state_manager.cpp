@@ -89,15 +89,16 @@ void StateManager::updateSBUS() {
     nokolat::SBUS& sbus = state_context_.instances.sbus_receiver.value();
     const nokolat::SBUS_DATA& sbus_data = sbus.getData();
 
-    state_context_.control_input.data = sbus_data.data;
-    state_context_.control_input.failsafe = sbus_data.failsafe;
-    state_context_.control_input.framelost = sbus_data.framelost;
-
     // SBUSデータをリスケーリング
     state_context_.rescaled_sbus_data = nokolat::SBUSRescaler::rescale(sbus_data.data);
 
+    // SBUSの状態フラグと生データを更新
+    state_context_.rescaled_sbus_data.failsafe = sbus_data.failsafe;
+    state_context_.rescaled_sbus_data.framelost = sbus_data.framelost;
+    state_context_.rescaled_sbus_data.raw_data = sbus_data.data;
+
     // フェイルセーフ判定 (SBUSフレーム内のフラグ)
-    if (state_context_.control_input.failsafe) {
+    if (state_context_.rescaled_sbus_data.failsafe) {
 
         printf("[StateManager::updateSBUS] SBUS FailSafe\n");
         changeState(StateID::EMERGENCY_STATE);
@@ -112,6 +113,7 @@ void StateManager::updateSBUS() {
         changeState(StateID::EMERGENCY_STATE);
     }
 }
+
 
 // 初期化処理
 // インスタンスの初期化、静的な設定を行う
@@ -131,23 +133,38 @@ void StateManager::init() {
 
     // 2. 使用するインスタンスの初期化
 
-    // 2-0 センサーマネージャーの初期化
-    state_context_.instances.sensor_manager.emplace(state_context_.pin_config.sensor_i2c);
+    // 2-0 センサーマネージャーの初期化（SensorFusionManager で使用）
+    // NOTE: SensorFusionManager が内部で所有する予定だが、
+    // 初期化の順序の都合上、ここで先に初期化している
+    SensorManager* sensor_manager_ptr = new SensorManager(state_context_.pin_config.sensor_i2c);
 
-    // 2-1 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
+    if (!sensor_manager_ptr->initSensors()) {
+        printf("[StateManager::init] Failed to initialize sensors\n");
+        delete sensor_manager_ptr;
+        return;
+    }
+
+    if (!sensor_manager_ptr->configSensors()) {
+        printf("[StateManager::init] Failed to configure sensors\n");
+        delete sensor_manager_ptr;
+        return;
+    }
+
+    // 2-1 センサー融合マネージャーの初期化
+    state_context_.instances.sensor_fusion_manager.emplace(sensor_manager_ptr);
+
+    if (!state_context_.instances.sensor_fusion_manager->init(SS_DT)) {
+        printf("[StateManager::init] Failed to initialize sensor fusion manager\n");
+        delete sensor_manager_ptr;
+        return;
+    }
+
+    // 2-2 PWM制御ユーティリティの初期化（モーター・サーボはPwmManager内で管理）
     state_context_.instances.pwm_controller.emplace();
 
-    // 2-2 姿勢推定EKFの初期化(6軸モード: IMUのみ使用、magnetometerなし、50Hz)
-    state_context_.instances.attitude_ekf.emplace();
-    AttitudeEKF_Init(&state_context_.instances.attitude_ekf.value(), SS_DT);
-
-    // 2-2-2 高度推定の初期化
-    state_context_.instances.altitude_estimator.emplace();
-    state_context_.instances.altitude_estimator->Init();
-
-    // 2-3 角度制御用PID（外側ループ）と角速度制御用PID（内側ループ）
+    // 2-3 カスケードPID（外側ループ: 角度制御、内側ループ: 角速度制御）
     // Note: InitStateの initializeCascadePID で初期化されるため、ここではコメント化
-    // 各軸ごとの設定は pid_config.hpp の Pitch/Roll/Yaw 名前空間で管理
+    // 各軸ごとの設定は cascade_pid_config.hpp の Pitch/Roll/Yaw 名前空間で管理
 
     // 2-4 SBUS
     state_context_.instances.sbus_receiver.emplace();
@@ -158,10 +175,10 @@ void StateManager::init() {
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
-    	//printf("[Debug] Using SBUS PORT: UART2\n");
-        //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
+    	printf("[Debug] Using SBUS PORT: UART2\n");
+        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
 
-        ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
+        //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
     }
 
     // 3. 初期状態を生成
