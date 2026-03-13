@@ -2,7 +2,7 @@
 #define SENSOR_MANAGER_HPP
 
 #include "main.h"
-#include "../../Lib/STM32_ICM42688P/ICM42688P_HAL_SPI.h"
+#include "../../Lib/STM32_ICM42688P/ICM42688P_HAL_I2C.h"
 #include "../../Test/MockBMM350/MockBMM350.hpp"
 #include "../../Lib/STM32_DPS368/DPS368_HAL_I2C.hpp"
 #include "../../Config/sensor_config.hpp"
@@ -49,7 +49,7 @@ class SensorManager {
 
     private:
 
-        ICM42688P_HAL_SPI icm_spi;
+        ICM42688P_HAL_I2C icm42688p;
         MockBMM350 bmm350;
         DPS368_HAL_I2C dps368;
 

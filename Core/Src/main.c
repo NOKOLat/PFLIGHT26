@@ -20,7 +20,6 @@
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -106,7 +105,6 @@ int main(void)
   MX_UART5_Init();
   MX_TIM12_Init();
   MX_TIM3_Init();
-  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   // bulid check code
