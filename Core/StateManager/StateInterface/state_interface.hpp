@@ -1,7 +1,6 @@
 #ifndef STATE_INTERFACE_HPP
 #define STATE_INTERFACE_HPP
 
-#include "state_id.hpp"
 #include "state_result.hpp"
 
 
