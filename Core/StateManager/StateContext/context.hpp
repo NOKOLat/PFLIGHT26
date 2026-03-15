@@ -9,10 +9,11 @@
 #include <cstdint>
 #include <array>
 #include <optional>
-#include "usart.h" 
+#include "usart.h"
 
 #include "SBUS/sbus.h"
 #include "sbus_rescaler.hpp"
+#include "../../Config/sensor_config.hpp"
 #include "../../Utility/Sensors/sensor_fusion_manager.hpp"
 #include "../../Utility/Motor_Servo/Pwm.hpp"
 #include "../../Utility/CascadePID/cascade_pid_manager.hpp"

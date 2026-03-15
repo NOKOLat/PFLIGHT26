@@ -110,6 +110,7 @@ class LevelTurnState : public ManualFlightStateBase {
     private:
         virtual ProcessStatus onUpdate(StateContext& context) override;
         virtual StateID evaluateNextState(StateContext& context) override;
+        bool mission_started_ = false;
 };
 
 // クライミングターン状態を実装するクラス

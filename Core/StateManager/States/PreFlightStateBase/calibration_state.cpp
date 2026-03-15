@@ -50,11 +50,20 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
     context.instances.sensor_fusion_manager->update();
 
     // 高度推定のキャリブレーション
-    // キャリブレーション中は機体が静止しているため、加速度は重力加速度（下向き）
-    context.instances.sensor_fusion_manager->calibrateAltitude(
-        context.instances.sensor_fusion_manager->getAltitude(),  // 現在の高度推定値を気圧値として使用
-        9.80665f  // 標準重力加速度 [m/s^2]
-    );
+    // DPS368 の気圧[Pa]を使用して高度推定キャリブレーションを実施する
+    SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+    if (sensor_mgr != nullptr) {
+        float pressure_Pa = 0.0f;
+        if (sensor_mgr->getPressData(&pressure_Pa)) {
+            // キャリブレーション中は機体が静止しているため、加速度は重力加速度（下向き）
+            context.instances.sensor_fusion_manager->calibrateAltitude(
+                pressure_Pa,   // DPS368 から取得した気圧[Pa]
+                9.80665f       // 標準重力加速度 [m/s^2]
+            );
+        } else {
+            printf("[Calibration] Warning: Failed to get pressure data for altitude calibration\n");
+        }
+    }
 
     return ProcessStatus::SUCCESS;
 }

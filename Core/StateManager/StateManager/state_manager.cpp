@@ -155,6 +155,7 @@ void StateManager::init() {
 
     if (!state_context_.instances.sensor_fusion_manager->init(SS_DT)) {
         printf("[StateManager::init] Failed to initialize sensor fusion manager\n");
+        state_context_.instances.sensor_fusion_manager.reset();  // optional を reset してからポインタを削除
         delete sensor_manager_ptr;
         return;
     }

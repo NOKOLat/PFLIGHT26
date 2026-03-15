@@ -79,9 +79,6 @@ float CascadePIDManager::calcYaw(float target_angle, float measured_angle,
         rate_yaw_pid_.calc(target_yaw_rate, measured_rate);
     }
 
-    // Update cycle counter after Yaw (last axis in the calc sequence)
-    cycle_counter_ = (cycle_counter_ + 1) % 2;
-
     return rate_yaw_pid_.getData();
 }
 
@@ -98,6 +95,10 @@ float CascadePIDManager::calcAngleRoll(float target_angle, float measured_angle)
 float CascadePIDManager::calcAngleYaw(float target_angle, float measured_angle) {
     angle_yaw_pid_.calc(target_angle, measured_angle);
     return angle_yaw_pid_.getData();
+}
+
+void CascadePIDManager::updateCycleCounter() {
+    cycle_counter_ = (cycle_counter_ + 1) % 2;
 }
 
 void CascadePIDManager::reset() {

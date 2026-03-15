@@ -27,6 +27,10 @@ public:
     float calcAngleRoll(float target_angle, float measured_angle);
     float calcAngleYaw(float target_angle, float measured_angle);
 
+    // Update cycle counter for rate loop frequency control
+    // Call this once per control cycle to properly manage the rate inner loop
+    void updateCycleCounter();
+
     void reset();
 
 private:

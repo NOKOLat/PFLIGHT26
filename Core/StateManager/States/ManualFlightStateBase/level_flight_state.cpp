@@ -59,7 +59,10 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         target_yaw, attitude.yaw(),
         pid_result
     );
-    
+
+    // Update cycle counter for rate inner loop frequency control
+    pid_manager.updateCycleCounter();
+
     // PIDの値をサーボの角度に入力
     context.control_output.servo_pwm.elevator() = pid_result[0] + 1.58; // pitch制御
     context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
