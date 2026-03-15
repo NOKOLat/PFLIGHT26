@@ -1,5 +1,6 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
+#include "../../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
 
 ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
@@ -21,8 +22,8 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         mission_started_ = true;
 
         // 初期値オフセットを記録（相対的な目標値計算用）
-        context.initial_yaw_offset = context.attitude_state.yaw_avg;
-        context.initial_altitude_offset = context.attitude_state.altitude_avg;
+        context.initial_yaw_offset = context.attitude.yaw();
+        context.initial_altitude_offset = context.altitude;
 
         printf("[LevelFlightState] Mission started - Level Flight\n");
         printf("[LevelFlightState] Initial offsets - Yaw: %f, Altitude: %f\n",
@@ -49,11 +50,19 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
 
     target_roll -= 5.0f;
 
-    if (!calculateCascadePID(context, target_pitch, target_roll, target_yaw, pid_result)) {
-        printf("[LevelFlightState::onUpdate] Failed to calculate cascade PID\n");
-        return ProcessStatus::FAILURE;
-    }
-    
+    // 全軸のカスケードPIDを計算
+    const Euler3f& attitude = context.attitude;
+    CascadePIDManager& pid_manager = context.instances.cascade_pid_manager.value();
+    pid_manager.calcCascadePIDAllAxes(
+        target_pitch, attitude.pitch(),
+        target_roll, attitude.roll(),
+        target_yaw, attitude.yaw(),
+        pid_result
+    );
+
+    // Update cycle counter for rate inner loop frequency control
+    pid_manager.updateCycleCounter();
+
     // PIDの値をサーボの角度に入力
     context.control_output.servo_pwm.elevator() = pid_result[0] + 1.58; // pitch制御
     context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
@@ -100,65 +109,3 @@ StateID LevelFlightState::getStateID() const {
     return StateID::LEVEL_FLIGHT_STATE;
 }
 
-
-bool LevelFlightState::calculateCascadePID(StateContext& context, float target_pitch, float target_roll, float target_yaw, float pid_result[3]) {
-
-    // PIDインスタンスの確認
-    if (!context.instances.angle_pitch_pid.has_value() ||
-        !context.instances.angle_roll_pid.has_value() ||
-        !context.instances.angle_yaw_pid.has_value() ||
-        !context.instances.rate_pitch_pid.has_value() ||
-        !context.instances.rate_roll_pid.has_value() ||
-        !context.instances.rate_yaw_pid.has_value()) {
-
-        printf("[LevelFlightState::calculateCascadePID] PID instances not initialized\n");
-        return false;
-    }
-
-    // 現在の姿勢状態を取得
-    const AttitudeState& attitude = context.attitude_state;
-
-    // ========== Pitch軸 ==========
-    // 外側ループ（角度制御）: 目標角度 → 目標角速度
-    PID& angle_pitch_pid = context.instances.angle_pitch_pid.value();
-    angle_pitch_pid.calc(target_pitch, attitude.angle.pitch());
-    float target_pitch_rate = angle_pitch_pid.getData();
-
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
-    PID& rate_pitch_pid = context.instances.rate_pitch_pid.value();
-    if (inner_loop_counter_ == 0) {
-        rate_pitch_pid.calc(target_pitch_rate, attitude.rate.pitch());
-    }
-    pid_result[0] = rate_pitch_pid.getData();
-
-    // ========== Roll軸 ==========
-    // 外側ループ（角度制御）: 目標角度 → 目標角速度
-    PID& angle_roll_pid = context.instances.angle_roll_pid.value();
-    angle_roll_pid.calc(target_roll, attitude.angle.roll());
-    float target_roll_rate = angle_roll_pid.getData();
-
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
-    PID& rate_roll_pid = context.instances.rate_roll_pid.value();
-    if (inner_loop_counter_ == 0) {
-        rate_roll_pid.calc(target_roll_rate, attitude.rate.roll());
-    }
-    pid_result[1] = rate_roll_pid.getData();
-
-    // ========== Yaw軸 ==========
-    // 外側ループ（角度制御）: 目標角度 → 目標角速度
-    PID& angle_yaw_pid = context.instances.angle_yaw_pid.value();
-    angle_yaw_pid.calc(target_yaw, attitude.angle.yaw());
-    float target_yaw_rate = angle_yaw_pid.getData();
-
-    // 内側ループ（角速度制御）: 目標角速度 → 制御出力（2回に1回のみ実行）
-    PID& rate_yaw_pid = context.instances.rate_yaw_pid.value();
-    if (inner_loop_counter_ == 0) {
-        rate_yaw_pid.calc(target_yaw_rate, attitude.rate.yaw());
-    }
-    pid_result[2] = rate_yaw_pid.getData();
-
-    // カウンターを更新（0と1を交互に）
-    inner_loop_counter_ = (inner_loop_counter_ + 1) % 2;
-
-    return true;
-}

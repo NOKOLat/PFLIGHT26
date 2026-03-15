@@ -24,7 +24,7 @@ struct RescaledSBUSData {
     float aileron;       // エルロン (ロール) [-100~100] %
     float elevator;      // エレベーター (ピッチ) [-100~100] %
     float rudder;        // ラダー (ヨー) [-100~100] %
-    float right_aileron;   // 右エルロン [-90~90] deg
+    float right_aileron;   // 右エルロン  [-100~100] %
 
     // AUXチャネル
     SwitchPosition autofly;         // 自動操縦フラグ [LOW / MID / HIGH]
@@ -34,6 +34,13 @@ struct RescaledSBUSData {
     SwitchPosition drop;            // 投下装置トリガー [LOW / MID / HIGH]
     SwitchPosition preflight_debug; // プリフライトデバッグ [LOW / MID / HIGH]
     SwitchPosition flight_debug;    // フライトデバッグ [LOW / MID / HIGH]
+
+    // SBUS状態フラグ
+    bool failsafe = false;  // SBUSフェイルセーフフラグ
+    bool framelost = false; // SBUSフレームロストフラグ
+
+    // 生データ (デバッグ・ログ用)
+    std::array<uint16_t, 18> raw_data = {}; // SBUS生データ
 };
 
 // ===== SBUSチャンネルのインデックス定義 =====

@@ -5,7 +5,12 @@
 ProcessStatus PostFlightState::onUpdate(StateContext& context) {
 
     // 飛行中に蓄積したデータをリセット
-    context.altitude_average.reset();
+    if (context.instances.sensor_fusion_manager.has_value()) {
+        SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();
+        if (sensor_mgr != nullptr) {
+            sensor_mgr->resetMovingAverages();
+        }
+    }
 
     // GPIO設定
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);

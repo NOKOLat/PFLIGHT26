@@ -29,6 +29,21 @@ public:
         return sum / static_cast<T>(count_);
     }
 
+    // 現在のバッファから移動平均を返す（値を追加しない）
+    // バッファが空の場合は 0 を返す
+    T getAverage() const {
+
+        if (count_ == 0) {
+            return static_cast<T>(0);
+        }
+
+        T sum = static_cast<T>(0);
+        for (uint8_t i = 0; i < count_; i++) {
+            sum += buffer_[i];
+        }
+        return sum / static_cast<T>(count_);
+    }
+
     // バッファをリセットする
     void reset() {
         buffer_ = {};
