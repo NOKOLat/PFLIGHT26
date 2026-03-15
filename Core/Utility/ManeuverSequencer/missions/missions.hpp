@@ -73,4 +73,29 @@ class MissionLevelFlight : public MissionBase {
         KeyFrame key_frames[NUM_KEY_FRAMES];
 };
 
+// ================================================================================
+// MissionLevelTurn - レベルターンミッション
+// ================================================================================
+// t=0～10秒、バンク角を増やしながら旋回する
+// 高度制御は使用しない（ATTITUDE チャンネルのみ制御）
+class MissionLevelTurn : public MissionBase {
+
+    public:
+
+        MissionLevelTurn();
+        ~MissionLevelTurn() = default;
+
+        // キーフレーム配列を取得する
+        const KeyFrame* getKeyFrames(int& num_frames) const override;
+
+        // このミッションが制御するチャンネルを取得する
+        // 高度制御を使用しないため ATTITUDE のみ
+        uint8_t getActiveChannels() const override;
+
+    private:
+
+        static constexpr int NUM_KEY_FRAMES = 2;
+        KeyFrame key_frames[NUM_KEY_FRAMES];
+};
+
 #endif // MISSIONS_HPP

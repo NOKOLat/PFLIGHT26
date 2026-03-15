@@ -1,12 +1,87 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
+#include "../../../Utility/ManeuverSequencer/Missions/missions.hpp"
 
 
 ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
 
+    // ManeuverSequencer が初期化されているか確認
+    if (!context.instances.maneuver_sequencer.has_value()) {
+        printf("[LevelTurnState::onUpdate] ManeuverSequencer not initialized\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    ManeuverSequencer& sequencer = context.instances.maneuver_sequencer.value();
+
+    // 初回のみミッション開始（MissionLevelTurn を使用）
+    if (!mission_started_) {
+
+        // MissionLevelTurn をスタック上に作成
+        static MissionLevelTurn level_turn_mission;
+        sequencer.startMission(&level_turn_mission);
+        mission_started_ = true;
+
+        // 初期値オフセットを記録（相対的な目標値計算用）
+        context.initial_yaw_offset = context.attitude.yaw();
+        context.initial_altitude_offset = context.altitude;
+
+        printf("[LevelTurnState] Mission started - Level Turn\n");
+        printf("[LevelTurnState] Initial offsets - Yaw: %f, Altitude: %f\n",
+               context.initial_yaw_offset, context.initial_altitude_offset);
+    }
+
+    // 目標値を取得（相対的な目標値）
+    float target_roll = 0.0f;
+    float target_pitch = 0.0f;
+    float target_yaw = 0.0f;
+    float target_altitude = 0.0f;
+
+    if (!sequencer.getTargetValues(target_roll, target_pitch, target_yaw, target_altitude)) {
+        printf("[LevelTurnState::onUpdate] Failed to get target values\n");
+        return ProcessStatus::FAILURE;
+    }
+
+    // 初期値オフセットを適用（絶対的な目標値に変換）
+    target_yaw += context.initial_yaw_offset;
+    target_altitude += context.initial_altitude_offset;
+
+    // カスケードPID制御の計算
+    float pid_result[3] = {0.0f, 0.0f, 0.0f};  // [pitch, roll, yaw]
+
+    target_roll -= 5.0f;
+
+    // 全軸のカスケードPIDを計算
+    const Euler3f& attitude = context.attitude;
+    CascadePIDManager& pid_manager = context.instances.cascade_pid_manager.value();
+    pid_manager.calcCascadePIDAllAxes(
+        target_pitch, attitude.pitch(),
+        target_roll, attitude.roll(),
+        target_yaw, attitude.yaw(),
+        pid_result
+    );
+
+    // PIDの値をサーボの角度に入力
+    // pitch, rollのみを制御している
+    // yawとスロットルはプロポからの入力を採用
+    
+    context.control_output.servo_pwm.elevator() = pid_result[0] + 1.58; // pitch制御
+    context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    //context.control_output.servo_pwm.rudder()   = pid_result[2]; // yaw制御
+    context.control_output.servo_pwm.aileron()  = pid_result[1] - 0.79; // roll制御
+
+    // エレベーターのリバースを適応
+    context.control_output.servo_pwm.elevator() *= -1;
 
 
-    // レベルターン用の更新処理
+    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる（ここは手動操縦）
+    context.control_output.motor_pwm.right() = context.rescaled_sbus_data.throttle;
+    context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
+
+
+    printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
+
+    // TODO: pid_result[0~2]を制御出力に変換してモーター・サーボに指令を送る
+
     return ProcessStatus::SUCCESS;
 }
 
