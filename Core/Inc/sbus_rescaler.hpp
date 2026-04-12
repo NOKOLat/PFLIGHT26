@@ -24,7 +24,7 @@ struct RescaledSBUSData {
     float aileron;       // エルロン (ロール) [-100~100] %
     float elevator;      // エレベーター (ピッチ) [-100~100] %
     float rudder;        // ラダー (ヨー) [-100~100] %
-    float right_aileron;   // 右エルロン  [-100~100] %
+    float right_aileron;   // 右エルロン [-100~100] %
 
     // AUXチャネル
     SwitchPosition autofly;         // 自動操縦フラグ [LOW / MID / HIGH]

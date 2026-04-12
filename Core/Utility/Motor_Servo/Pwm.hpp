@@ -22,7 +22,7 @@ class PwmManager {
         bool setMotorSpeed(const MotorPwm2f& motor_pwm);
 
         // 従来のfloat配列API（互換性維持）
-        bool setServoAngle(const float angle[4]);
+        bool setServoAngle(const float angle[5]);
         bool setServoAngle_Independent(const float angle[4]);  // テスト用：各サーボを独立制御
         bool setMotorSpeed(const float speed[2]);
 

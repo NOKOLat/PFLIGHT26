@@ -23,9 +23,10 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
     // サーボはこの状態から動くようにする
     
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm.elevator() = context.rescaled_sbus_data.elevator * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.rudder()   = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.aileron()  = context.rescaled_sbus_data.aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.elevator()      = context.rescaled_sbus_data.elevator * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.left_aileron()  = context.rescaled_sbus_data.aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.right_aileron() = context.rescaled_sbus_data.right_aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
 
     // サーボ出力を定義
     context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.getptr());

@@ -27,7 +27,7 @@ namespace SensorConfig {
     // Z軸反転オプション（基板上でIMUが上下逆に実装されている場合に有効）
     // false: Z軸を反転しない (デフォルト)
     // true:  Z軸を反転する
-    constexpr bool ACCEL_INVERT_Z = false;
+    constexpr bool ACCEL_INVERT_Z = true;
 
 } // namespace SensorConfig
 

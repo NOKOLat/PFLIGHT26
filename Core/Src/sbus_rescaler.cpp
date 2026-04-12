@@ -154,8 +154,8 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
 
     // AUXチャネルのリスケーリング
 
-    // 右エルロン: -100~100 を -90~90 deg にスケール
-    result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds.right_aileron) * 0.9f;
+    // 右エルロン: -100~100 （deg変換は呼び出し側で SBUS_TO_SERVO_DEG を乗算）
+    result.right_aileron = getControl(sbus_data, SBUSChannel::RIGHT_AILERON, thresholds.right_aileron);
 
     // AUXスイッチチャネル: SwitchPosition (LOW / MID / HIGH) に変換
     result.autofly         = getSwitch(sbus_data, SBUSChannel::AUTOFLY,         thresholds);

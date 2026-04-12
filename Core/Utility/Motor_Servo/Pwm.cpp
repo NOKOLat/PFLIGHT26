@@ -129,21 +129,21 @@ bool PwmManager::setMotorSpeed(const MotorPwm2f& motor_pwm) {
 }
 
 
-bool PwmManager::setServoAngle(const float angle[4]) {
+bool PwmManager::setServoAngle(const float angle[5]) {
 
     // angle[0] = エレベーター角度 [-90 ~ 90 deg]
     // angle[1] = ラダー角度 [-90 ~ 90 deg]
-    // angle[2] = エルロン角度（右） [-90 ~ 90 deg]
-    // angle[3] = 投下装置角度 [-90 ~ 90 deg]
-    // 左エルロンは右エルロンの反対の角度
+    // angle[2] = 右エルロン角度 [-90 ~ 90 deg]
+    // angle[3] = 左エルロン角度 [-90 ~ 90 deg]
+    // angle[4] = 投下装置角度 [-90 ~ 90 deg]
 
     uint8_t result = 0;
 
     result |= elevator_servo.setAngle(angle[0]);
     result |= rudder_servo.setAngle(angle[1]);
     result |= right_aileron_servo.setAngle(angle[2]);
-    result |= left_aileron_servo.setAngle(angle[2]);  
-    result |= drop_servo.setAngle(angle[3]);
+    result |= left_aileron_servo.setAngle(angle[3]);
+    result |= drop_servo.setAngle(angle[4]);
 
     if (result != 0) {
 

@@ -31,6 +31,26 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
             return ProcessStatus::FAILURE;
         }
 
+        // キャリブレーション実行時は測定値を出力して停止
+        if (sensor_mgr->isCalibrationEnabled()) {
+
+            int16_t accel_offset[3] = {0, 0, 0};
+            int16_t gyro_offset[3] = {0, 0, 0};
+            sensor_mgr->getAccelOffsets(accel_offset);
+            sensor_mgr->getGyroOffsets(gyro_offset);
+
+            printf("[Calibration] === Calibration Result ===\n");
+            printf("[Calibration] Accel Offsets - X: %d, Y: %d, Z: %d\n",
+                   accel_offset[0], accel_offset[1], accel_offset[2]);
+            printf("[Calibration] Gyro Offsets  - X: %d, Y: %d, Z: %d\n",
+                   gyro_offset[0], gyro_offset[1], gyro_offset[2]);
+            printf("[Calibration] -> calibration_config.hpp を上記の値で更新し、ENABLE_CALIBRATION = false にしてください\n");
+
+            while (1) {
+                // キャリブレーション測定完了。値を確認後、calibration_config.hpp を更新してください
+            }
+        }
+
         // 手動設定値を使用する場合は適用
         if (!sensor_mgr->isCalibrationEnabled()) {
 

@@ -11,7 +11,7 @@ ProcessStatus ServoMotorTestState::onUpdate(StateContext& context) {
 
     // モーターテストパラメータ (TIM3 CH1: 右モーター)
     const uint32_t SERVO_TEST_TOTAL_LOOPS = TOTAL_SERVOS * TOTAL_STEPS_PER_SERVO * LOOP_PER_STEP;  // 1200ループ
-    const uint32_t MOTOR_TEST_DURATION    = 715;  // 約5秒（@7ms/loop）
+    const uint32_t MOTOR_TEST_DURATION    = 500;  // 約5秒
     const uint32_t MOTOR_TEST_END_LOOP    = SERVO_TEST_TOTAL_LOOPS + MOTOR_TEST_DURATION;
 
     // ===== フェーズ1: サーボテスト =====
@@ -72,7 +72,7 @@ ProcessStatus ServoMotorTestState::onUpdate(StateContext& context) {
     // サーボテスト完了時に一度だけサーボを中立位置に戻してモーターテスト開始を通知
     if (loop_count == (int)SERVO_TEST_TOTAL_LOOPS) {
 
-        float neutral_angles[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        float neutral_angles[5] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         if (context.instances.pwm_controller) {
 
             context.instances.pwm_controller->setServoAngle(neutral_angles);

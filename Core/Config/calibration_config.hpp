@@ -13,14 +13,14 @@ namespace CalibrationConfig {
     // これらの値は、水平な面に置いた状態での実測値から設定します
 
     // 加速度センサーオフセット値（int16）
-    constexpr int16_t MANUAL_ACCEL_OFFSET_X = -191;
-    constexpr int16_t MANUAL_ACCEL_OFFSET_Y = 177;
+    constexpr int16_t MANUAL_ACCEL_OFFSET_X = 8;
+    constexpr int16_t MANUAL_ACCEL_OFFSET_Y = -3;
     constexpr int16_t MANUAL_ACCEL_OFFSET_Z = 0;
 
     // ジャイロセンサーオフセット値（int16）
-    constexpr int16_t MANUAL_GYRO_OFFSET_X = 1;
-    constexpr int16_t MANUAL_GYRO_OFFSET_Y = -13;
-    constexpr int16_t MANUAL_GYRO_OFFSET_Z = -30;
+    constexpr int16_t MANUAL_GYRO_OFFSET_X = -15;
+    constexpr int16_t MANUAL_GYRO_OFFSET_Y = -49;
+    constexpr int16_t MANUAL_GYRO_OFFSET_Z = 42;
 
 } // namespace CalibrationConfig
 
