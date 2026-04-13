@@ -4,7 +4,7 @@
 ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
     // デバッグ: SBUS生データを表示
-    if(1){
+    if(0){
 
         printf("SBUS Raw: [0]=%d [1]=%d [2]=%d [3]=%d [5]=%d\n",
                context.rescaled_sbus_data.raw_data[0], 
@@ -12,6 +12,16 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
                context.rescaled_sbus_data.raw_data[2], 
                context.rescaled_sbus_data.raw_data[3],
 			   context.rescaled_sbus_data.raw_data[5]);
+    }
+
+    // デバック: サーボのデータ
+    if(1){
+
+    	printf("Servo: ele: %f, rud: %f, ailL: %f, ailR: %f\n",
+    			context.control_output.servo_pwm.elevator(),
+    			context.control_output.servo_pwm.rudder(),
+    			context.control_output.servo_pwm.left_aileron(),
+    			context.control_output.servo_pwm.right_aileron());
     }
 
     // サーボはこの状態から動くようにする
