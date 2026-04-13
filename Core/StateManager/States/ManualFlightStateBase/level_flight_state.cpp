@@ -87,8 +87,19 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
     context.control_output.motor_pwm.right() = context.rescaled_sbus_data.throttle;
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
+    // デバック: サーボのデータ
+    if(1){
 
-    printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
+    	printf("Servo: ele: %f, rud: %f, ailL: %f, ailR: %f\n",
+    			context.control_output.servo_pwm.elevator(),
+    			context.control_output.servo_pwm.rudder(),
+    			context.control_output.servo_pwm.left_aileron(),
+    			context.control_output.servo_pwm.right_aileron());
+    }
+
+
+
+    //printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
 
     // TODO: pid_result[0~2]を制御出力に変換してモーター・サーボに指令を送る
 

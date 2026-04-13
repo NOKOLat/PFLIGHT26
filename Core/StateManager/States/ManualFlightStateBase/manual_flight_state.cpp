@@ -15,10 +15,20 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm.elevator()      = context.rescaled_sbus_data.elevator * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.left_aileron()  = context.rescaled_sbus_data.aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.right_aileron() = context.rescaled_sbus_data.right_aileron * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    // 手動操縦はトリムなし: SBUS_MIN/MID/MAX のデフォルト値から計算する
+    const auto& raw = context.rescaled_sbus_data.raw_data;
+    const float deg_per_pct = context.unit_conversion.SBUS_TO_SERVO_DEG;
+
+    const nokolat::SBUSRescaler::AxisCalib std_calib = {
+        nokolat::SBUSRescaler::SBUS_MIN,
+        nokolat::SBUSRescaler::SBUS_MID,
+        nokolat::SBUSRescaler::SBUS_MAX
+    };
+
+    context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
 
     // 投下装置
@@ -32,14 +42,12 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
     }
 
     // debug: モーター出力[%], サーボ角度[deg]
-    // printf("motor: %f %f | servo: %f %f %f %f\n",
-    //         context.control_output.motor_pwm.right(),
-    //         context.control_output.motor_pwm.left(),
-    //         context.control_output.servo_pwm.elevator(),
-    //         context.control_output.servo_pwm.rudder(),
-    //         context.control_output.servo_pwm.aileron(),
-    //         context.control_output.servo_pwm.drop()
-    // );
+     printf("servo: %f %f %f %f\n",
+             context.control_output.servo_pwm.elevator(),
+             context.control_output.servo_pwm.rudder(),
+             context.control_output.servo_pwm.right_aileron(),
+             context.control_output.servo_pwm.left_aileron()
+     );
 
     return ProcessStatus::SUCCESS;
 }

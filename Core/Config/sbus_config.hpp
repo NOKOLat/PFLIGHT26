@@ -32,9 +32,9 @@ namespace SbusConfig {
     constexpr uint16_t RUDDER_MAX = 1680;
 
     // エルロン（右）
-    constexpr uint16_t RIGHT_AILERON_MIN = 360;
-    constexpr uint16_t RIGHT_AILERON_MID = 1024;
-    constexpr uint16_t RIGHT_AILERON_MAX = 1680;
+    constexpr uint16_t RIGHT_AILERON_MIN = 460;
+    constexpr uint16_t RIGHT_AILERON_MID = 1124;
+    constexpr uint16_t RIGHT_AILERON_MAX = 1780;
 
     // ===== 3段階スイッチ判定閾値 =====
     constexpr uint16_t SWITCH_LOW_THRESHOLD  = 750;

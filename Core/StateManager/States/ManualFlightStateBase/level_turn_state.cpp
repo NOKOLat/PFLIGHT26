@@ -80,6 +80,16 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
     context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::clamp(
         pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f); // roll制御（左右同値）
 
+    // デバック: サーボのデータ
+    if(1){
+
+    	printf("Servo: ele: %f, rud: %f, ailL: %f, ailR: %f\n",
+    			context.control_output.servo_pwm.elevator(),
+    			context.control_output.servo_pwm.rudder(),
+    			context.control_output.servo_pwm.left_aileron(),
+    			context.control_output.servo_pwm.right_aileron());
+    }
+
     // エレベーターのリバースを適応
     context.control_output.servo_pwm.elevator() *= -1;
 
