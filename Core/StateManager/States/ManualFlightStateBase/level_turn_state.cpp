@@ -67,11 +67,18 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
     // pitch, rollのみを制御している
     // yawとスロットルはプロポからの入力を採用
 
-    context.control_output.servo_pwm.elevator()      = pid_result[0] + 1.58; // pitch制御
+    // 出力 = PID制御結果[deg] + サブトリム[deg]  clamp(±90°)
+    // サブトリムはキャリブレーション値のMIDが標準中心(SBUS_MID=1024)からずれた分を角度換算した値
+    const nokolat::SBUSRescaler::Thresholds& th = nokolat::SBUSRescaler::default_thresholds;
+    context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::clamp(
+        pid_result[0] + nokolat::SBUSRescaler::calcSubtrimAngle(th.elevator), -90.0f, 90.0f);       // pitch制御
     context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    //context.control_output.servo_pwm.rudder()      = pid_result[2]; // yaw制御
-    context.control_output.servo_pwm.left_aileron()  = pid_result[1] - 0.79; // roll制御
-    context.control_output.servo_pwm.right_aileron() = pid_result[1] - 0.79; // roll制御（左右同値）
+    //context.control_output.servo_pwm.rudder()      = nokolat::SBUSRescaler::clamp(
+    //    pid_result[2] + nokolat::SBUSRescaler::calcSubtrimAngle(th.rudder), -90.0f, 90.0f);       // yaw制御
+    context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::clamp(
+        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.left_aileron), -90.0f, 90.0f);  // roll制御
+    context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::clamp(
+        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f); // roll制御（左右同値）
 
     // エレベーターのリバースを適応
     context.control_output.servo_pwm.elevator() *= -1;

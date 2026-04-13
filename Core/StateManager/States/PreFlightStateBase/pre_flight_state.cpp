@@ -3,21 +3,15 @@
 
 ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
-    loop_count++;
-	if(loop_count % 10 == 0){
-
-		printf("Channel: %f %f %f %f, SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.rudder, context.rescaled_sbus_data.aileron, context.rescaled_sbus_data.elevator, static_cast<int>(context.rescaled_sbus_data.safety));
-	}
-
-
-
     // デバッグ: SBUS生データを表示
     if(1){
-        printf("SBUS Raw: [0]=%d [1]=%d [2]=%d [3]=%d\n", 
+
+        printf("SBUS Raw: [0]=%d [1]=%d [2]=%d [3]=%d [5]=%d\n",
                context.rescaled_sbus_data.raw_data[0], 
                context.rescaled_sbus_data.raw_data[1], 
                context.rescaled_sbus_data.raw_data[2], 
-               context.rescaled_sbus_data.raw_data[3]);
+               context.rescaled_sbus_data.raw_data[3],
+			   context.rescaled_sbus_data.raw_data[5]);
     }
 
     // サーボはこの状態から動くようにする
