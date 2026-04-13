@@ -75,10 +75,12 @@ ProcessStatus CalibrationState::onUpdate(StateContext& context) {
 
     if (sensor_mgr != nullptr) {
 
+    	for(uint16_t i=0; i<1000; i++){
 
-        float pressure_Pa = 0.0f;
-        sensor_mgr->getPressData(&pressure_Pa);
-        context.instances.sensor_fusion_manager->calibrateAltitude(pressure_Pa, 9.80665f);
+			float pressure_Pa = 0.0f;
+			sensor_mgr->getPressData(&pressure_Pa);
+			context.instances.sensor_fusion_manager->calibrateAltitude(pressure_Pa, 9.80665f);
+    	}
     }
 
     return ProcessStatus::SUCCESS;
@@ -102,6 +104,7 @@ ProcessStatus CalibrationState::ApplyManualCalibrationOffsets(StateContext& cont
         CalibrationConfig::MANUAL_ACCEL_OFFSET_Y,
         CalibrationConfig::MANUAL_ACCEL_OFFSET_Z
     };
+
     int16_t manual_gyro_offset[3] = {
         CalibrationConfig::MANUAL_GYRO_OFFSET_X,
         CalibrationConfig::MANUAL_GYRO_OFFSET_Y,

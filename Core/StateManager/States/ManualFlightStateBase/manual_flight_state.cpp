@@ -1,5 +1,6 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
+#include "../../../Utility/DebugPrinter/context_printer.hpp"
 
 
 ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
@@ -41,13 +42,8 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
         context.control_output.servo_pwm.drop() = 0.0f;
     }
 
-    // debug: モーター出力[%], サーボ角度[deg]
-     printf("servo: %f %f %f %f\n",
-             context.control_output.servo_pwm.elevator(),
-             context.control_output.servo_pwm.rudder(),
-             context.control_output.servo_pwm.right_aileron(),
-             context.control_output.servo_pwm.left_aileron()
-     );
+    // デバック: サーボのデータ
+    if(0){ ContextPrinter::printServo(context); }
 
     return ProcessStatus::SUCCESS;
 }

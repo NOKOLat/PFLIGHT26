@@ -1,6 +1,7 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 #include "../../../Utility/ManeuverSequencer/Missions/missions.hpp"
+#include "../../../Utility/DebugPrinter/context_printer.hpp"
 
 
 ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
@@ -81,14 +82,7 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
         pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f); // roll制御（左右同値）
 
     // デバック: サーボのデータ
-    if(1){
-
-    	printf("Servo: ele: %f, rud: %f, ailL: %f, ailR: %f\n",
-    			context.control_output.servo_pwm.elevator(),
-    			context.control_output.servo_pwm.rudder(),
-    			context.control_output.servo_pwm.left_aileron(),
-    			context.control_output.servo_pwm.right_aileron());
-    }
+    if(1){ ContextPrinter::printServo(context); }
 
     // エレベーターのリバースを適応
     context.control_output.servo_pwm.elevator() *= -1;
@@ -99,7 +93,7 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
 
-    printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
+    if(1){ ContextPrinter::printPidResult(pid_result); }
 
     // TODO: pid_result[0~2]を制御出力に変換してモーター・サーボに指令を送る
 
