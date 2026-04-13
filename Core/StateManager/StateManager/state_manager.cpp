@@ -38,7 +38,7 @@ void StateManager::changeState(StateID state_id) {
 
 void StateManager::update() {
 
-    // 初回実行時は初期化を行う
+    // 初回実行時は初期化のみを行う
     if (is_first_execution_) {
 
         init();
@@ -47,12 +47,6 @@ void StateManager::update() {
 
     // SBUSデータの更新・フェイルセーフ判定
     updateSBUS();
-
-    // 無線通信データの更新
-
-    // あとでLidarからのデータを受け取る部分を実装する
-    //
-    //
 
     // 現在の状態が有効でない場合
     if (!current_state_) {
@@ -83,6 +77,8 @@ void StateManager::update() {
 void StateManager::updateSBUS() {
 
     if (!state_context_.instances.sbus_receiver.has_value()) {
+
+        printf("[StateManager::updateSBUS] SBUS instance not available\n");
         return;
     }
 
@@ -108,8 +104,7 @@ void StateManager::updateSBUS() {
     constexpr uint32_t SBUS_TIMEOUT_MS = 500;
     if (HAL_GetTick() - ISRManager::getLastValidFrameTick() > SBUS_TIMEOUT_MS) {
 
-        printf("[StateManager::updateSBUS] SBUS Timeout FailSafe (%lu ms)\n",
-               HAL_GetTick() - ISRManager::getLastValidFrameTick());
+        printf("[StateManager::updateSBUS] SBUS Timeout FailSafe (%lu ms)\n", HAL_GetTick() - ISRManager::getLastValidFrameTick());
         changeState(StateID::EMERGENCY_STATE);
     }
 }
@@ -134,8 +129,6 @@ void StateManager::init() {
     // 2. 使用するインスタンスの初期化
 
     // 2-0 センサーマネージャーの初期化（SensorFusionManager で使用）
-    // NOTE: SensorFusionManager が内部で所有する予定だが、
-    // 初期化の順序の都合上、ここで先に初期化している
     SensorManager* sensor_manager_ptr = new SensorManager(state_context_.pin_config.sensor_i2c);
 
     if (!sensor_manager_ptr->initSensors()) {
@@ -176,9 +169,12 @@ void StateManager::init() {
     // ISRマネージャにSBUSインスタンスとUARTハンドルを登録
     if (state_context_.instances.sbus_receiver.has_value()) {
 
+        // デバック用のUARTポート
     	//printf("[Debug] Using SBUS PORT: UART2\n");
         //ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.debug_uart);
 
+        // 本番用のUARTポート
+        printf("[Production] Using SBUS PORT: UART5\n");
         ISRManager::registerSBUS(&state_context_.instances.sbus_receiver.value(), state_context_.pin_config.sbus_uart);
     }
 
@@ -186,5 +182,5 @@ void StateManager::init() {
     current_state_ = StateFactory::createState(init_state_id_);
 
 
-    printf("[StateManager] All Instances Generated\n");
+    printf("[StateManager] All Instances Generated\n\n\n");
 }
