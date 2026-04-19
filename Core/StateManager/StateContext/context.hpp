@@ -37,7 +37,7 @@ struct ControlOutput {
 struct PinConfiguration {
 
     I2C_HandleTypeDef*  sensor_i2c  = SensorConfig::i2c_handle;  // センサー用 I2C
-    UART_HandleTypeDef* sbus_uart   = &huart5;                   // SBUS用 UART
+    UART_HandleTypeDef* sbus_uart   = &huart4;                   // SBUS用 UART
     UART_HandleTypeDef* debug_uart  = &huart2;                   // デバッグ用 UART
 };
 

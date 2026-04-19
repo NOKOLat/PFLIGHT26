@@ -28,8 +28,8 @@ ProcessStatus ManualFlightState::onUpdate(StateContext& context) {
 
     context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
     context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
-    context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
-    context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.left_aileron()  = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.right_aileron() = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
 
     // 投下装置
@@ -79,15 +79,15 @@ StateID ManualFlightState::evaluateNextState(StateContext& context) {
 			return StateID::LEVEL_TURN_STATE;
 		}
 
-		if(context.rescaled_sbus_data.selectmission == SwitchPosition::MID){
-
-			return StateID::CLIMBING_TURN_STATE;
-		}
-
-		if(context.rescaled_sbus_data.selectmission == SwitchPosition::HIGH){
-
-			return StateID::FUGUE_EIGHT_STATE;
-		}
+//		if(context.rescaled_sbus_data.selectmission == SwitchPosition::MID){
+//
+//			return StateID::CLIMBING_TURN_STATE;
+//		}
+//
+//		if(context.rescaled_sbus_data.selectmission == SwitchPosition::HIGH){
+//
+//			return StateID::FUGUE_EIGHT_STATE;
+//		}
 
 	}
 

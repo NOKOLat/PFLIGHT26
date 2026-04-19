@@ -17,14 +17,14 @@ namespace SbusConfig {
     constexpr uint16_t THROTTLE_MAX = 1696;
 
     // エルロン（左）
-    constexpr uint16_t AILERON_MIN = 360;
-    constexpr uint16_t AILERON_MID = 1024;
-    constexpr uint16_t AILERON_MAX = 1680;
+    constexpr uint16_t AILERON_MIN = 360  - 92 - 200;
+    constexpr uint16_t AILERON_MID = 1024 - 92 - 200;
+    constexpr uint16_t AILERON_MAX = 1680 - 92 - 200;
 
     // エレベーター
-    constexpr uint16_t ELEVATOR_MIN = 360;
-    constexpr uint16_t ELEVATOR_MID = 1024;
-    constexpr uint16_t ELEVATOR_MAX = 1680;
+    constexpr uint16_t ELEVATOR_MIN = 360 - 33;
+    constexpr uint16_t ELEVATOR_MID = 1024- 33;
+    constexpr uint16_t ELEVATOR_MAX = 1680- 33;
 
     // ラダー
     constexpr uint16_t RUDDER_MIN = 360;
@@ -32,9 +32,9 @@ namespace SbusConfig {
     constexpr uint16_t RUDDER_MAX = 1680;
 
     // エルロン（右）
-    constexpr uint16_t RIGHT_AILERON_MIN = 460;
-    constexpr uint16_t RIGHT_AILERON_MID = 1124;
-    constexpr uint16_t RIGHT_AILERON_MAX = 1780;
+    constexpr uint16_t RIGHT_AILERON_MIN = 360  + 140;
+    constexpr uint16_t RIGHT_AILERON_MID = 1024 + 140;
+    constexpr uint16_t RIGHT_AILERON_MAX = 1680 + 140;
 
     // ===== 3段階スイッチ判定閾値 =====
     constexpr uint16_t SWITCH_LOW_THRESHOLD  = 750;

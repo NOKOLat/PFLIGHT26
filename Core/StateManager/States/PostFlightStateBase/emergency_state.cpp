@@ -3,7 +3,12 @@
 
 ProcessStatus EmergencyState::onUpdate(StateContext& context) {
 
-    // 緊急対応の処理
+    // モーターを停止
+    float motor_stop[2] = {0.0f, 0.0f};
+    if (context.instances.pwm_controller) {
+        context.instances.pwm_controller->setMotorSpeed(motor_stop);
+    }
+
     return ProcessStatus::SUCCESS;
 }
 

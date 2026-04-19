@@ -37,6 +37,17 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
     float target_yaw = 0.0f;
     float target_altitude = 0.0f;
 
+    // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
+    // 手動操縦はトリムなし: SBUS_MIN/MID/MAX のデフォルト値から計算する
+    const auto& raw = context.rescaled_sbus_data.raw_data;
+    const float deg_per_pct = context.unit_conversion.SBUS_TO_SERVO_DEG;
+
+    const nokolat::SBUSRescaler::AxisCalib std_calib = {
+        nokolat::SBUSRescaler::SBUS_MIN,
+        nokolat::SBUSRescaler::SBUS_MID,
+        nokolat::SBUSRescaler::SBUS_MAX
+    };
+
     if (!sequencer.getTargetValues(target_roll, target_pitch, target_yaw, target_altitude)) {
         printf("[LevelTurnState::onUpdate] Failed to get target values\n");
         return ProcessStatus::FAILURE;
@@ -73,27 +84,38 @@ ProcessStatus LevelTurnState::onUpdate(StateContext& context) {
     const nokolat::SBUSRescaler::Thresholds& th = nokolat::SBUSRescaler::default_thresholds;
     context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::clamp(
         pid_result[0] + nokolat::SBUSRescaler::calcSubtrimAngle(th.elevator), -90.0f, 90.0f);       // pitch制御
-    context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    //context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    context.control_output.servo_pwm.rudder()        = 15.0f;
+
     //context.control_output.servo_pwm.rudder()      = nokolat::SBUSRescaler::clamp(
     //    pid_result[2] + nokolat::SBUSRescaler::calcSubtrimAngle(th.rudder), -90.0f, 90.0f);       // yaw制御
+
+
+
     context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::clamp(
-        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.left_aileron), -90.0f, 90.0f);  // roll制御
+        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.left_aileron), -90.0f, 90.0f);
+
     context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::clamp(
-        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f); // roll制御（左右同値）
+        pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f);
 
-    // デバック: サーボのデータ
-    if(1){ ContextPrinter::printServo(context); }
+    // 手動操縦用の計算（手動操縦で上書きされる）
+    //context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
+    //context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
+	//context.control_output.servo_pwm.left_aileron()  = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+	//context.control_output.servo_pwm.right_aileron() = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
-    // エレベーターのリバースを適応
-    context.control_output.servo_pwm.elevator() *= -1;
-
-
-    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる（ここは手動操縦）
+    // 手動操縦用の計算（手動操縦で上書きされる）
     context.control_output.motor_pwm.right() = context.rescaled_sbus_data.throttle;
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
+    // デバック: サーボのデータ
+    // if(1){ ContextPrinter::printServo(context); }
 
-    if(1){ ContextPrinter::printPidResult(pid_result); }
+    // エレベーターのリバースを適応
+    //context.control_output.servo_pwm.elevator() *= -1;
+
+
+    //if(1){ ContextPrinter::printPidResult(pid_result); }
 
     // TODO: pid_result[0~2]を制御出力に変換してモーター・サーボに指令を送る
 
