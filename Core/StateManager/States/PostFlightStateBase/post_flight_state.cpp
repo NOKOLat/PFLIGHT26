@@ -4,6 +4,12 @@
 
 ProcessStatus PostFlightState::onUpdate(StateContext& context) {
 
+    // モーターを停止
+    float motor_stop[2] = {0.0f, 0.0f};
+    if (context.instances.pwm_controller) {
+        context.instances.pwm_controller->setMotorSpeed(motor_stop);
+    }
+
     // 飛行中に蓄積したデータをリセット
     if (context.instances.sensor_fusion_manager.has_value()) {
         SensorManager* sensor_mgr = context.instances.sensor_fusion_manager->getSensorManager();

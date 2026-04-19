@@ -19,8 +19,8 @@ ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
     context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
     context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
-    context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
-    context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.left_aileron()  = -nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.right_aileron() = -nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
     // サーボ出力を定義
     context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.getptr());
