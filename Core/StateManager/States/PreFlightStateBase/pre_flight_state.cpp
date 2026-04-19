@@ -1,36 +1,35 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
+#include "../../../Utility/DebugPrinter/context_printer.hpp"
 
 ProcessStatus PreFlightState::onUpdate(StateContext& context) {
 
-    loop_count++;
-	if(loop_count % 10 == 0){
-
-		printf("Channel: %f %f %f %f, SBUS[9] = %d\n", context.rescaled_sbus_data.throttle, context.rescaled_sbus_data.rudder, context.rescaled_sbus_data.aileron, context.rescaled_sbus_data.elevator, static_cast<int>(context.rescaled_sbus_data.safety));
-	}
-
-
-
-    // デバッグ: SBUS生データを表示
-    if(1){
-        printf("SBUS Raw: [0]=%d [1]=%d [2]=%d [3]=%d\n", 
-               context.rescaled_sbus_data.raw_data[0], 
-               context.rescaled_sbus_data.raw_data[1], 
-               context.rescaled_sbus_data.raw_data[2], 
-               context.rescaled_sbus_data.raw_data[3]);
-    }
-
     // サーボはこの状態から動くようにする
-    
+
     // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
-    context.control_output.servo_pwm.elevator()      = context.rescaled_sbus_data.elevator * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder   * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.left_aileron()  = context.rescaled_sbus_data.aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    context.control_output.servo_pwm.right_aileron() = context.rescaled_sbus_data.right_aileron  * context.unit_conversion.SBUS_TO_SERVO_DEG;
+    // トリムなし: SBUS_MIN/MID/MAX のデフォルト値から計算する（手動操縦と同じ）
+    const auto& raw = context.rescaled_sbus_data.raw_data;
+    const float deg_per_pct = context.unit_conversion.SBUS_TO_SERVO_DEG;
+
+    const nokolat::SBUSRescaler::AxisCalib std_calib = {
+        nokolat::SBUSRescaler::SBUS_MIN,
+        nokolat::SBUSRescaler::SBUS_MID,
+        nokolat::SBUSRescaler::SBUS_MAX
+    };
+
+    context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.left_aileron()  = -nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.right_aileron() = -nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
     // サーボ出力を定義
     context.instances.pwm_controller->setServoAngle(context.control_output.servo_pwm.getptr());
 
+    // デバック: サーボのデータ
+    if(1) ContextPrinter::printServo(context);
+
+    // デバッグ: SBUS生データを表示
+    if(0){ ContextPrinter::printSbusRaw(context); }
 
     return ProcessStatus::SUCCESS;
 }

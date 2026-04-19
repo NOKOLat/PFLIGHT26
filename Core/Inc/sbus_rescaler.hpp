@@ -85,7 +85,7 @@ public:
         uint16_t throttle_max = SbusConfig::THROTTLE_MAX;
 
         // 各軸のキャリブレーション: -100~100の範囲にマッピング
-        AxisCalib aileron       = {SbusConfig::AILERON_MIN,       SbusConfig::AILERON_MID,       SbusConfig::AILERON_MAX};
+        AxisCalib left_aileron  = {SbusConfig::AILERON_MIN,       SbusConfig::AILERON_MID,       SbusConfig::AILERON_MAX};
         AxisCalib elevator      = {SbusConfig::ELEVATOR_MIN,      SbusConfig::ELEVATOR_MID,      SbusConfig::ELEVATOR_MAX};
         AxisCalib rudder        = {SbusConfig::RUDDER_MIN,        SbusConfig::RUDDER_MID,        SbusConfig::RUDDER_MAX};
         AxisCalib right_aileron = {SbusConfig::RIGHT_AILERON_MIN, SbusConfig::RIGHT_AILERON_MID, SbusConfig::RIGHT_AILERON_MAX};
@@ -141,6 +141,21 @@ public:
     // SBUS生データから RescaledSBUSData を生成
     static RescaledSBUSData rescale(const std::array<uint16_t, 18>& sbus_data,
                                      const Thresholds& thresholds = default_thresholds);
+
+    // ===== SBUS値 → 角度 変換 =====
+    // mid を 0° 基準として、SBUS生値を角度 [deg] に変換する
+    // 手動操縦と同じ変換ロジックを明示化したユーティリティ
+    // 例: AILERON_MID(1024) → 0°, AILERON_MAX(1680) → +max_angle_deg
+    static float sbusToAngle(uint16_t sbus_value,
+                              const AxisCalib& calib,
+                              float max_angle_deg = 90.0f);
+
+    // ===== サブトリム角度 計算 =====
+    // calib.center（プロポのサブトリム反映値）が標準中心(SBUS_MID)から
+    // どれだけずれているかを角度 [deg] に変換して返す
+    // 変換式: (center - SBUS_MID) × (180° / (max - min))
+    // 自動操縦出力: servo_angle = pid_result + calcSubtrimAngle(calib)
+    static float calcSubtrimAngle(const AxisCalib& calib);
 
     // ===== ユーティリティメソッド =====
     // デッドバンド適用（小さな値を0にする）

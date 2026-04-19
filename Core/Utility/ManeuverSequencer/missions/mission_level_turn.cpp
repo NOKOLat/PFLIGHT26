@@ -5,8 +5,8 @@ MissionLevelTurn::MissionLevelTurn() {
     // キーフレーム定義
     // time_ms, roll_deg, pitch_deg, yaw_deg, altitude_m
     // 注：altitude_m は ATTITUDE チャンネルのみなので使用されない
-    key_frames[0] = {0,     15.0f,  0.0f,  0.0f,  0.0f};     
-    key_frames[1] = {50000, 15.0f, 0.0f,  0.0f, 0.0f};   
+    key_frames[0] = {0,     5.0f,  2.0f,  0.0f,  0.0f};
+    key_frames[1] = {50000, 5.0f, 2.0f,  0.0f, 0.0f};
 }
 
 const KeyFrame* MissionLevelTurn::getKeyFrames(int& num_frames) const {

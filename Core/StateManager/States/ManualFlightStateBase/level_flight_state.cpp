@@ -1,6 +1,7 @@
 #include "../StateHeaders.hpp"
 #include "../../StateContext/context.hpp"
 #include "../../../Utility/ManeuverSequencer/Missions/missions.hpp"
+#include "../../../Utility/DebugPrinter/context_printer.hpp"
 
 
 ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
@@ -30,9 +31,20 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
                context.initial_yaw_offset, context.initial_altitude_offset);
     }
 
+    // SBUSの値（-100~100）をサーボの角度（-90~90)に変換
+    // 手動操縦はトリムなし: SBUS_MIN/MID/MAX のデフォルト値から計算する
+    const auto& raw = context.rescaled_sbus_data.raw_data;
+    const float deg_per_pct = context.unit_conversion.SBUS_TO_SERVO_DEG;
+
+    const nokolat::SBUSRescaler::AxisCalib std_calib = {
+        nokolat::SBUSRescaler::SBUS_MIN,
+        nokolat::SBUSRescaler::SBUS_MID,
+        nokolat::SBUSRescaler::SBUS_MAX
+    };
+
     // 目標値を取得（相対的な目標値）
     float target_roll = 0.0f;
-    float target_pitch = 0.0f;
+    float target_pitch = -2.0f;
     float target_yaw = 0.0f;
     float target_altitude = 0.0f;
 
@@ -48,8 +60,6 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
     // カスケードPID制御の計算
     float pid_result[3] = {0.0f, 0.0f, 0.0f};  // [pitch, roll, yaw]
 
-    target_roll -= 5.0f;
-
     // 全軸のカスケードPIDを計算
     const Euler3f& attitude = context.attitude;
     CascadePIDManager& pid_manager = context.instances.cascade_pid_manager.value();
@@ -60,26 +70,41 @@ ProcessStatus LevelFlightState::onUpdate(StateContext& context) {
         pid_result
     );
 
+
     // Update cycle counter for rate inner loop frequency control
     pid_manager.updateCycleCounter();
 
     // PIDの値をサーボの角度に入力
-    context.control_output.servo_pwm.elevator()      = pid_result[0] + 1.58; // pitch制御
+    // 出力 = PID制御結果[deg] + サブトリム[deg]  clamp(±90°)
+    // サブトリムはキャリブレーション値のMIDが標準中心(SBUS_MID=1024)からずれた分を角度換算した値
+    const nokolat::SBUSRescaler::Thresholds& th = nokolat::SBUSRescaler::default_thresholds;
+
+    // pitch
+    context.control_output.servo_pwm.elevator()      = -nokolat::SBUSRescaler::clamp(pid_result[0] + nokolat::SBUSRescaler::calcSubtrimAngle(th.elevator), -90.0f, 90.0f);
+
+    // yaw
     context.control_output.servo_pwm.rudder()        = context.rescaled_sbus_data.rudder * context.unit_conversion.SBUS_TO_SERVO_DEG;
-    //context.control_output.servo_pwm.rudder()      = pid_result[2]; // yaw制御
-    context.control_output.servo_pwm.left_aileron()  = pid_result[1] - 0.79; // roll制御
-    context.control_output.servo_pwm.right_aileron() = pid_result[1] - 0.79; // roll制御（左右同値）
+    //context.control_output.servo_pwm.rudder()      = nokolat::SBUSRescaler::clamp(pid_result[2] + nokolat::SBUSRescaler::calcSubtrimAngle(th.rudder), -90.0f, 90.0f);
+    
+    // roll
+    context.control_output.servo_pwm.left_aileron()  = nokolat::SBUSRescaler::clamp(pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.left_aileron), -90.0f, 90.0f);
+    context.control_output.servo_pwm.right_aileron() = nokolat::SBUSRescaler::clamp(pid_result[1] + nokolat::SBUSRescaler::calcSubtrimAngle(th.right_aileron), -90.0f, 90.0f);
 
-    // エレベーターのリバースを適応
-    context.control_output.servo_pwm.elevator() *= -1;
+    // 手動操縦用の計算（手動操縦で上書きされる）
+    //context.control_output.servo_pwm.elevator()      = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_ELEVATOR],      std_calib) * deg_per_pct;
+    context.control_output.servo_pwm.rudder()        = nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RUDDER],        std_calib) * deg_per_pct;
+	//context.control_output.servo_pwm.left_aileron()  = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_AILERON],       std_calib) * deg_per_pct;
+	//context.control_output.servo_pwm.right_aileron() = - nokolat::SBUSRescaler::rescaleControl(raw[SbusConfig::CH_RIGHT_AILERON], std_calib) * deg_per_pct;
 
-
-    // SBUSの値(0~100)をそのままスロットルの値(0~100)に入れる（ここは手動操縦）
+    // 手動操縦用の計算（手動操縦で上書きされる）
     context.control_output.motor_pwm.right() = context.rescaled_sbus_data.throttle;
     context.control_output.motor_pwm.left()  = context.rescaled_sbus_data.throttle;
 
+    // デバック: サーボのデータ
+    // if(1){ ContextPrinter::printServo(context); }
 
-    printf("pitch: %f, roll: %f, yaw: %f\n", pid_result[0], pid_result[1], pid_result[2]);
+    // デバック: PID結果
+    //if(0){ ContextPrinter::printPidResult(pid_result); }
 
     // TODO: pid_result[0~2]を制御出力に変換してモーター・サーボに指令を送る
 

@@ -123,6 +123,28 @@ uint8_t SBUSRescaler::getSwitchInt(const std::array<uint16_t, 18>& sbus_data,
     return static_cast<uint8_t>(getSwitch(sbus_data, channel, thresholds));
 }
 
+// ===== SBUS値 → 角度 変換 =====
+// mid を 0° 基準として角度 [deg] に変換する
+// 変換式: rescaleControl() [-100,100] × (max_angle_deg / 100)
+float SBUSRescaler::sbusToAngle(uint16_t sbus_value,
+                                  const AxisCalib& calib,
+                                  float max_angle_deg) {
+
+    float pct = rescaleControl(sbus_value, calib);  // -100 ~ +100
+    return pct * (max_angle_deg / 100.0f);
+}
+
+// ===== サブトリム角度 計算 =====
+// calib.center が標準中心(SBUS_MID)からずれている分を角度 [deg] に変換する
+// 変換式: (center - SBUS_MID) × (180° / (max - min))
+// 例: center=1024(標準) → 0°, center=1100 → (1100-1024)×(180/1320) ≈ +10.4°
+float SBUSRescaler::calcSubtrimAngle(const AxisCalib& calib) {
+
+    float deg_per_unit = 180.0f / static_cast<float>(calib.max - calib.min);
+    return static_cast<float>(static_cast<int16_t>(calib.center) - static_cast<int16_t>(SBUS_MID))
+           * deg_per_unit;
+}
+
 // ===== デッドバンド適用 =====
 float SBUSRescaler::applyDeadband(float value, float deadband) {
 
@@ -148,7 +170,7 @@ RescaledSBUSData SBUSRescaler::rescale(const std::array<uint16_t, 18>& sbus_data
 
     // アナログチャネルのリスケーリング（各軸ごとのキャリブレーション値を使用）
     result.throttle = getThrottle(sbus_data, SBUSChannel::THROTTLE, thresholds);
-    result.aileron  = getControl(sbus_data, SBUSChannel::AILERON,  thresholds.aileron);
+    result.aileron  = getControl(sbus_data, SBUSChannel::AILERON,  thresholds.left_aileron);
     result.elevator = getControl(sbus_data, SBUSChannel::ELEVATOR, thresholds.elevator);
     result.rudder   = getControl(sbus_data, SBUSChannel::RUDDER,   thresholds.rudder);
 
